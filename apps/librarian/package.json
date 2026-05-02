@@ -1,0 +1,29 @@
+{
+  "name": "@aigency/librarian",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LIBRARIAN (Ren Nakamura) — knowledge graph curator service. Runs lint, compile, and HarvestMoon oracle feed.",
+  "type": "module",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "tsx src/lint-run.ts",
+    "compile": "tsx src/compile-run.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@aigency/agent-core": "workspace:*",
+    "@aigency/vault-tools": "workspace:*",
+    "@aigency/surreal": "workspace:*"
+  },
+  "devDependencies": {
+    "@aigency/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}

@@ -1,0 +1,107 @@
+# Development Configuration Overrides
+# This file overrides config/providers.yaml for development environment
+
+server:
+  port: 8402
+  host: localhost
+
+# Enable only a subset of providers for faster development startup
+providers:
+  mistral:
+    enabled: true
+    models:
+      - id: mistral-large-latest
+        name: Mistral Large Latest
+        contextWindow: 128000
+        maxOutput: 32000
+        capabilities: [function-calling, code, reasoning]
+        quota:
+          monthlyRequests: 1000000000
+          rpm: 60
+          quotaSize: huge
+        tier: complex
+
+      - id: mistral-small-latest
+        name: Mistral Small Latest
+        contextWindow: 128000
+        maxOutput: 32000
+        capabilities: [function-calling, code, fast]
+        quota:
+          monthlyRequests: 1000000000
+          rpm: 60
+          quotaSize: huge
+        tier: simple
+
+      - id: ministral-14b-latest
+        name: Ministral 14B
+        contextWindow: 128000
+        maxOutput: 32000
+        capabilities: [function-calling, code, fast]
+        quota:
+          monthlyRequests: 1000000000
+          rpm: 60
+          quotaSize: huge
+        tier: medium
+
+      - id: codestral-latest
+        name: Codestral
+        contextWindow: 256000
+        maxOutput: 32000
+        capabilities: [code, function-calling]
+        quota:
+          monthlyRequests: 1000000000
+          rpm: 60
+          quotaSize: huge
+        tier: complex
+
+      # Verified New Models
+      - id: magistral-small-latest
+        name: Magistral Small (Reasoning)
+        contextWindow: 128000
+        maxOutput: 32000
+        capabilities: [function-calling, reasoning, chain-of-thought]
+        quota:
+          monthlyRequests: 1000000000
+          rpm: 60
+          quotaSize: huge
+        tier: reasoning
+
+      - id: voxtral-small-latest
+        name: Voxtral Small (Audio/Transcribe)
+        contextWindow: 128000
+        maxOutput: 32000
+        capabilities: [transcriptions, audio, function-calling]
+        quota:
+          monthlyRequests: 1000000000
+          rpm: 60
+          quotaSize: huge
+        tier: medium
+
+      - id: devstral-latest
+        name: Devstral 2 (Agentic)
+        contextWindow: 256000
+        maxOutput: 32000
+        capabilities: [function-calling, code, agentic]
+        quota:
+          monthlyRequests: 1000000000
+          rpm: 60
+          quotaSize: huge
+        tier: complex
+
+  groq:
+    enabled: true
+
+  gemini:
+    enabled: true
+
+  # Others disabled for faster startup
+  cerebras:
+    enabled: false
+  openrouter:
+    enabled: false
+  voidai:
+    enabled: false
+  zai:
+    enabled: false
+  kimi:
+    enabled: false

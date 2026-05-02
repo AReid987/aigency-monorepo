@@ -1,0 +1,33 @@
+{
+  "name": "@aigency/mem-brain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aigency Mem_Brain — unified memory layer combining SurrealDB (knowledge graph) and Honcho (peer identity)",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@aigency/agent-core": "workspace:*",
+    "@aigency/surreal": "workspace:*",
+    "@aigency/honcho": "workspace:*"
+  },
+  "devDependencies": {
+    "@aigency/tsconfig": "workspace:*",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}

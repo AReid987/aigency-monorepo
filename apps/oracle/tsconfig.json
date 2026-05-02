@@ -1,0 +1,1 @@
+{ "extends": "@aigency/tsconfig/node.json", "include": ["src"], "exclude": ["node_modules", "dist"] }

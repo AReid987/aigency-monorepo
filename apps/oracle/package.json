@@ -1,0 +1,30 @@
+{
+  "name": "@aigency/oracle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ORACLE (Sable Quinn) — persistent memory agent service. SurrealDB bootstrap, metric submission, Honcho workspace init.",
+  "type": "module",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "seed": "tsx src/seed.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@aigency/agent-core": "workspace:*",
+    "@aigency/mem-brain": "workspace:*",
+    "@aigency/surreal": "workspace:*",
+    "@aigency/honcho": "workspace:*",
+    "@aigency/vault-tools": "workspace:*"
+  },
+  "devDependencies": {
+    "@aigency/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}

@@ -1,0 +1,8 @@
+callsign: ECHO
+name: "Selene Navarro"
+role: "Marketing & Content"
+color: "#FF2D78"
+substrate: "TBD"
+vault: "../../aigency-vault/agents/echo"
+soul: "../../aigency-vault/agents/echo/SOUL.md"
+rules: "../../aigency-vault/agents/echo/RULES.md"

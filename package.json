@@ -1,0 +1,30 @@
+{
+  "name": "aigency",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aigency — multi-agent AI operating system",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rimraf node_modules",
+    "router": "turbo run dev --filter=@aigency/router",
+    "membrane": "turbo run dev --filter=@aigency/membrane",
+    "oracle": "turbo run dev --filter=@aigency/oracle"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "turbo": "^2.9.7",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.4"
+}

@@ -1,0 +1,218 @@
+# SimpleLLMRouter Configuration
+# Default provider definitions and server settings
+
+server:
+  port: 8402
+  host: localhost
+
+# Logging configuration (supports Conductor team's logging system)
+logging:
+  level: info
+  format: pretty
+  # file: logs/router.log  # Optional file logging
+  # errorReporting:        # Optional external error reporting (e.g., Sentry)
+  #   enabled: false
+  #   dsn: ""
+  #   environment: development
+
+# Provider definitions
+# Note: API keys should be set via environment variables (PROVIDER_{ID}_API_KEY)
+# or in providerConfig section below for development purposes
+providers:
+  mistral:
+    id: mistral
+    name: Mistral
+    baseUrl: https://api.mistral.ai/v1
+    enabled: true
+    models:
+      - id: mistral-large-latest
+        name: Mistral Large Latest
+        contextWindow: 128000
+        maxOutput: 8192
+        capabilities: [function-calling, reasoning, code]
+        quota:
+          monthlyRequests: 1000000000
+          rpm: 500000
+          quotaSize: huge
+        tier: complex
+
+      - id: mistral-small-latest
+        name: Mistral Small Latest
+        contextWindow: 128000
+        maxOutput: 8192
+        capabilities: [function-calling, fast]
+        quota:
+          monthlyRequests: 1000000000
+          rpm: 500000
+          quotaSize: huge
+        tier: simple
+
+  groq:
+    id: groq
+    name: Groq
+    baseUrl: https://api.groq.com/openai/v1
+    enabled: true
+    models:
+      - id: llama-3.3-70b-versatile
+        name: Llama 3.3 70B Versatile
+        contextWindow: 128000
+        maxOutput: 8192
+        capabilities: [function-calling, fast, code]
+        quota:
+          dailyRequests: 14400
+          rpm: 30
+          quotaSize: large
+        tier: medium
+
+      - id: llama-3.1-8b-instant
+        name: Llama 3.1 8B Instant
+        contextWindow: 128000
+        maxOutput: 8192
+        capabilities: [fast]
+        quota:
+          dailyRequests: 14400
+          rpm: 30
+          quotaSize: large
+        tier: simple
+
+  gemini:
+    id: gemini
+    name: Google Gemini
+    baseUrl: https://generativelanguage.googleapis.com/v1beta
+    enabled: true
+    models:
+      - id: gemini-2.0-flash-exp
+        name: Gemini 2.0 Flash Experimental
+        contextWindow: 1000000
+        maxOutput: 8192
+        capabilities: [vision, function-calling, fast, multimodal]
+        quota:
+          dailyRequests: 1500
+          rpm: 15
+          quotaSize: large
+        tier: medium
+
+      - id: gemini-1.5-flash
+        name: Gemini 1.5 Flash
+        contextWindow: 1000000
+        maxOutput: 8192
+        capabilities: [vision, function-calling, multimodal]
+        quota:
+          dailyRequests: 1500
+          rpm: 15
+          quotaSize: large
+        tier: simple
+
+      - id: gemini-1.5-pro
+        name: Gemini 1.5 Pro
+        contextWindow: 2000000
+        maxOutput: 8192
+        capabilities: [vision, function-calling, reasoning, multimodal]
+        quota:
+          dailyRequests: 1500
+          rpm: 2
+          quotaSize: large
+        tier: reasoning
+
+  cerebras:
+    id: cerebras
+    name: Cerebras
+    baseUrl: https://api.cerebras.ai/v1
+    enabled: true
+    models:
+      - id: llama-3.3-70b
+        name: Llama 3.3 70B
+        contextWindow: 128000
+        maxOutput: 8192
+        capabilities: [fast, code]
+        quota:
+          dailyRequests: 2000
+          rpm: 30
+          quotaSize: medium
+        tier: medium
+
+      - id: llama-3.1-8b
+        name: Llama 3.1 8B
+        contextWindow: 128000
+        maxOutput: 8192
+        capabilities: [fast]
+        quota:
+          dailyRequests: 2000
+          rpm: 30
+          quotaSize: medium
+        tier: simple
+
+  openrouter:
+    id: openrouter
+    name: OpenRouter
+    baseUrl: https://openrouter.ai/api/v1
+    enabled: true
+    models:
+      - id: google/gemini-2.0-flash-exp:free
+        name: Gemini 2.0 Flash (via OpenRouter)
+        contextWindow: 1000000
+        maxOutput: 8192
+        capabilities: [vision, fast, multimodal]
+        quota:
+          dailyRequests: 1000
+          quotaSize: medium
+        tier: medium
+
+      - id: meta-llama/llama-3.1-8b-instruct:free
+        name: Llama 3.1 8B (via OpenRouter)
+        contextWindow: 128000
+        maxOutput: 8192
+        capabilities: [fast]
+        quota:
+          dailyRequests: 1000
+          quotaSize: medium
+        tier: simple
+
+  voidai:
+    id: voidai
+    name: VoidAI
+    baseUrl: https://api.voidai.com/v1
+    enabled: true
+    models:
+      - id: void-1
+        name: Void-1
+        contextWindow: 128000
+        maxOutput: 4096
+        capabilities: [fast]
+        quota:
+          dailyRequests: 500
+          rpm: 10
+          quotaSize: small
+        tier: simple
+
+  zai:
+    id: zai
+    name: z.ai Coding Plan
+    baseUrl: https://api.z.ai/v1
+    enabled: true
+    models:
+      - id: z-coder
+        name: z.ai Coder
+        contextWindow: 128000
+        maxOutput: 8192
+        capabilities: [code, function-calling]
+        quota:
+          dailyRequests: 100
+          quotaSize: tiny
+        tier: medium
+
+  kimi:
+    id: kimi
+    name: Kimi Coding Plan
+    baseUrl: https://api.moonshot.cn/v1
+    enabled: true
+    models:
+      - id: moonshot-v1-128k
+        name: Kimi 128K
+        contextWindow: 128000
+        maxOutput: 4096
+        capabilities: [code, reasoning]
+        quota:
+          dailyRequests: 100
+          quotaSize: tiny
+        tier: medium

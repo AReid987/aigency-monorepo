@@ -1,0 +1,8 @@
+callsign: ATLAS
+name: "Jordan Mercer"
+role: "Revenue & Sales Ops"
+color: "#FFB300"
+substrate: "TBD"
+vault: "../../aigency-vault/agents/atlas"
+soul: "../../aigency-vault/agents/atlas/SOUL.md"
+rules: "../../aigency-vault/agents/atlas/RULES.md"

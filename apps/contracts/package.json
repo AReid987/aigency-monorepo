@@ -1,0 +1,16 @@
+{
+  "name": "@aigency/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Solidity smart contracts — HarvestMoon.sol (graft quality gate), AigencyGraft ERC-721, AigencyGraftAccess ERC-20. Base L2 (chain ID 8453).",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test -vvv",
+    "deploy:testnet": "forge script script/Deploy.s.sol --rpc-url base-sepolia --broadcast",
+    "deploy:mainnet": "forge script script/Deploy.s.sol --rpc-url base-mainnet --broadcast",
+    "clean": "forge clean"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

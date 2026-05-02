@@ -1,0 +1,39 @@
+# Production Configuration Template
+# Copy to config/providers.production.yaml and customize for your production environment
+# DO NOT commit actual production API keys to version control
+
+server:
+  port: 80
+  host: 0.0.0.0
+
+# Production logging configuration
+logging:
+  level: info
+  format: json
+  file: logs/router.log
+  errorReporting:
+    enabled: true
+    dsn: ""  # Add your Sentry DSN or other error tracking service
+    environment: production
+
+# Enable all production providers
+providers:
+  mistral:
+    enabled: true
+  groq:
+    enabled: true
+  gemini:
+    enabled: true
+  cerebras:
+    enabled: true
+  openrouter:
+    enabled: true
+  voidai:
+    enabled: true
+  zai:
+    enabled: true
+  kimi:
+    enabled: true
+
+# Production API keys should be set via environment variables
+# Example: PROVIDER_MISTRAL_API_KEY=your_key PROVIDER_GROQ_API_KEY=your_key
