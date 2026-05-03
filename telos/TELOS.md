@@ -24,8 +24,17 @@ For Aigency, TELOS files serve as the **ground truth** for:
 
 Every TCF follows this structure. Sections marked `(optional)` may be omitted for simpler entities (e.g. a lightweight agent).
 
+> **Important:** TELOS files are **captured through interview**, not invented top-down.
+> See `telos/INTERVIEW.md` for the full protocol.
+> Use `telos/templates/TELOS-v1-blank.md` as the starting point for new TCFs.
+
 ### 1. Document Purpose
 What this TELOS is for, who uses it, and how it shapes decisions.
+
+> **Rule:** The personal TELOS (`architect-personal.md`) and corporate TELOS
+> (`aigency-corporate.md`) **must** be written by THE ARCHITECT. They cannot be
+> delegated to agents. These files exist as `telos/drafts/*.DRAFT.md` for reference
+> only — replace them with the real interview-captured versions.
 
 ### 2. Entity Identity
 - **Name / Callsign** — the entity's identifier
@@ -135,14 +144,39 @@ Use this shorthand when referencing TELOS sections in conversation or code:
 
 ## Writing a TELOS v1
 
-1. **Start with Mission.** If you can't articulate why you exist in one sentence, stop.
-2. **List Problems.** What sucks in the world that you're fixing?
-3. **Set Goals.** Be specific, measurable, time-bound. Force-rank them.
-4. **Define KPIs.** If you can't measure it, you can't manage it.
-5. **State Strategies.** How will you achieve the goals?
-6. **Log Risks.** Be honest about what could kill this.
-7. **Write the Narrative.** Tell the story. Make it real.
-8. **Add Activity.** Seed with today's date and current state.
+There are two valid paths:
+
+### Path A: Interview Capture (Recommended)
+
+Use `telos/INTERVIEW.md`. The interviewer asks questions. The entity answers.
+The TELOS is synthesized from the conversation.
+
+1. Prepare: Fill out `telos/templates/agent-persona.md` (for agents) or reflect
+   on your own identity (for personal/corporate).
+2. Interview: Run the 10-phase interview protocol. Record or transcribe.
+3. Extract: Map answers to the TELOS structure.
+4. Verify: Ask the interviewee "does this sound like you?"
+5. Iterate: Until the answer is yes.
+6. Commit: Date the Activity Log. Push to git.
+
+### Path B: Top-Down Draft (Emergency Only)
+
+If an interview is impossible, use `telos/templates/TELOS-v1-blank.md` and write
+from scratch. Mark the file as `*.DRAFT.md`. Schedule an interview to replace it.
+
+> **Warning:** Top-down drafts are fiction. They reflect what the writer thinks
+> the entity believes, not what it actually believes. Always replace with
+> interview-captured versions.
+
+### Checklist
+
+- [ ] Mission is one sentence, no commas, no caveats
+- [ ] Goals are force-ranked (G1 > G2 > G3...)
+- [ ] KPIs have numbers and owners
+- [ ] Risks are honest (not "nothing could go wrong")
+- [ ] Narrative contains emotion, not just facts
+- [ ] Activity Log has at least one dated entry
+- [ ] File is reviewed and approved by the entity it describes
 
 Then iterate. A TELOS is never "done" — it evolves as the entity evolves.
 

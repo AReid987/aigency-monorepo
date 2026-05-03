@@ -1,3 +1,9 @@
+# DRAFT — To Be Replaced by Author
+
+> This is a skeleton draft generated without interview input.
+> Replace this with the real version written by THE ARCHITECT.
+> See telos/INTERVIEW.md for the proper capture process.
+
 # Aigency Corporate TELOS
 
 > **Entity:** Aigency, Inc. (working name)
