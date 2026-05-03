@@ -6,3 +6,6 @@ substrate: "TBD"
 vault: "../../aigency-vault/agents/atlas"
 soul: "../../aigency-vault/agents/atlas/SOUL.md"
 rules: "../../aigency-vault/agents/atlas/RULES.md"
+
+
+telos: "../../telos/agents/atlas.md"

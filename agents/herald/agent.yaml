@@ -6,3 +6,5 @@ substrate: "Motia"
 vault: "../../aigency-vault/agents/herald"
 soul: "../../aigency-vault/agents/herald/SOUL.md"
 rules: "../../aigency-vault/agents/herald/RULES.md"
+
+telos: "../../telos/agents/herald.md"

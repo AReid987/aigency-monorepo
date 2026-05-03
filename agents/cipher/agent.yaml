@@ -7,3 +7,5 @@ vault: "../../aigency-vault/agents/cipher"
 soul: "../../aigency-vault/agents/cipher/SOUL.md"
 rules: "../../aigency-vault/agents/cipher/RULES.md"
 owns: ["apps/membrane", "apps/router", "apps/contracts"]
+
+telos: "../../telos/agents/cipher.md"

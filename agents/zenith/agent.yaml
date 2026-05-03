@@ -8,3 +8,5 @@ soul: "../../aigency-vault/agents/zenith/SOUL.md"
 rules: "../../aigency-vault/agents/zenith/RULES.md"
 twin: NEXUS
 twin_note: "Identical twins. ZENITH runs the Core Exec Squad. NEXUS runs the Agile Squad."
+
+telos: "../../telos/agents/zenith.md"

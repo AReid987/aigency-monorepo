@@ -6,3 +6,5 @@ substrate: "TBD"
 vault: "../../aigency-vault/agents/compass"
 soul: "../../aigency-vault/agents/compass/SOUL.md"
 rules: "../../aigency-vault/agents/compass/RULES.md"
+
+telos: "../../telos/agents/compass.md"
