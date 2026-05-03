@@ -7,4 +7,4 @@ vault: "../../aigency-vault/agents/vector"
 soul: "../../aigency-vault/agents/vector/SOUL.md"
 rules: "../../aigency-vault/agents/vector/RULES.md"
 
-telos: "../../telos/agents/vector.md"
+telos: "../../apps/telos/agents/vector.md"

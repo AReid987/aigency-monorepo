@@ -8,4 +8,4 @@ soul: "../../aigency-vault/agents/cipher/SOUL.md"
 rules: "../../aigency-vault/agents/cipher/RULES.md"
 owns: ["apps/membrane", "apps/router", "apps/contracts"]
 
-telos: "../../telos/agents/cipher.md"
+telos: "../../apps/telos/agents/cipher.md"

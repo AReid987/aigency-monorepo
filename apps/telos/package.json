@@ -1,0 +1,32 @@
+{
+  "name": "@aigency/telos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TELOS — Deep Context Framework for Aigency. Interview-driven identity capture, agent TELOS management, and deployed TELOS web presence.",
+  "type": "module",
+  "bin": {
+    "telos": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/cli.ts --format esm --dts",
+    "dev": "tsx watch src/dev-server.ts",
+    "start": "node dist/dev-server.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@aigency/agent-core": "workspace:*",
+    "js-yaml": "^4.1.0",
+    "marked": "^12.0.0"
+  },
+  "devDependencies": {
+    "@aigency/tsconfig": "workspace:*",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.2",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}
