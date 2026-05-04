@@ -1,0 +1,17 @@
+{
+  "name": "@aigency/docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aigency Documentation — deep-wiki, onboarding guides, and AGENTS.md rendered as a deployable static site",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'Docs site build not yet implemented — see README roadmap'",
+    "dev": "echo 'Docs dev server not yet implemented — see README roadmap'",
+    "typecheck": "echo 'No TypeScript to check yet'",
+    "lint": "echo 'No lint configured yet'",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  }
+}
