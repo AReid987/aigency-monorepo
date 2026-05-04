@@ -1,0 +1,41 @@
+# Aigency Monorepo
+
+> Aigency is a multi-agent AI operating system built as a Turborepo monorepo.
+
+## Overview
+
+- **Type:** Turborepo monorepo (pnpm workspaces)
+- **Node:** >= 20, **pnpm:** >= 9.15.4
+- **Key Technologies:** TypeScript 5.7, SurrealDB 3.0, React 18, Three.js, Foundry
+
+## Workspace Structure
+
+- `apps/` — Deployable services: Router (LLM proxy), Membrane (3D UI), Oracle (memory bootstrap), Librarian (vault curator), Contracts (Solidity), TELOS (identity framework)
+- `packages/` — Shared libraries: agent-core, surreal, honcho, mem-brain, design-tokens, vault-tools, tsconfig
+- `agents/` — Agent identity manifests (agent.yaml)
+
+## Agent Registry
+
+11 registered identities in `packages/agent-core/src/index.ts`:
+
+THE_ARCHITECT (human founder), ZENITH (Chief of Staff), VECTOR (Strategy), CIPHER (Engineering), ECHO (Marketing), ATLAS (Revenue), COMPASS (Finance), IRIS (Design), HERALD (Communications), ORACLE (Memory), LIBRARIAN (Knowledge)
+
+## Key Services
+
+- **Router** (port 8402): OpenAI-compatible LLM proxy with 14-dimension request classification, quota-aware routing, and automatic fallback chains
+- **Membrane**: Three.js + React 3D knowledge graph with SurrealDB LIVE query integration
+- **Oracle**: Bootstraps SurrealDB agent records and serves Honcho workspace
+- **Librarian**: Scheduled lint/compile/flush workflow for vault quality
+- **Contracts**: `HarvestMoon.sol` on Base L2 — quality-gated NFT minting
+
+## Memory Architecture
+
+Dual-store: SurrealDB (graph + document + vector + LIVE queries) + Honcho (peer identity + cross-session reasoning). Unified via `MemBrain` class in `@aigency/mem-brain`.
+
+## Documentation
+
+Full deep-wiki at `wiki/`:
+- `01-getting-started/` — Overview, setup, quick reference
+- `02-deep-dive/` — Architecture, agent system, data layer, apps, packages, frontend
+- `03-agents/` — Individual agent profiles
+- `onboarding/` — Role-specific guides

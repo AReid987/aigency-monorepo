@@ -1,0 +1,186 @@
+# Aigency Monorepo — Full Context
+
+## Project
+
+Aigency — multi-agent AI operating system. Turborepo monorepo with pnpm workspaces.
+
+## Repository Facts
+
+- Location: `/Users/antonioreid/CODE/00_PROJECTS/00_APPS/aigency-monorepo`
+- Package Manager: pnpm 9.15.4
+- Node.js: >= 20
+- TypeScript: 5.7 (strict mode)
+- Build: Turborepo 2.9.7
+- No git remote — local-only repository
+- Default branch: main
+
+## Workspace Layout
+
+```
+aigency-monorepo/
+├── apps/
+│   ├── contracts/     — Solidity smart contracts (Foundry, Base L2)
+│   ├── librarian/     — Knowledge graph curator service
+│   ├── membrane/      — 3D spatial interface (Three.js + React)
+│   ├── oracle/        — SurrealDB memory service
+│   ├── router/        — LLM routing proxy (port 8402)
+│   └── telos/         — Deep Context Framework
+├── packages/
+│   ├── agent-core/    — Agent registry, types, AgentCallsign enum
+│   ├── design-tokens/ — W3C DTCG design tokens
+│   ├── honcho/        — Honcho peer/identity client
+│   ├── mem-brain/     — Unified memory layer
+│   ├── surreal/       — SurrealDB client, LIVE queries
+│   ├── tsconfig/      — Shared TypeScript configs
+│   └── vault-tools/   — Lint, compile, flush utilities
+├── agents/
+│   ├── atlas/         — Revenue & Sales Ops
+│   ├── cipher/        — Engineering & DevOps
+│   ├── compass/       — Finance & Operations
+│   ├── echo/          — Marketing & Content
+│   ├── herald/        — Communications
+│   ├── iris/          — Design & Brand Systems
+│   ├── vector/        — Strategy & Intelligence
+│   └── zenith/        — Chief of Staff & Orchestrator
+├── wiki/              — Comprehensive documentation
+├── CLAUDE.md          — Working memory for Claude
+└── package.json       — Root monorepo config
+```
+
+## Agent Registry (Canonical)
+
+From `packages/agent-core/src/index.ts:26-38`:
+
+| Callsign | Name | Role | Color | Substrate |
+|----------|------|------|-------|-----------|
+| THE_ARCHITECT | Antonio Reid | Founder & Chief Architect | #FFD700 | human |
+| ZENITH | Newton Hughes | Chief of Staff & Orchestrator | #00E5CC | OpenClaw |
+| VECTOR | Dominique Osei | Strategy & Intelligence | #7B2FFF | gptme |
+| CIPHER | Roman Voss | Engineering & DevOps | #39FF14 | gptme |
+| ECHO | Selene Navarro | Marketing & Content | #FF2D78 | TBD |
+| ATLAS | Jordan Mercer | Revenue & Sales Ops | #FFB300 | TBD |
+| COMPASS | Imara Adeyemi | Finance & Operations | #00BFA5 | TBD |
+| IRIS | Vivienne Calloway | Design & Brand Systems | #C77DFF | TBD |
+| HERALD | Dax Okafor | Communications | #FFFFFF | Motia |
+| ORACLE | Sable Quinn | Persistent Memory Agent | #1A237E | Letta/MemGPT |
+| LIBRARIAN | Ren Nakamura | Knowledge Graph Curator | #FF6D00 | ZeroClaw |
+
+## Apps
+
+### Router (@aigency/router)
+- OpenAI-compatible HTTP proxy on port 8402
+- 14-dimension request classification (token count, code presence, reasoning keywords, math, multi-turn, question complexity, technical domain, creative task)
+- Quota-preservation routing strategy
+- RateLimitTracker with configurable cooldown
+- Fallback chain of up to 3 models
+- Configuration via YAML + environment variables
+- Zod schema validation
+
+### Membrane (@aigency/membrane)
+- Three.js + @react-three/fiber 3D canvas
+- Floating frosted glass UI panels
+- Design tokens from @aigency/design-tokens
+- Planned: SynapTree knowledge graph, QuerySurface, DirectiveFeed, TimelineRail
+
+### Oracle (@aigency/oracle)
+- Bootstraps SurrealDB with 11 agent records
+- Subscribes to lint_run timeline events
+- Honcho workspace initialization
+- Intended off-chain submitter for HarvestMoon.sol metrics
+
+### Librarian (@aigency/librarian)
+- Scheduled lint/compile/flush workflow
+- Lint computes health score (0-100), wiki density (0.0-1.0), vault age
+- Compile transforms raw session notes to wiki articles via LLM
+- Flush syncs session logs to SurrealDB timeline (placeholder)
+- Emits lint_run timeline event when harvest conditions met
+
+### Contracts (@aigency/contracts)
+- Foundry-based Solidity development
+- Base L2 (chain ID 8453) / Base Sepolia (84532)
+- HarvestMoon.sol: quality-gated graft minting
+- Thresholds: health >= 85, density >= 0.70, age >= 90 days, 30-day cooldown
+
+### TELOS (@aigency/telos)
+- Deep Context Framework for agent identity
+- Telos Context Files (TCFs): markdown documents with Mission, Problems, Goals, KPIs, Strategies, Risks, Narrative, Projects, Activity Log
+- 10-phase interview protocol
+- Future: CLI tool, web UI, auto-deployment, agent substrate integration
+
+## Packages
+
+### Agent Core (@aigency/agent-core)
+- AgentCallsign union type (11 literals)
+- AgentIdentity interface
+- AGENT_REGISTRY constant
+- AgentRoutingContext interface
+- TaskComplexity union: SIMPLE | MEDIUM | COMPLEX | REASONING
+- MemoryBlockType union
+- AigencyEvent interface
+
+### Surreal (@aigency/surreal)
+- SurrealClient singleton (WebSocket connection manager)
+- LIVE query helpers (subscribe, onEvent, onAgentStatus)
+- Record types: AgentRecord, DirectiveRecord, PatternRecord, TimelineRecord
+- Graph edge types: DecidedByEdge, InformedByEdge, SupersedesEdge
+
+### Honcho (@aigency/honcho)
+- HonchoClient wrapper around honcho-ai SDK
+- getPeer, startSession, addMessage, dream methods
+- AigencyPeer and AigencySession types
+- Note: honcho-ai@0.2.0 is deprecated on npm
+
+### Mem-Brain (@aigency/mem-brain)
+- MemBrain unified memory interface
+- Combines SurrealDB (directives, patterns, timeline, LIVE) and Honcho (sessions, messages, dreaming)
+- Vector similarity search with 0.75 cosine threshold
+
+### Design Tokens (@aigency/design-tokens)
+- W3C DTCG token exports (atoms, molecules, organisms)
+- agentColor(callsign), nodeShape(type), opacityForAge(hours) accessors
+- Token JSON at src/synapttree-design-tokens.json
+
+### Vault Tools (@aigency/vault-tools)
+- lint: health score, wiki density, vault age, harvest readiness
+- compile: LLM-powered raw-to-wiki transformation
+- flush: session log sync to SurrealDB (placeholder)
+- Binaries: vault-lint, vault-compile, vault-flush
+
+## Tech Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| DB | SurrealDB 3.0 | Multi-model: graph + vector + document + LIVE |
+| Peer identity | Honcho ^0.2.0 | Cross-session reasoning, dreaming |
+| LLM inference | MLX + Llama.cpp | Local-first, no Ollama |
+| LLM router | apps/router | OpenAI-compat proxy, quota-aware |
+| Chain | Base L2 (8453) | EVM, low gas, Coinbase |
+| Contracts | Foundry | forge + cast + anvil |
+| Frontend | React + Three.js + @react-three/fiber | SynapTree 3D graph |
+| Package manager | pnpm workspaces | Fast, disk-efficient |
+| Build system | Turborepo | Task pipelines with caching |
+
+## Critical Rules
+
+- ZENITH and NEXUS are identical twins. ZENITH runs Core Exec Squad; NEXUS runs Agile Squad. NEXUS is NOT in this repo.
+- All 10 exec agents + THE_ARCHITECT are in AGENT_REGISTRY.
+- agent.yaml files point to aigency-vault/ for SOUL.md and RULES.md — they do not duplicate them.
+- API keys are never in config files; use PROVIDER_*_API_KEY environment variables.
+
+## Commands
+
+```bash
+pnpm install          # install all workspace deps
+pnpm dev              # start all apps in dev mode (turbo)
+pnpm build            # build all packages + apps
+pnpm test             # run all tests
+pnpm router           # dev just the router (port 8402)
+pnpm oracle           # dev just ORACLE
+pnpm membrane         # dev just the Membrane UI
+pnpm --filter @aigency/oracle seed        # bootstrap SurrealDB agent records
+pnpm --filter @aigency/librarian lint     # run LIBRARIAN lint pass
+```
+
+## Documentation
+
+Full deep-wiki generated at `wiki/` with architecture diagrams, agent profiles, package deep-dives, and onboarding guides for contributors, staff engineers, executives, and product managers.
