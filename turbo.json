@@ -25,6 +25,23 @@
     },
     "clean": {
       "cache": false
+    },
+    "docs:build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "apps/docs/**"],
+      "outputs": ["apps/docs/dist/**"]
+    },
+    "docs:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "gitnexus:sync": {
+      "cache": false,
+      "inputs": ["apps/**", "packages/**", "agents/**"]
+    },
+    "docs:check": {
+      "cache": false,
+      "inputs": ["apps/docs/**", "apps/**", "packages/**", "agents/**"]
     }
   }
 }

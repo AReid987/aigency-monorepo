@@ -44,3 +44,4 @@ typechain-types
 # local inference config (has API keys / node IPs)
 config/providers.yaml
 config/tailnet.yaml
+.gitnexus
