@@ -45,3 +45,17 @@ typechain-types
 config/providers.yaml
 config/tailnet.yaml
 .gitnexus
+
+# lefthook
+lefthook-local.yml
+
+# megalinter
+megalinter-reports/
+mega-linter.log
+
+# commitlint / cz
+.commitlintrc.json.local
+
+# stale markers from automation
+docs-stale.marker
+stale-files.txt

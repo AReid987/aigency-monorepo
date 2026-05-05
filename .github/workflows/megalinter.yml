@@ -1,0 +1,76 @@
+name: MegaLinter
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  APPLY_FIXES: none
+  APPLY_FIXES_EVENT: pull_request
+  APPLY_FIXES_MODE: commit
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  megalinter:
+    name: MegaLinter
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: MegaLinter
+        id: ml
+        uses: oxsecurity/megalinter@v8
+        env:
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISABLE_LINTERS: "SPELL_CSPELL,SPELL_LYCHEE"
+          TYPESCRIPT_DEFAULT_STYLE: "biome"
+          JAVASCRIPT_DEFAULT_STYLE: "biome"
+          JSON_PRETTIER_FILTER_REGEX_EXCLUDE: "(pnpm-lock|package\.json)"
+          MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: "(\.gitnexus|llm-wiki)"
+          COPYPASTE_JSCPD_DISABLE_ERRORS: true
+
+      - name: Upload MegaLinter artifacts
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MegaLinter reports
+          path: |
+            megalinter-reports
+            mega-linter.log
+
+      - name: Archive production artifacts
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linter-reports
+          path: |
+            megalinter-reports

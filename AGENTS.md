@@ -40,4 +40,40 @@ This project is indexed by GitNexus as **aigency-monorepo** (1321 symbols, 1567 
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
+---
+
+## Aigency LLM-Wiki — Persistent Knowledge
+
+This repo includes an **LLM-Wiki v2** at `packages/mem-brain/llm-wiki/`. It is a persistent, compounding knowledge base maintained by AI agents — not a RAG system. Knowledge is compiled once and kept current.
+
+### Architecture
+
+```
+raw/      — Immutable sources (aigency-specs, articles, transcripts)
+wiki/     — LLM-maintained pages (entity pages, concepts, synthesis)
+AGENTS.md — Schema for how the LLM maintains the wiki
+```
+
+### Key Pages
+
+| Page | What It Contains |
+|------|-----------------|
+| `packages/mem-brain/llm-wiki/wiki/constitution.md` | AI Coder Constitution — five pillars, Quality Gates |
+| `packages/mem-brain/llm-wiki/wiki/org/human-layer.md` | Human executive org chart |
+| `packages/mem-brain/llm-wiki/wiki/org/agent-network.md` | Full AI agent network (8 squads, 25+ agents) |
+| `packages/mem-brain/llm-wiki/wiki/architecture/memory-tiers.md` | 3-tier memory architecture |
+| `packages/mem-brain/llm-wiki/wiki/architecture/integrations.md` | External service integration specs |
+| `packages/mem-brain/llm-wiki/wiki/squads/*.md` | Detailed squad breakdowns |
+
+### When to Use the Wiki
+
+- Answering questions about Aigency organization, architecture, or processes
+- Onboarding new agents to the system
+- Resolving contradictions between sources
+- Crystallizing completed work into reusable knowledge
+
+### Agent Schema
+
+When maintaining the wiki, read `packages/mem-brain/llm-wiki/AGENTS.md` FIRST. It defines ingest/query/lint/crystallize operations, knowledge graph conventions, confidence scoring, and golden rules.
+
 <!-- gitnexus:end -->

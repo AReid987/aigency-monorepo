@@ -3,217 +3,98 @@ name: Aigency Automation
 on:
   push:
     branches: [main]
-    paths:
-      - 'apps/**'
-      - 'packages/**'
-      - 'agents/**'
-      - '.github/workflows/automation.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'apps/**'
-      - 'packages/**'
-      - 'agents/**'
   schedule:
-    # Nightly full refresh at 3 AM UTC
-    - cron: '0 3 * * *'
+    - cron: "0 3 * * *"
   workflow_dispatch:
-    inputs:
-      force_reindex:
-        description: 'Force full GitNexus re-index'
-        required: false
-        default: 'false'
-      regenerate_wiki:
-        description: 'Regenerate deep-wiki via AI'
-        required: false
-        default: 'false'
 
-env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9.15.4'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  # ───────────────────────────────────────────────
-  # JOB 1: GitNexus Index Sync
-  # ───────────────────────────────────────────────
   gitnexus-sync:
-    name: Sync GitNexus Knowledge Graph
+    name: GitNexus Knowledge Graph Sync
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+          version: 9
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: "20"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Sync GitNexus
+        run: pnpm turbo run gitnexus:sync
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Check GitNexus Status
-        id: status
-        run: |
-          echo "Checking GitNexus index status..."
-          if [ -d ".gitnexus" ]; then
-            echo "index_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "index_exists=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Run GitNexus Analyze
-        run: |
-          if [ "${{ github.event.inputs.force_reindex }}" == "true" ]; then
-            npx gitnexus analyze --force
-          else
-            npx gitnexus analyze
-          fi
-
-      - name: Verify Index
-        run: npx gitnexus status
-
-      - name: Commit Index Changes
-        if: github.ref == 'refs/heads/main'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .gitnexus/
-          if git diff --cached --quiet; then
-            echo "No GitNexus index changes to commit"
-          else
-            git commit -m "chore(gitnexus): auto-sync knowledge graph [skip ci]"
-            git push
-          fi
-
-  # ───────────────────────────────────────────────
-  # JOB 2: Docs Staleness Detection
-  # ───────────────────────────────────────────────
   docs-staleness-check:
-    name: Check Docs Freshness
+    name: Docs Staleness Check
     runs-on: ubuntu-latest
     needs: gitnexus-sync
-    outputs:
-      is_stale: ${{ steps.check.outputs.is_stale }}
-      stale_files: ${{ steps.check.outputs.stale_files }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Check docs freshness
+        run: ./scripts/automation/docs-staleness-check.sh
+      - name: Upload stale state
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-stale-state
+          path: |
+            docs-stale.marker
+            stale-files.txt
+      - name: Discord alert (stale docs)
+        if: failure()
+        uses: Ilshidur/action-discord@0.3.2
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          args: "🧠 Aigency docs are stale. Wiki regeneration needed."
 
-      - name: Check if docs need refresh
-        id: check
-        run: |
-          # Calculate age of docs vs. last source code change
-          DOCS_LAST_MOD=$(git log -1 --format=%ct -- apps/docs/ 2>/dev/null || echo "0")
-          SOURCE_LAST_MOD=$(git log -1 --format=%ct -- apps/ packages/ agents/ 2>/dev/null || echo "0")
-
-          AGE_DIFF=$((SOURCE_LAST_MOD - DOCS_LAST_MOD))
-          THRESHOLD=$((7 * 24 * 60 * 60))  # 7 days in seconds
-
-          if [ "$AGE_DIFF" -gt "$THRESHOLD" ]; then
-            echo "is_stale=true" >> $GITHUB_OUTPUT
-            echo "stale_files=Documentation is ${AGE_DIFF}s behind source code" >> $GITHUB_OUTPUT
-            echo "⚠️  Documentation is stale — last updated $(date -d @$DOCS_LAST_MOD), source changed $(date -d @$SOURCE_LAST_MOD)"
-          else
-            echo "is_stale=false" >> $GITHUB_OUTPUT
-            echo "✅ Documentation is fresh"
-          fi
-
-  # ───────────────────────────────────────────────
-  # JOB 3: Trigger Agentic Wiki Regeneration (Manual / Scheduled)
-  # ───────────────────────────────────────────────
-  agentic-wiki-trigger:
-    name: Trigger Wiki Regeneration
+  docs-build:
+    name: Build Docs
     runs-on: ubuntu-latest
     needs: docs-staleness-check
-    # Only run on schedule, manual trigger, or when explicitly requested
-    if: |
-      (github.event_name == 'schedule' && needs.docs-staleness-check.outputs.is_stale == 'true') ||
-      github.event.inputs.regenerate_wiki == 'true' ||
-      github.event_name == 'workflow_dispatch'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run docs:build
 
-      - name: Create Wiki Regeneration Issue
-        if: github.event.inputs.regenerate_wiki != 'true'
+  agentic-trigger:
+    name: Agentic Wiki Regeneration Trigger
+    runs-on: ubuntu-latest
+    needs: docs-staleness-check
+    if: failure()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Trigger wiki regen (dry-run)
+        run: pnpm turbo run docs:regen
+      - name: Create regeneration issue
         uses: actions/github-script@v7
         with:
           script: |
-            const { data: issue } = await github.rest.issues.create({
+            github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: '🤖 Agentic Workflow: Deep-wiki regeneration needed',
-              body: `## Staleness Detected
-
-${{ needs.docs-staleness-check.outputs.stale_files }}
-
-### Action Required
-An AI agent should regenerate the deep-wiki to reflect current codebase state.
-
-### Suggested Workflow
-1. Run deep-wiki skill on the repo
-2. Review generated content for accuracy
-3. Open PR with changes
-4. Merge after human review
-
-### Automation Note
-This issue was auto-created by the staleness detection job.
-To manually trigger regeneration, run the \`automation.yml\` workflow with \`regenerate_wiki: true\`.
-`,
-              labels: ['automation', 'docs', 'agentic']
+              title: '🧠 Wiki regeneration needed — docs stale',
+              body: 'The docs staleness check detected outdated wiki pages.\\n\\nRun `pnpm wiki:lint` and tell the LLM to regenerate affected pages.',
+              labels: ['wiki', 'automation', 'stale']
             });
-            console.log(`Created issue #${issue.number}`);
-
-      - name: Notify via Webhook (optional)
-        if: env.DISCORD_WEBHOOK_URL != ''
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: |
-          curl -X POST "$DISCORD_WEBHOOK_URL" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "content": "🤖 **Aigency Automation Alert**\n\nDocumentation staleness detected. Wiki regeneration needed.\n\nRun workflow: \`.github/workflows/automation.yml\` with \`regenerate_wiki: true\`"
-            }'
-
-  # ───────────────────────────────────────────────
-  # JOB 4: Build Docs Site (if site generator exists)
-  # ───────────────────────────────────────────────
-  build-docs:
-    name: Build Documentation Site
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install Dependencies
-        run: pnpm install
-
-      - name: Build Docs (placeholder)
-        run: |
-          if [ -f "apps/docs/package.json" ]; then
-            pnpm --filter @aigency/docs build || echo "Docs build not yet implemented — see apps/docs/README.md"
-          else
-            echo "No docs app found — skipping build"
-          fi
-
-      - name: Upload Build Artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: docs-site
-          path: apps/docs/dist/
-          if-no-files-found: ignore

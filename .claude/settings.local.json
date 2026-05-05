@@ -1,11 +1,13 @@
 {
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "claude-flow"
-  ],
   "permissions": {
     "allow": [
-      "Bash(rtk ls ~/.claude/skills/)"
+      "Bash(rtk ls ~/.claude/skills/)",
+      "Bash(rtk ls -la ~/.agents/skills/agent-eval-harness/)",
+      "Bash(rtk ls:*)",
+      "Bash(rtk find ~/.agents/skills/browser-automation/ -type f)",
+      "Bash(rtk find ~/.agents/skills/browser/agent-workspace/ -name \"*.py\")"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": ["claude-flow"]
 }

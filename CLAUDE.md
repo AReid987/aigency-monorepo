@@ -7,11 +7,11 @@
 
 ## What This Repo Is
 
-Turborepo monorepo for the Aigency AI operating system.  
-**Not** the LLM wiki (that's a separate standalone project).  
-**Not** the aigency-vault markdown knowledge store (that lives at `../aigency-vault` or the Mem_Brain folder).
+Turborepo monorepo for the Aigency AI operating system.
 
-This is the **runtime codebase** — TypeScript services, smart contracts, and the Membraned Interface.
+This is the **runtime codebase** — TypeScript services, smart contracts, the Membraned Interface, **and** the LLM-Wiki persistent knowledge base.
+
+The aigency-vault markdown knowledge store lives separately at `../aigency-vault`.
 
 ---
 
@@ -32,7 +32,7 @@ aigency-monorepo/
 │   ├── honcho/           @aigency/honcho         — Honcho peer/identity client
 │   ├── vault-tools/      @aigency/vault-tools    — lint.ts, compile.ts, flush.ts (port of Python scripts)
 │   ├── design-tokens/    @aigency/design-tokens  — SynapTree W3C DTCG tokens (atoms/molecules/organisms)
-│   └── mem-brain/        @aigency/mem-brain      — MemBrain unified memory layer (SurrealDB + Honcho)
+│   └── mem-brain/        @aigency/mem-brain      — MemBrain unified memory layer (SurrealDB + Honcho + LLM-Wiki)
 └── agents/
     ├── zenith/ vector/ cipher/ echo/ atlas/ compass/ iris/ herald/
     │   └── agent.yaml    — identity, color, substrate, vault pointer
@@ -55,6 +55,9 @@ pnpm membrane         # dev just the Membrane UI
 pnpm --filter @aigency/router dev
 pnpm --filter @aigency/librarian lint     # run LIBRARIAN lint pass
 pnpm --filter @aigency/oracle seed        # bootstrap SurrealDB agent records
+pnpm format                               # format all code with Biome
+pnpm lint:fix                             # lint and auto-fix with Biome
+pnpm commit                               # interactive commit with cz-git
 ```
 
 ---
@@ -81,6 +84,17 @@ pnpm --filter @aigency/oracle seed        # bootstrap SurrealDB agent records
 | Frontend | React + Three.js + @react-three/fiber | SynapTree 3D graph in browser |
 | Package manager | pnpm workspaces | Fast, disk-efficient, strict |
 | Build system | Turborepo | Task pipelines with caching |
+
+---
+
+## LLM-Wiki
+
+Persistent knowledge base at `packages/mem-brain/llm-wiki/`:
+- **Human docs:** `packages/mem-brain/llm-wiki/README.md`
+- **Agent schema:** `packages/mem-brain/llm-wiki/AGENTS.md`
+- **Key knowledge:** Constitution, org charts, memory architecture, squad details
+- **Ingest sources:** Drop files into `llm-wiki/raw/`, tell the LLM to process
+- **Query:** Ask the LLM questions against the wiki
 
 ---
 

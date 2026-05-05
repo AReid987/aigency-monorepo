@@ -7,24 +7,43 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --write",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rimraf node_modules",
+    "commit": "cz",
+    "prepare": "lefthook install",
     "router": "turbo run dev --filter=@aigency/router",
     "membrane": "turbo run dev --filter=@aigency/membrane",
-    "oracle": "turbo run dev --filter=@aigency/oracle"
+    "oracle": "turbo run dev --filter=@aigency/oracle",
+    "wiki:ingest": "echo 'Run: tell the LLM to ingest a new source into packages/mem-brain/llm-wiki/raw/'",
+    "wiki:lint": "echo 'Run: tell the LLM to lint packages/mem-brain/llm-wiki/'"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
     "@types/node": "^22.10.2",
+    "commitizen": "^4.3.1",
+    "cz-git": "^1.11.1",
+    "lefthook": "^1.11.12",
+    "lint-staged": "^15.5.1",
     "rimraf": "^6.0.1",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",
     "turbo": "^2.9.7",
     "typescript": "^5.7.2"
   },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git"
+    }
+  },
   "engines": {
     "node": ">=20",
     "pnpm": ">=9"
   },
-  "packageManager": "pnpm@9.15.4"
+  "packageManager": "pnpm@10.33.2"
 }

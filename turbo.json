@@ -19,6 +19,10 @@
     "lint": {
       "inputs": ["$TURBO_DEFAULT$"]
     },
+    "format": {
+      "inputs": ["$TURBO_DEFAULT$"],
+      "cache": false
+    },
     "typecheck": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$"]
