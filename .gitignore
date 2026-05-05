@@ -59,3 +59,10 @@ mega-linter.log
 # stale markers from automation
 docs-stale.marker
 stale-files.txt
+
+# coderabbit
+.coderabbit/
+coderabbit-report*.json
+
+# autofix backups
+*.autofix.bak

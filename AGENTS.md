@@ -42,6 +42,28 @@ This project is indexed by GitNexus as **aigency-monorepo** (1321 symbols, 1567 
 
 ---
 
+## CodeRabbit AI Review
+
+This repo is configured for **CodeRabbit** AI code review:
+- **CLI:** `pnpm review` (quick), `pnpm review:staged`, `pnpm review:committed`, `pnpm review:agent`
+- **GitHub Action:** Runs on every PR via `.github/workflows/coderabbit.yml`
+- **Config:** `.coderabbit.yaml` — path-specific instructions for TypeScript, Solidity, agent.yaml, and wiki pages
+- **Install CLI:** `curl -fsSL https://cli.coderabbit.ai/install.sh | sh`
+
+### Autofix
+
+Run `pnpm autofix` to apply all automatic fixes:
+1. Biome format
+2. Biome lint (safe + unsafe fixes)
+3. Organize imports
+4. Package.json sort
+5. Git conflict marker detection
+6. Trailing whitespace cleanup
+
+Run `pnpm autofix:check` to verify without applying.
+
+---
+
 ## Aigency LLM-Wiki — Persistent Knowledge
 
 This repo includes an **LLM-Wiki v2** at `packages/mem-brain/llm-wiki/`. It is a persistent, compounding knowledge base maintained by AI agents — not a RAG system. Knowledge is compiled once and kept current.

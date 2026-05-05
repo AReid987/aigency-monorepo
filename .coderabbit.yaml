@@ -1,0 +1,117 @@
+# CodeRabbit Configuration — Aigency Monorepo
+# Docs: https://docs.coderabbit.ai/reference/configuration
+# Install CLI: curl -fsSL https://cli.coderabbit.ai/install.sh | sh
+
+language: en
+early_access: true
+tone_instructions: |
+  You are reviewing code for the Aigency AI operating system — a Turborepo
+  monorepo with TypeScript services, smart contracts, and multi-agent
+  orchestration. Be thorough but concise. Prioritize: security, correctness,
+  performance, and adherence to the AI Coder Constitution (Autonomy, Context,
+  Verification, Atomicity, Constraints). Flag any code that violates Quality
+  Gates (Syntax, Logic, Security, Consensus).
+
+reviews:
+  profile: assertive
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+  changed_files_summary: true
+  sequence_diagrams: true
+  assess_linked_issues: true
+  related_issues: true
+  suggested_labels: true
+  suggested_reviewers: true
+  auto_apply_labels: false
+
+  # Path-specific instructions
+  path_instructions:
+    - path: "packages/**/*.ts"
+      instructions: |
+        Review TypeScript code for:
+        1. Strict type safety — no `any` without justification
+        2. Proper error handling with Either/TaskEither patterns where applicable
+        3. Memory safety — no unbounded context growth
+        4. Agent-appropriate abstractions — clear interfaces for agent consumption
+    - path: "apps/contracts/**/*.sol"
+      instructions: |
+        Review Solidity for:
+        1. Reentrancy guards and access control
+        2. Gas optimization
+        3. Proper event emission for agent observability
+        4. Compliance with AigencyGraft ERC-721/ERC-20 patterns
+    - path: "agents/**/agent.yaml"
+      instructions: |
+        Review agent identity manifests for:
+        1. Consistent color/substrate mapping
+        2. Valid vault pointer paths
+        3. TELOS context file references
+    - path: "packages/mem-brain/llm-wiki/**/*.md"
+      instructions: |
+        Review wiki pages for:
+        1. Confidence scoring frontmatter
+        2. Proper cross-references to related pages
+        3. Source citations for all claims
+        4. Consistency with AI Coder Constitution
+
+  # Auto-review settings
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+    ignore_title_keywords:
+      - "[skip-review]"
+      - "WIP"
+      - "wip"
+    labels:
+      - "!skip-coderabbit"
+
+  # Tools integration
+  tools:
+    biome:
+      enabled: true
+    actionlint:
+      enabled: true
+    markdownlint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    yamllint:
+      enabled: true
+
+  # Finishing touches
+  finishing_touches:
+    docstrings:
+      enabled: true
+    unit_tests:
+      enabled: true
+    simplify:
+      enabled: false
+
+# Knowledge base
+knowledge_base:
+  opt_out: false
+  learnings:
+    scope: local
+  issues:
+    scope: local
+  pull_requests:
+    scope: local
+  code_guidelines:
+    enabled: true
+    file_patterns:
+      - "CLAUDE.md"
+      - "AGENTS.md"
+      - "packages/mem-brain/llm-wiki/AGENTS.md"
+      - ".cursorrules"
+      - ".github/copilot-instructions.md"
+
+# Chat
+chat:
+  auto_reply: true
+  integrations:
+    - slack
+    - discord

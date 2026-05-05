@@ -10,9 +10,11 @@ commit-msg:
 pre-commit:
   parallel: true
   commands:
+    autofix:
+      run: ./scripts/automation/autofix.sh fix
     biome-check:
       glob: "*.{js,ts,jsx,tsx,json,cjs,mjs}"
-      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      run: pnpm exec biome check --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
     biome-format-md-json:
       glob: "*.{md,json}"
       run: pnpm exec biome format --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
@@ -28,3 +30,12 @@ pre-push:
       run: pnpm exec turbo run typecheck
     test:
       run: pnpm exec turbo run test
+    coderabbit-review:
+      run: |
+        if command -v coderabbit &>/dev/null || command -v cr &>/dev/null; then
+          echo "🐰 Running CodeRabbit pre-push review..."
+          ./scripts/automation/coderabbit-review.sh committed --plain || true
+        else
+          echo "⏭️  CodeRabbit CLI not installed. Skipping pre-push review."
+          echo "   Install: curl -fsSL https://cli.coderabbit.ai/install.sh | sh"
+        fi

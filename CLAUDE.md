@@ -57,6 +57,10 @@ pnpm --filter @aigency/librarian lint     # run LIBRARIAN lint pass
 pnpm --filter @aigency/oracle seed        # bootstrap SurrealDB agent records
 pnpm format                               # format all code with Biome
 pnpm lint:fix                             # lint and auto-fix with Biome
+pnpm autofix                              # run all auto-fixers (biome + imports + sort)
+pnpm autofix:check                        # verify without applying fixes
+pnpm review                               # CodeRabbit AI review (uncommitted)
+pnpm review:agent                         # CodeRabbit review (agent-optimized output)
 pnpm commit                               # interactive commit with cz-git
 ```
 

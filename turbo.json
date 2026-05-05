@@ -19,6 +19,10 @@
     "lint": {
       "inputs": ["$TURBO_DEFAULT$"]
     },
+    "lint:fix": {
+      "inputs": ["$TURBO_DEFAULT$"],
+      "cache": false
+    },
     "format": {
       "inputs": ["$TURBO_DEFAULT$"],
       "cache": false
