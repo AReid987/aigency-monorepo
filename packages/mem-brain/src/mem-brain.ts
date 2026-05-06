@@ -2,9 +2,9 @@
 // Single entry point for all agent memory operations.
 // Abstracts over SurrealDB (graph) + Honcho (peer identity).
 
-import { SurrealClient, LIVE } from "@aigency/surreal";
-import { HonchoClient } from "@aigency/honcho";
 import type { AgentCallsign } from "@aigency/agent-core";
+import { HonchoClient } from "@aigency/honcho";
+import { LIVE, SurrealClient } from "@aigency/surreal";
 import type { DirectiveRecord, PatternRecord, TimelineRecord } from "@aigency/surreal";
 
 export interface MemBrainConfig {
@@ -31,7 +31,6 @@ export class MemBrain {
 
   async connect(): Promise<void> {
     await SurrealClient.connect(config.surreal);
-    console.log("[mem-brain] Connected to SurrealDB + Honcho");
   }
 
   // ─── Directive Operations ──────────────────────────────────────────────────

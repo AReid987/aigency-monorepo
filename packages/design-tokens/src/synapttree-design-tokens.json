@@ -18,122 +18,131 @@
     "color": {
       "$description": "All color primitives in the system.",
       "agent": {
-        "architect":  { "$value": "#FFD700", "$type": "color" },
-        "zenith":     { "$value": "#00E5CC", "$type": "color" },
-        "vector":     { "$value": "#7B2FFF", "$type": "color" },
-        "cipher":     { "$value": "#39FF14", "$type": "color" },
-        "echo":       { "$value": "#FF2D78", "$type": "color" },
-        "atlas":      { "$value": "#FFB300", "$type": "color" },
-        "compass":    { "$value": "#00BFA5", "$type": "color" },
-        "iris":       { "$value": "#C77DFF", "$type": "color" },
-        "herald":     { "$value": "#FFFFFF", "$type": "color" },
-        "oracle":     { "$value": "#3949AB", "$type": "color" },
-        "oracle-deep":{ "$value": "#1A237E", "$type": "color" },
-        "librarian":  { "$value": "#FF6D00", "$type": "color" },
-        "external":   { "$value": "#9E9E9E", "$type": "color" }
+        "architect": { "$value": "#FFD700", "$type": "color" },
+        "zenith": { "$value": "#00E5CC", "$type": "color" },
+        "vector": { "$value": "#7B2FFF", "$type": "color" },
+        "cipher": { "$value": "#39FF14", "$type": "color" },
+        "echo": { "$value": "#FF2D78", "$type": "color" },
+        "atlas": { "$value": "#FFB300", "$type": "color" },
+        "compass": { "$value": "#00BFA5", "$type": "color" },
+        "iris": { "$value": "#C77DFF", "$type": "color" },
+        "herald": { "$value": "#FFFFFF", "$type": "color" },
+        "oracle": { "$value": "#3949AB", "$type": "color" },
+        "oracle-deep": { "$value": "#1A237E", "$type": "color" },
+        "librarian": { "$value": "#FF6D00", "$type": "color" },
+        "external": { "$value": "#9E9E9E", "$type": "color" }
       },
       "base": {
-        "void":         { "$value": "#000000", "$type": "color" },
-        "canvas":       { "$value": "#0A0A0A", "$type": "color" },
-        "surface-1":    { "$value": "#111111", "$type": "color" },
-        "surface-2":    { "$value": "#1A1A1A", "$type": "color" },
-        "surface-3":    { "$value": "#222222", "$type": "color" },
-        "border":       { "$value": "#2A2A2A", "$type": "color" },
-        "border-bright":{ "$value": "#444444", "$type": "color" }
+        "void": { "$value": "#000000", "$type": "color" },
+        "canvas": { "$value": "#0A0A0A", "$type": "color" },
+        "surface-1": { "$value": "#111111", "$type": "color" },
+        "surface-2": { "$value": "#1A1A1A", "$type": "color" },
+        "surface-3": { "$value": "#222222", "$type": "color" },
+        "border": { "$value": "#2A2A2A", "$type": "color" },
+        "border-bright": { "$value": "#444444", "$type": "color" }
       },
       "text": {
-        "primary":  { "$value": "#E8E8E8", "$type": "color" },
-        "secondary":{ "$value": "#AAAAAA", "$type": "color" },
-        "muted":    { "$value": "#666666", "$type": "color" },
-        "inverse":  { "$value": "#0A0A0A", "$type": "color" }
+        "primary": { "$value": "#E8E8E8", "$type": "color" },
+        "secondary": { "$value": "#AAAAAA", "$type": "color" },
+        "muted": { "$value": "#666666", "$type": "color" },
+        "inverse": { "$value": "#0A0A0A", "$type": "color" }
       },
       "semantic": {
-        "live":    { "$value": "#E040FB", "$type": "color" },
-        "fresh":   { "$value": "#39FF14", "$type": "color" },
+        "live": { "$value": "#E040FB", "$type": "color" },
+        "fresh": { "$value": "#39FF14", "$type": "color" },
         "warning": { "$value": "#FFB300", "$type": "color" },
-        "critical":{ "$value": "#FF4444", "$type": "color" },
+        "critical": { "$value": "#FF4444", "$type": "color" },
         "harvest": { "$value": "#FFD700", "$type": "color" }
       }
     },
 
     "opacity": {
-      "fresh":     { "$value": 1.0,  "$type": "number" },
-      "semi-fresh":{ "$value": 0.9,  "$type": "number" },
-      "recent":    { "$value": 0.8,  "$type": "number" },
-      "aging":     { "$value": 0.6,  "$type": "number" },
-      "old":       { "$value": 0.4,  "$type": "number" },
-      "stale":     { "$value": 0.3,  "$type": "number" },
-      "archived":  { "$value": 0.2,  "$type": "number" },
-      "deprecated":{ "$value": 0.1,  "$type": "number" },
-      "dimmed":    { "$value": 0.12, "$type": "number" }
+      "fresh": { "$value": 1.0, "$type": "number" },
+      "semi-fresh": { "$value": 0.9, "$type": "number" },
+      "recent": { "$value": 0.8, "$type": "number" },
+      "aging": { "$value": 0.6, "$type": "number" },
+      "old": { "$value": 0.4, "$type": "number" },
+      "stale": { "$value": 0.3, "$type": "number" },
+      "archived": { "$value": 0.2, "$type": "number" },
+      "deprecated": { "$value": 0.1, "$type": "number" },
+      "dimmed": { "$value": 0.12, "$type": "number" }
     },
 
     "shape": {
-      "agent":    { "$value": "SphereGeometry",      "$type": "string" },
+      "agent": { "$value": "SphereGeometry", "$type": "string" },
       "decision": { "$value": "TetrahedronGeometry", "$type": "string" },
-      "document": { "$value": "BoxGeometry",         "$type": "string" },
-      "session":  { "$value": "TorusGeometry",       "$type": "string" },
-      "graft":    { "$value": "OctahedronGeometry",  "$type": "string" },
-      "pattern":  { "$value": "IcosahedronGeometry", "$type": "string" },
-      "peer":     { "$value": "TorusGeometry-flat",  "$type": "string" }
+      "document": { "$value": "BoxGeometry", "$type": "string" },
+      "session": { "$value": "TorusGeometry", "$type": "string" },
+      "graft": { "$value": "OctahedronGeometry", "$type": "string" },
+      "pattern": { "$value": "IcosahedronGeometry", "$type": "string" },
+      "peer": { "$value": "TorusGeometry-flat", "$type": "string" }
     },
 
     "timing": {
-      "instant":           { "$value": 80,   "$type": "number" },
-      "fast":              { "$value": 200,  "$type": "number" },
-      "normal":            { "$value": 600,  "$type": "number" },
-      "slow":              { "$value": 1500, "$type": "number" },
-      "very-slow":         { "$value": 2500, "$type": "number" },
-      "pulse-frequency":   { "$value": 2000, "$type": "number" },
-      "opacity-transition":{ "$value": 2000, "$type": "number" }
+      "instant": { "$value": 80, "$type": "number" },
+      "fast": { "$value": 200, "$type": "number" },
+      "normal": { "$value": 600, "$type": "number" },
+      "slow": { "$value": 1500, "$type": "number" },
+      "very-slow": { "$value": 2500, "$type": "number" },
+      "pulse-frequency": { "$value": 2000, "$type": "number" },
+      "opacity-transition": { "$value": 2000, "$type": "number" }
     },
 
     "blur": {
-      "light":  { "$value": "8px",  "$type": "string" },
+      "light": { "$value": "8px", "$type": "string" },
       "medium": { "$value": "12px", "$type": "string" },
-      "heavy":  { "$value": "20px", "$type": "string" }
+      "heavy": { "$value": "20px", "$type": "string" }
     },
 
     "radius": {
-      "sm":   { "$value": "4px",  "$type": "string" },
-      "md":   { "$value": "8px",  "$type": "string" },
-      "lg":   { "$value": "12px", "$type": "string" },
-      "full": { "$value": "50%",  "$type": "string" }
+      "sm": { "$value": "4px", "$type": "string" },
+      "md": { "$value": "8px", "$type": "string" },
+      "lg": { "$value": "12px", "$type": "string" },
+      "full": { "$value": "50%", "$type": "string" }
     }
   },
 
   "molecules": {
     "node": {
-      "agent-sphere":    { "geometry": { "$value": "{atoms.shape.agent}" },    "bloom-frequency": { "$value": "{atoms.timing.pulse-frequency}" } },
-      "decision-tetra":  { "geometry": { "$value": "{atoms.shape.decision}" } },
-      "document-cube":   { "geometry": { "$value": "{atoms.shape.document}" } },
-      "session-torus":   { "geometry": { "$value": "{atoms.shape.session}" } },
-      "graft-crystal":   { "geometry": { "$value": "{atoms.shape.graft}" }, "iridescent": { "$value": true } },
-      "pattern-icosa":   { "geometry": { "$value": "{atoms.shape.pattern}" } },
-      "peer-ring":       { "geometry": { "$value": "{atoms.shape.peer}" } }
+      "agent-sphere": {
+        "geometry": { "$value": "{atoms.shape.agent}" },
+        "bloom-frequency": { "$value": "{atoms.timing.pulse-frequency}" }
+      },
+      "decision-tetra": { "geometry": { "$value": "{atoms.shape.decision}" } },
+      "document-cube": { "geometry": { "$value": "{atoms.shape.document}" } },
+      "session-torus": { "geometry": { "$value": "{atoms.shape.session}" } },
+      "graft-crystal": {
+        "geometry": { "$value": "{atoms.shape.graft}" },
+        "iridescent": { "$value": true }
+      },
+      "pattern-icosa": { "geometry": { "$value": "{atoms.shape.pattern}" } },
+      "peer-ring": { "geometry": { "$value": "{atoms.shape.peer}" } }
     },
     "edge": {
-      "decided-by":  { "style": { "$value": "solid"  }, "width": { "$value": "{atoms.size.edge.thick}" } },
-      "informed-by": { "style": { "$value": "solid"  }, "glow":  { "$value": true } },
-      "involves":    { "style": { "$value": "dashed" } },
-      "supersedes":  { "style": { "$value": "solid"  } },
-      "generated":   { "style": { "$value": "solid"  }, "animated": { "$value": true } },
-      "references":  { "style": { "$value": "dotted" } }
+      "decided-by": {
+        "style": { "$value": "solid" },
+        "width": { "$value": "{atoms.size.edge.thick}" }
+      },
+      "informed-by": { "style": { "$value": "solid" }, "glow": { "$value": true } },
+      "involves": { "style": { "$value": "dashed" } },
+      "supersedes": { "style": { "$value": "solid" } },
+      "generated": { "style": { "$value": "solid" }, "animated": { "$value": true } },
+      "references": { "style": { "$value": "dotted" } }
     },
     "panel": {
       "base": {
-        "background":      { "$value": "rgba(10,10,10,0.55)" },
+        "background": { "$value": "rgba(10,10,10,0.55)" },
         "backdrop-filter": { "$value": "{atoms.blur.medium}" },
-        "border":          { "$value": "1px solid rgba(42,42,42,0.8)" },
-        "border-radius":   { "$value": "{atoms.radius.md}" }
+        "border": { "$value": "1px solid rgba(42,42,42,0.8)" },
+        "border-radius": { "$value": "{atoms.radius.md}" }
       }
     }
   },
 
   "organisms": {
     "synapttree-graph": {
-      "renderer":   "Three.js WebGL",
-      "layout":     "d3-force-3d, damping 0.4",
+      "renderer": "Three.js WebGL",
+      "layout": "d3-force-3d, damping 0.4",
       "background": { "$value": "{atoms.color.base.void}" },
       "target-fps": 60
     },
@@ -143,7 +152,7 @@
     },
     "graft-panel-overlay": {
       "trigger": "HarvestMoon conditions met",
-      "border":  { "$value": "1px solid {atoms.color.semantic.harvest}" }
+      "border": { "$value": "1px solid {atoms.color.semantic.harvest}" }
     }
   }
 }

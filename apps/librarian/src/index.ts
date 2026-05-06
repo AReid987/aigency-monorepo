@@ -2,22 +2,16 @@
 // Runs on a schedule (via cron / GitHub Actions).
 // Workflow: lint → if harvest-ready, notify ORACLE → compile raw/ → flush to SurrealDB
 
-import { lint, compile, loadConfig } from "@aigency/vault-tools";
-import { SurrealClient } from "@aigency/surreal";
 import { join } from "node:path";
+import { SurrealClient } from "@aigency/surreal";
+import { compile, lint, loadConfig } from "@aigency/vault-tools";
 
 async function main() {
   const vaultRoot = process.env.VAULT_ROOT ?? join(process.cwd(), "../../aigency-vault");
   const config = loadConfig(vaultRoot);
-
-  console.log("[LIBRARIAN] Running lint pass...");
   const result = lint(config);
 
-  console.log(`[LIBRARIAN] Health: ${result.healthScore}/100 | Wiki density: ${(result.wikiDensity * 100).toFixed(1)}% | Age: ${result.vaultAgeDays}d`);
-  console.log(`[LIBRARIAN] Harvest ready: ${result.isHarvestReady ? "✦ YES" : "no"}`);
-
   if (result.isHarvestReady) {
-    console.log("[LIBRARIAN] ✦ HARVEST MOON CONDITIONS MET — notifying ORACLE");
     // TODO: emit timeline event → ORACLE subscribes via LIVE query → submits to HarvestMoon.sol
     await SurrealClient.connect({
       url: process.env.SURREAL_URL ?? "ws://localhost:8000/rpc",
@@ -38,10 +32,7 @@ async function main() {
       created_at: new Date().toISOString(),
     });
   }
-
-  console.log("[LIBRARIAN] Running compile pass...");
-  const compileResult = await compile(config);
-  console.log(`[LIBRARIAN] Compile: ${compileResult.compiled} compiled, ${compileResult.skipped} skipped`);
+  const _compileResult = await compile(config);
 }
 
 main().catch(console.error);

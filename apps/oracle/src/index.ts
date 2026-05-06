@@ -9,8 +9,6 @@ import { AGENT_REGISTRY } from "@aigency/agent-core";
 import { SurrealClient } from "@aigency/surreal";
 
 async function main() {
-  console.log("[ORACLE] Initializing...");
-
   await SurrealClient.connect({
     url: process.env.SURREAL_URL ?? "ws://localhost:8000/rpc",
     namespace: process.env.SURREAL_NS ?? "aigency",
@@ -36,9 +34,6 @@ async function main() {
       }
     );
   }
-
-  console.log("[ORACLE] Agent records bootstrapped.");
-  console.log("[ORACLE] Ready. Listening for lint_run events...");
 
   // TODO: subscribe to lint_run events → submitMetrics to HarvestMoon.sol
   // LIVE.onEvent("lint_run", async (action, event) => { ... })

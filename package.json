@@ -4,28 +4,35 @@
   "private": true,
   "description": "Aigency — multi-agent AI operating system",
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "lint:fix": "turbo run lint -- --write",
-    "format": "biome format --write .",
-    "format:check": "biome format .",
     "autofix": "./scripts/automation/autofix.sh fix",
     "autofix:check": "./scripts/automation/autofix.sh check",
-    "test": "turbo run test",
-    "typecheck": "turbo run typecheck",
+    "build": "turbo run build",
     "clean": "turbo run clean && rimraf node_modules",
     "commit": "cz",
-    "prepare": "lefthook install",
-    "review": "./scripts/automation/coderabbit-review.sh quick",
-    "review:staged": "./scripts/automation/coderabbit-review.sh staged",
-    "review:committed": "./scripts/automation/coderabbit-review.sh committed",
-    "review:agent": "./scripts/automation/coderabbit-review.sh agent",
-    "router": "turbo run dev --filter=@aigency/router",
+    "coverage:check": "./scripts/automation/coverage-check.sh",
+    "dev": "turbo run dev",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --write",
     "membrane": "turbo run dev --filter=@aigency/membrane",
     "oracle": "turbo run dev --filter=@aigency/oracle",
+    "prepare": "lefthook install",
+    "review": "./scripts/automation/coderabbit-review.sh quick",
+    "review:agent": "./scripts/automation/coderabbit-review.sh agent",
+    "review:committed": "./scripts/automation/coderabbit-review.sh committed",
+    "review:staged": "./scripts/automation/coderabbit-review.sh staged",
+    "router": "turbo run dev --filter=@aigency/router",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "typecheck": "turbo run typecheck",
     "wiki:ingest": "echo 'Run: tell the LLM to ingest a new source into packages/mem-brain/llm-wiki/raw/'",
     "wiki:lint": "echo 'Run: tell the LLM to lint packages/mem-brain/llm-wiki/'"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git"
+    }
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -42,14 +49,9 @@
     "turbo": "^2.9.7",
     "typescript": "^5.7.2"
   },
-  "config": {
-    "commitizen": {
-      "path": "node_modules/cz-git"
-    }
-  },
+  "packageManager": "pnpm@10.33.2",
   "engines": {
     "node": ">=20",
     "pnpm": ">=9"
-  },
-  "packageManager": "pnpm@10.33.2"
+  }
 }

@@ -5,18 +5,17 @@
  * Supports both YAML and JSON formats for configuration files.
  */
 
-import { promises as fs } from 'fs';
-import { parse } from 'yaml';
-import type { AppConfig } from './schema.js';
+import { promises as fs } from "node:fs";
+import { parse } from "yaml";
 
 /**
  * Determines the current environment from NODE_ENV or defaults to development.
  *
  * @returns The current environment ('development' or 'production')
  */
-export function getEnvironment(): 'development' | 'production' {
+export function getEnvironment(): "development" | "production" {
   const env = process.env.NODE_ENV?.toLowerCase();
-  return env === 'production' ? 'production' : 'development';
+  return env === "production" ? "production" : "development";
 }
 
 /**
@@ -38,7 +37,7 @@ export function getConfigPath(filename: string): string {
  */
 async function loadAndParseConfigFile(filePath: string): Promise<unknown> {
   try {
-    const content = await fs.readFile(filePath, 'utf-8');
+    const content = await fs.readFile(filePath, "utf-8");
 
     // Check for empty file
     if (!content.trim()) {
@@ -55,13 +54,13 @@ async function loadAndParseConfigFile(filePath: string): Promise<unknown> {
       } catch (jsonError) {
         throw new Error(
           `Invalid configuration file format: ${filePath}\n` +
-          `YAML Error: ${(yamlError as Error).message}\n` +
-          `JSON Error: ${(jsonError as Error).message}`
+            `YAML Error: ${(yamlError as Error).message}\n` +
+            `JSON Error: ${(jsonError as Error).message}`
         );
       }
     }
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       throw new Error(`Configuration file not found: ${filePath}`);
     }
     throw error;
@@ -82,14 +81,14 @@ function deepMerge(base: unknown, source: unknown): unknown {
   if (base === null || base === undefined) {
     return source;
   }
-  if (typeof source !== 'object' || typeof base !== 'object') {
+  if (typeof source !== "object" || typeof base !== "object") {
     return source;
   }
   if (Array.isArray(source) || Array.isArray(base)) {
     return source;
   }
 
-  const result = { ...base as Record<string, unknown> };
+  const result = { ...(base as Record<string, unknown>) };
   for (const key of Object.keys(source as Record<string, unknown>)) {
     result[key] = deepMerge(
       (base as Record<string, unknown>)[key],
@@ -113,13 +112,13 @@ function deepMerge(base: unknown, source: unknown): unknown {
  * @throws Error if no configuration file can be loaded
  */
 export async function loadConfigFile(
-  environmentOrFilename?: 'development' | 'production' | string
+  environmentOrFilename?: "development" | "production" | string
 ): Promise<unknown> {
   // If it looks like a filename (contains a dot), use it directly
   // Check if it's an absolute path or contains a dot (but not just 'development' or 'production')
-  if (environmentOrFilename && environmentOrFilename.includes('.')) {
+  if (environmentOrFilename?.includes(".")) {
     // If it's an absolute path, use it directly
-    if (environmentOrFilename.startsWith('/')) {
+    if (environmentOrFilename.startsWith("/")) {
       return loadAndParseConfigFile(environmentOrFilename);
     }
     // Otherwise, treat it as a filename in the config directory
@@ -127,27 +126,23 @@ export async function loadConfigFile(
     return loadAndParseConfigFile(filePath);
   }
 
-  const env = (environmentOrFilename as 'development' | 'production' | undefined) || getEnvironment();
+  const env =
+    (environmentOrFilename as "development" | "production" | undefined) || getEnvironment();
 
   // Always load the base providers.yaml first
-  const baseFilePath = getConfigPath('providers.yaml');
+  const baseFilePath = getConfigPath("providers.yaml");
   let baseConfig: unknown;
 
   try {
     baseConfig = await loadAndParseConfigFile(baseFilePath);
   } catch (error) {
     throw new Error(
-      `Failed to load base configuration file: providers.yaml\n` +
-      `Error: ${(error as Error).message}\n\n` +
-      `Please create config/providers.yaml with your provider configuration.`
+      `Failed to load base configuration file: providers.yaml\nError: ${(error as Error).message}\n\nPlease create config/providers.yaml with your provider configuration.`
     );
   }
 
   // Try to load environment-specific overrides and merge them
-  const envOverrideFiles = [
-    `providers.${env}.yaml`,
-    `providers.${env}.yml`,
-  ];
+  const envOverrideFiles = [`providers.${env}.yaml`, `providers.${env}.yml`];
 
   for (const filename of envOverrideFiles) {
     const filePath = getConfigPath(filename);
@@ -158,9 +153,11 @@ export async function loadConfigFile(
       return deepMerge(baseConfig, overrideConfig);
     } catch (error) {
       // Environment override file doesn't exist or can't be loaded - that's OK
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
         // File exists but failed to load - log a warning but continue
-        console.warn(`Warning: Failed to load ${filename}, using base config: ${(error as Error).message}`);
+        console.warn(
+          `Warning: Failed to load ${filename}, using base config: ${(error as Error).message}`
+        );
       }
       // Continue to next file
     }

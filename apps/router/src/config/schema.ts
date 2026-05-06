@@ -5,7 +5,7 @@
  * Provides runtime validation with TypeScript type inference.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Quota Schema
@@ -16,7 +16,7 @@ export const QuotaSchema = z.object({
   monthlyRequests: z.number().optional(),
   rpm: z.number().optional(),
   tpm: z.number().optional(),
-  quotaSize: z.enum(['tiny', 'small', 'medium', 'large', 'huge']),
+  quotaSize: z.enum(["tiny", "small", "medium", "large", "huge"]),
 });
 
 /**
@@ -30,7 +30,7 @@ export const ModelSchema = z.object({
   maxOutput: z.number().positive(),
   capabilities: z.array(z.string()),
   quota: QuotaSchema,
-  tier: z.enum(['simple', 'medium', 'complex', 'reasoning']),
+  tier: z.enum(["simple", "medium", "complex", "reasoning"]),
 });
 
 /**
@@ -59,16 +59,20 @@ export const ProviderConfigSchema = z.object({
  * Logging Config Schema
  * Extensible logging configuration for Conductor team integration
  */
-export const LoggingConfigSchema = z.object({
-  level: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
-  format: z.enum(['json', 'pretty']).default('pretty'),
-  file: z.string().optional(),
-  errorReporting: z.object({
-    enabled: z.boolean().default(false),
-    dsn: z.string().optional(),
-    environment: z.string().default('development'),
-  }).optional(),
-}).optional();
+export const LoggingConfigSchema = z
+  .object({
+    level: z.enum(["debug", "info", "warn", "error"]).default("info"),
+    format: z.enum(["json", "pretty"]).default("pretty"),
+    file: z.string().optional(),
+    errorReporting: z
+      .object({
+        enabled: z.boolean().default(false),
+        dsn: z.string().optional(),
+        environment: z.string().default("development"),
+      })
+      .optional(),
+  })
+  .optional();
 
 /**
  * Server Config Schema
@@ -76,7 +80,7 @@ export const LoggingConfigSchema = z.object({
  */
 export const ServerConfigSchema = z.object({
   port: z.number().positive().default(8402),
-  host: z.string().default('localhost'),
+  host: z.string().default("localhost"),
 });
 
 /**

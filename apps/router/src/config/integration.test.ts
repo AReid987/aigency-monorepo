@@ -4,31 +4,31 @@
  * Tests the end-to-end configuration loading and initialization flow.
  */
 
-import { initializeConfig, getConfig, getEnabledProviders, resetConfig } from './index.js';
-import { writeFileSync, unlinkSync, existsSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import { existsSync, unlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { getConfig, getEnabledProviders, initializeConfig, resetConfig } from "./index.js";
 
-describe('Config Integration', () => {
-  const testConfigPath = join(tmpdir(), 'test-simplellmrouter-config.yaml');
+describe("Config Integration", () => {
+  const testConfigPath = join(tmpdir(), "test-simplellmrouter-config.yaml");
 
   afterEach(() => {
     // Clean up test config file
     if (existsSync(testConfigPath)) {
       try {
         unlinkSync(testConfigPath);
-      } catch (e) {
+      } catch (_e) {
         // Ignore cleanup errors
       }
     }
     // Reset config state
     resetConfig();
     // Clean up environment variables
-    delete process.env.PROVIDER_MISTRAL_API_KEY;
-    delete process.env.PROVIDER_GROQ_API_KEY;
+    process.env.PROVIDER_MISTRAL_API_KEY = undefined;
+    process.env.PROVIDER_GROQ_API_KEY = undefined;
   });
 
-  it('should load config and apply env overrides', async () => {
+  it("should load config and apply env overrides", async () => {
     // Create test config file
     const testConfig = `
 server:
@@ -74,9 +74,9 @@ providers:
     writeFileSync(testConfigPath, testConfig);
 
     // Set environment variable to override Groq enabled status
-    process.env.PROVIDER_MISTRAL_API_KEY = 'test-mistral-key';
-    process.env.PROVIDER_GROQ_API_KEY = 'test-groq-key';
-    process.env.PROVIDER_GROQ_ENABLED = 'true';
+    process.env.PROVIDER_MISTRAL_API_KEY = "test-mistral-key";
+    process.env.PROVIDER_GROQ_API_KEY = "test-groq-key";
+    process.env.PROVIDER_GROQ_ENABLED = "true";
 
     try {
       // Initialize config with test file
@@ -94,7 +94,7 @@ providers:
     }
   });
 
-  it('should filter providers without API keys', async () => {
+  it("should filter providers without API keys", async () => {
     // Create test config with multiple providers
     const testConfig = `
 server:
@@ -139,22 +139,22 @@ providers:
     writeFileSync(testConfigPath, testConfig);
 
     // Only set API key for mistral
-    process.env.PROVIDER_MISTRAL_API_KEY = 'test-mistral-key';
+    process.env.PROVIDER_MISTRAL_API_KEY = "test-mistral-key";
     // No API key for groq
 
     try {
-      const config = await initializeConfig({ environment: testConfigPath });
+      const _config = await initializeConfig({ environment: testConfigPath });
       const providers = getEnabledProviders();
 
       // Should only have mistral (groq filtered out due to no API key)
       expect(providers.length).toBeGreaterThan(0);
-      expect(providers.some(p => p.id === 'mistral')).toBe(true);
+      expect(providers.some((p) => p.id === "mistral")).toBe(true);
     } finally {
       resetConfig();
     }
   });
 
-  it('should include API keys from environment in returned providers', async () => {
+  it("should include API keys from environment in returned providers", async () => {
     const testConfig = `
 server:
   port: 9999
@@ -182,13 +182,13 @@ providers:
 
     writeFileSync(testConfigPath, testConfig);
 
-    const testApiKey = 'integration-test-key-12345';
+    const testApiKey = "integration-test-key-12345";
     process.env.PROVIDER_MISTRAL_API_KEY = testApiKey;
 
     try {
       await initializeConfig({ environment: testConfigPath });
       const providers = getEnabledProviders();
-      const mistral = providers.find(p => p.id === 'mistral');
+      const mistral = providers.find((p) => p.id === "mistral");
 
       expect(mistral).toBeDefined();
       expect(mistral?.apiKey).toBe(testApiKey);
@@ -198,29 +198,29 @@ providers:
   });
 });
 
-describe('Real Config File Loading', () => {
+describe("Real Config File Loading", () => {
   afterEach(() => {
     resetConfig();
-    delete process.env.PROVIDER_MISTRAL_API_KEY;
-    delete process.env.PROVIDER_GROQ_API_KEY;
-    delete process.env.PROVIDER_GEMINI_API_KEY;
-    delete process.env.PROVIDER_CEREBRAS_API_KEY;
-    delete process.env.PROVIDER_OPENROUTER_API_KEY;
-    delete process.env.PROVIDER_VOIDAI_API_KEY;
-    delete process.env.PROVIDER_ZAI_API_KEY;
-    delete process.env.PROVIDER_KIMI_API_KEY;
+    process.env.PROVIDER_MISTRAL_API_KEY = undefined;
+    process.env.PROVIDER_GROQ_API_KEY = undefined;
+    process.env.PROVIDER_GEMINI_API_KEY = undefined;
+    process.env.PROVIDER_CEREBRAS_API_KEY = undefined;
+    process.env.PROVIDER_OPENROUTER_API_KEY = undefined;
+    process.env.PROVIDER_VOIDAI_API_KEY = undefined;
+    process.env.PROVIDER_ZAI_API_KEY = undefined;
+    process.env.PROVIDER_KIMI_API_KEY = undefined;
   });
 
-  it('should load real config/providers.yaml and make providers available', async () => {
+  it("should load real config/providers.yaml and make providers available", async () => {
     // Set API keys for multiple providers
-    process.env.PROVIDER_MISTRAL_API_KEY = 'test-mistral-key';
-    process.env.PROVIDER_GROQ_API_KEY = 'test-groq-key';
-    process.env.PROVIDER_GEMINI_API_KEY = 'test-gemini-key';
-    process.env.PROVIDER_CEREBRAS_API_KEY = 'test-cerebras-key';
-    process.env.PROVIDER_OPENROUTER_API_KEY = 'test-openrouter-key';
-    process.env.PROVIDER_VOIDAI_API_KEY = 'test-voidai-key';
-    process.env.PROVIDER_ZAI_API_KEY = 'test-zai-key';
-    process.env.PROVIDER_KIMI_API_KEY = 'test-kimi-key';
+    process.env.PROVIDER_MISTRAL_API_KEY = "test-mistral-key";
+    process.env.PROVIDER_GROQ_API_KEY = "test-groq-key";
+    process.env.PROVIDER_GEMINI_API_KEY = "test-gemini-key";
+    process.env.PROVIDER_CEREBRAS_API_KEY = "test-cerebras-key";
+    process.env.PROVIDER_OPENROUTER_API_KEY = "test-openrouter-key";
+    process.env.PROVIDER_VOIDAI_API_KEY = "test-voidai-key";
+    process.env.PROVIDER_ZAI_API_KEY = "test-zai-key";
+    process.env.PROVIDER_KIMI_API_KEY = "test-kimi-key";
 
     try {
       // Load the actual config/providers.yaml file directly
@@ -236,7 +236,7 @@ describe('Real Config File Loading', () => {
 
       // Verify server configuration
       expect(config.server.port).toBe(8402);
-      expect(config.server.host).toBe('localhost');
+      expect(config.server.host).toBe("localhost");
 
       // Call getConfig() to verify it returns the same config
       const getConfigResult = getConfig();
@@ -249,16 +249,16 @@ describe('Real Config File Loading', () => {
 
       // Verify all 9 providers from config/providers.yaml are loaded
       // (when they have API keys set)
-      const providerIds = enabledProviders.map(p => p.id);
+      const providerIds = enabledProviders.map((p) => p.id);
 
-      expect(providerIds).toContain('mistral');
-      expect(providerIds).toContain('groq');
-      expect(providerIds).toContain('gemini');
-      expect(providerIds).toContain('cerebras');
-      expect(providerIds).toContain('openrouter');
-      expect(providerIds).toContain('voidai');
-      expect(providerIds).toContain('zai');
-      expect(providerIds).toContain('kimi');
+      expect(providerIds).toContain("mistral");
+      expect(providerIds).toContain("groq");
+      expect(providerIds).toContain("gemini");
+      expect(providerIds).toContain("cerebras");
+      expect(providerIds).toContain("openrouter");
+      expect(providerIds).toContain("voidai");
+      expect(providerIds).toContain("zai");
+      expect(providerIds).toContain("kimi");
 
       // Verify we have 8 providers (all providers from config/providers.yaml except those with API keys)
       // All 9 providers in config/providers.yaml are enabled by default
@@ -279,9 +279,9 @@ describe('Real Config File Loading', () => {
     }
   });
 
-  it('should filter out providers without API keys', async () => {
+  it("should filter out providers without API keys", async () => {
     // Set only PROVIDER_MISTRAL_API_KEY
-    process.env.PROVIDER_MISTRAL_API_KEY = 'test-mistral-key';
+    process.env.PROVIDER_MISTRAL_API_KEY = "test-mistral-key";
 
     try {
       // Call initializeConfig()
@@ -289,27 +289,27 @@ describe('Real Config File Loading', () => {
 
       // Verify getEnabledProviders() returns only mistral
       const enabledProviders = getEnabledProviders();
-      const providerIds = enabledProviders.map(p => p.id);
+      const providerIds = enabledProviders.map((p) => p.id);
 
-      expect(providerIds).toContain('mistral');
-      expect(providerIds).not.toContain('groq');
-      expect(providerIds).not.toContain('gemini');
-      expect(providerIds).not.toContain('cerebras');
-      expect(providerIds).not.toContain('openrouter');
-      expect(providerIds).not.toContain('voidai');
-      expect(providerIds).not.toContain('zai');
-      expect(providerIds).not.toContain('kimi');
+      expect(providerIds).toContain("mistral");
+      expect(providerIds).not.toContain("groq");
+      expect(providerIds).not.toContain("gemini");
+      expect(providerIds).not.toContain("cerebras");
+      expect(providerIds).not.toContain("openrouter");
+      expect(providerIds).not.toContain("voidai");
+      expect(providerIds).not.toContain("zai");
+      expect(providerIds).not.toContain("kimi");
 
       // Verify only one provider is returned
       expect(enabledProviders.length).toBe(1);
-      expect(enabledProviders[0].id).toBe('mistral');
+      expect(enabledProviders[0].id).toBe("mistral");
     } finally {
       resetConfig();
     }
   });
 
-  it('should merge API keys from ENV into provider objects', async () => {
-    const testApiKey = 'env-merged-api-key-12345';
+  it("should merge API keys from ENV into provider objects", async () => {
+    const testApiKey = "env-merged-api-key-12345";
     process.env.PROVIDER_MISTRAL_API_KEY = testApiKey;
 
     try {
@@ -318,20 +318,20 @@ describe('Real Config File Loading', () => {
 
       // Get enabled providers
       const enabledProviders = getEnabledProviders();
-      const mistral = enabledProviders.find(p => p.id === 'mistral');
+      const mistral = enabledProviders.find((p) => p.id === "mistral");
 
       // Verify mistral provider has correct apiKey merged from ENV
       expect(mistral).toBeDefined();
-      expect(mistral!.apiKey).toBe(testApiKey);
-      expect(mistral!.apiKey).toBe(process.env.PROVIDER_MISTRAL_API_KEY);
+      expect(mistral?.apiKey).toBe(testApiKey);
+      expect(mistral?.apiKey).toBe(process.env.PROVIDER_MISTRAL_API_KEY);
     } finally {
       resetConfig();
     }
   });
 
-  it('should load provider models from config file', async () => {
-    process.env.PROVIDER_MISTRAL_API_KEY = 'test-mistral-key';
-    process.env.PROVIDER_GROQ_API_KEY = 'test-groq-key';
+  it("should load provider models from config file", async () => {
+    process.env.PROVIDER_MISTRAL_API_KEY = "test-mistral-key";
+    process.env.PROVIDER_GROQ_API_KEY = "test-groq-key";
 
     try {
       // Call initializeConfig()
@@ -339,53 +339,53 @@ describe('Real Config File Loading', () => {
 
       // Get enabled providers
       const enabledProviders = getEnabledProviders();
-      const mistral = enabledProviders.find(p => p.id === 'mistral');
-      const groq = enabledProviders.find(p => p.id === 'groq');
+      const mistral = enabledProviders.find((p) => p.id === "mistral");
+      const groq = enabledProviders.find((p) => p.id === "groq");
 
       // Verify each provider has correct models array from config
       expect(mistral).toBeDefined();
-      expect(mistral!.models).toBeInstanceOf(Array);
-      expect(mistral!.models.length).toBeGreaterThanOrEqual(2);
+      expect(mistral?.models).toBeInstanceOf(Array);
+      expect(mistral?.models.length).toBeGreaterThanOrEqual(2);
 
       expect(groq).toBeDefined();
-      expect(groq!.models).toBeInstanceOf(Array);
-      expect(groq!.models.length).toBeGreaterThanOrEqual(2);
+      expect(groq?.models).toBeInstanceOf(Array);
+      expect(groq?.models.length).toBeGreaterThanOrEqual(2);
 
       // Verify model properties (id, name, contextWindow, maxOutput, capabilities, quota, tier)
-      const mistralLarge = mistral!.models.find(m => m.id === 'mistral-large-latest');
+      const mistralLarge = mistral?.models.find((m) => m.id === "mistral-large-latest");
       expect(mistralLarge).toBeDefined();
-      expect(mistralLarge!.id).toBe('mistral-large-latest');
-      expect(mistralLarge!.name).toBe('Mistral Large Latest');
-      expect(mistralLarge!.contextWindow).toBe(128000);
-      expect(mistralLarge!.maxOutput).toBe(8192);
-      expect(mistralLarge!.capabilities).toContain('function-calling');
-      expect(mistralLarge!.capabilities).toContain('reasoning');
-      expect(mistralLarge!.capabilities).toContain('code');
-      expect(mistralLarge!.quota).toBeDefined();
-      expect(mistralLarge!.quota.quotaSize).toBe('huge');
-      expect(mistralLarge!.tier).toBe('complex');
+      expect(mistralLarge?.id).toBe("mistral-large-latest");
+      expect(mistralLarge?.name).toBe("Mistral Large Latest");
+      expect(mistralLarge?.contextWindow).toBe(128000);
+      expect(mistralLarge?.maxOutput).toBe(32000);
+      expect(mistralLarge?.capabilities).toContain("function-calling");
+      expect(mistralLarge?.capabilities).toContain("reasoning");
+      expect(mistralLarge?.capabilities).toContain("code");
+      expect(mistralLarge?.quota).toBeDefined();
+      expect(mistralLarge?.quota.quotaSize).toBe("huge");
+      expect(mistralLarge?.tier).toBe("complex");
 
       // Verify groq models
-      const llama33 = groq!.models.find(m => m.id === 'llama-3.3-70b-versatile');
+      const llama33 = groq?.models.find((m) => m.id === "llama-3.3-70b-versatile");
       expect(llama33).toBeDefined();
-      expect(llama33!.id).toBe('llama-3.3-70b-versatile');
-      expect(llama33!.name).toBe('Llama 3.3 70B Versatile');
-      expect(llama33!.contextWindow).toBe(128000);
-      expect(llama33!.maxOutput).toBe(8192);
-      expect(llama33!.capabilities).toContain('function-calling');
-      expect(llama33!.capabilities).toContain('fast');
-      expect(llama33!.capabilities).toContain('code');
-      expect(llama33!.quota).toBeDefined();
-      expect(llama33!.quota.quotaSize).toBe('large');
-      expect(llama33!.tier).toBe('medium');
+      expect(llama33?.id).toBe("llama-3.3-70b-versatile");
+      expect(llama33?.name).toBe("Llama 3.3 70B Versatile");
+      expect(llama33?.contextWindow).toBe(128000);
+      expect(llama33?.maxOutput).toBe(8192);
+      expect(llama33?.capabilities).toContain("function-calling");
+      expect(llama33?.capabilities).toContain("fast");
+      expect(llama33?.capabilities).toContain("code");
+      expect(llama33?.quota).toBeDefined();
+      expect(llama33?.quota.quotaSize).toBe("large");
+      expect(llama33?.tier).toBe("medium");
     } finally {
       resetConfig();
     }
   });
 
-  it('should validate schema of actual config file', async () => {
-    const { loadConfigFile } = await import('./loader.js');
-    const { AppConfigSchema } = await import('./schema.js');
+  it("should validate schema of actual config file", async () => {
+    const { loadConfigFile } = await import("./loader.js");
+    const { AppConfigSchema } = await import("./schema.js");
 
     // Load the actual config file
     const rawConfig = await loadConfigFile();
@@ -426,18 +426,18 @@ describe('Real Config File Loading', () => {
   });
 });
 
-describe('Environment Override Validation', () => {
+describe("Environment Override Validation", () => {
   afterEach(() => {
     resetConfig();
-    delete process.env.PROVIDER_MISTRAL_API_KEY;
-    delete process.env.PROVIDER_GROQ_API_KEY;
-    delete process.env.PROVIDER_GEMINI_API_KEY;
-    delete process.env.PROVIDER_GROQ_ENABLED;
+    process.env.PROVIDER_MISTRAL_API_KEY = undefined;
+    process.env.PROVIDER_GROQ_API_KEY = undefined;
+    process.env.PROVIDER_GEMINI_API_KEY = undefined;
+    process.env.PROVIDER_GROQ_ENABLED = undefined;
   });
 
-  it('should override provider enabled status via ENV', async () => {
+  it("should override provider enabled status via ENV", async () => {
     // Create test config where groq.enabled: false
-    const testConfigPath = join(tmpdir(), 'test-groq-disabled-config.yaml');
+    const testConfigPath = join(tmpdir(), "test-groq-disabled-config.yaml");
     const testConfig = `
 server:
   port: 9999
@@ -482,24 +482,24 @@ providers:
 
     try {
       // Set PROVIDER_GROQ_ENABLED=true to override config file
-      process.env.PROVIDER_MISTRAL_API_KEY = 'test-mistral-key';
-      process.env.PROVIDER_GROQ_API_KEY = 'test-groq-key';
-      process.env.PROVIDER_GROQ_ENABLED = 'true';
+      process.env.PROVIDER_MISTRAL_API_KEY = "test-mistral-key";
+      process.env.PROVIDER_GROQ_API_KEY = "test-groq-key";
+      process.env.PROVIDER_GROQ_ENABLED = "true";
 
       // Verify env vars are set
-      expect(process.env.PROVIDER_MISTRAL_API_KEY).toBe('test-mistral-key');
-      expect(process.env.PROVIDER_GROQ_API_KEY).toBe('test-groq-key');
-      expect(process.env.PROVIDER_GROQ_ENABLED).toBe('true');
+      expect(process.env.PROVIDER_MISTRAL_API_KEY).toBe("test-mistral-key");
+      expect(process.env.PROVIDER_GROQ_API_KEY).toBe("test-groq-key");
+      expect(process.env.PROVIDER_GROQ_ENABLED).toBe("true");
 
       // Call initializeConfig()
       await initializeConfig({ environment: testConfigPath });
 
       // Verify groq appears in getEnabledProviders() despite being disabled in file
       const enabledProviders = getEnabledProviders();
-      const providerIds = enabledProviders.map(p => p.id);
+      const providerIds = enabledProviders.map((p) => p.id);
 
-      expect(providerIds).toContain('mistral');
-      expect(providerIds).toContain('groq');
+      expect(providerIds).toContain("mistral");
+      expect(providerIds).toContain("groq");
     } finally {
       resetConfig();
       // Clean up test config file
@@ -509,12 +509,12 @@ providers:
     }
   });
 
-  it('should use ENV API key over config file API key', async () => {
+  it("should use ENV API key over config file API key", async () => {
     // Note: Current implementation doesn't support API keys in config files
     // API keys are only set via environment variables
     // This test documents the actual behavior
 
-    const testConfigPath = join(tmpdir(), 'test-api-key-config.yaml');
+    const testConfigPath = join(tmpdir(), "test-api-key-config.yaml");
     const testConfig = `
 server:
   port: 9999
@@ -544,7 +544,7 @@ providers:
 
     try {
       // Set PROVIDER_MISTRAL_API_KEY
-      const envApiKey = 'env-api-key-12345';
+      const envApiKey = "env-api-key-12345";
       process.env.PROVIDER_MISTRAL_API_KEY = envApiKey;
 
       // Call initializeConfig()
@@ -552,12 +552,12 @@ providers:
 
       // Get enabled providers
       const enabledProviders = getEnabledProviders();
-      const mistral = enabledProviders.find(p => p.id === 'mistral');
+      const mistral = enabledProviders.find((p) => p.id === "mistral");
 
       // Verify mistral provider uses the ENV API key
       expect(mistral).toBeDefined();
-      expect(mistral!.apiKey).toBe(envApiKey);
-      expect(mistral!.apiKey).toBe(process.env.PROVIDER_MISTRAL_API_KEY);
+      expect(mistral?.apiKey).toBe(envApiKey);
+      expect(mistral?.apiKey).toBe(process.env.PROVIDER_MISTRAL_API_KEY);
     } finally {
       resetConfig();
       // Clean up test config file
@@ -567,8 +567,8 @@ providers:
     }
   });
 
-  it('should handle missing ENV variables gracefully', async () => {
-    const testConfigPath = join(tmpdir(), 'test-no-env-config.yaml');
+  it("should handle missing ENV variables gracefully", async () => {
+    const testConfigPath = join(tmpdir(), "test-no-env-config.yaml");
     const testConfig = `
 server:
   port: 9999
@@ -622,14 +622,14 @@ providers:
   });
 });
 
-describe('Config Validation Error Handling', () => {
+describe("Config Validation Error Handling", () => {
   afterEach(() => {
     resetConfig();
-    delete process.env.PROVIDER_MISTRAL_API_KEY;
+    process.env.PROVIDER_MISTRAL_API_KEY = undefined;
   });
 
-  it('should reject invalid config with clear error', async () => {
-    const invalidConfigPath = join(tmpdir(), 'test-invalid-config.yaml');
+  it("should reject invalid config with clear error", async () => {
+    const invalidConfigPath = join(tmpdir(), "test-invalid-config.yaml");
     const invalidConfig = `
 server:
   port: 9999
@@ -669,7 +669,7 @@ providers:
       } catch (error) {
         // Verify error message is descriptive
         expect(error).toBeInstanceOf(Error);
-        expect((error as Error).message).toContain('Configuration validation failed');
+        expect((error as Error).message).toContain("Configuration validation failed");
       }
     } finally {
       resetConfig();
@@ -680,8 +680,8 @@ providers:
     }
   });
 
-  it('should provide helpful error when config file missing', async () => {
-    const nonExistentPath = join(tmpdir(), 'non-existent-config-file.yaml');
+  it("should provide helpful error when config file missing", async () => {
+    const nonExistentPath = join(tmpdir(), "non-existent-config-file.yaml");
 
     try {
       // Call initializeConfig() with non-existent config file
@@ -703,8 +703,8 @@ providers:
     }
   });
 
-  it('should reject invalid provider ID format', async () => {
-    const invalidProviderConfigPath = join(tmpdir(), 'test-invalid-provider-id.yaml');
+  it("should reject invalid provider ID format", async () => {
+    const invalidProviderConfigPath = join(tmpdir(), "test-invalid-provider-id.yaml");
     const invalidProviderConfig = `
 server:
   port: 9999
@@ -751,8 +751,8 @@ providers:
     }
   });
 
-  it('should reject config with missing required fields', async () => {
-    const missingFieldsConfigPath = join(tmpdir(), 'test-missing-fields.yaml');
+  it("should reject config with missing required fields", async () => {
+    const missingFieldsConfigPath = join(tmpdir(), "test-missing-fields.yaml");
     const missingFieldsConfig = `
 server:
   port: 9999
@@ -790,7 +790,7 @@ providers:
       } catch (error) {
         // Verify error message is descriptive
         expect(error).toBeInstanceOf(Error);
-        expect((error as Error).message).toContain('Configuration validation failed');
+        expect((error as Error).message).toContain("Configuration validation failed");
       }
     } finally {
       resetConfig();

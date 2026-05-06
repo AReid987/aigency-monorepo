@@ -30,6 +30,15 @@ pre-push:
       run: pnpm exec turbo run typecheck
     test:
       run: pnpm exec turbo run test
+    coverage-check:
+      run: |
+        if [ -f apps/router/coverage/coverage-summary.json ] || \
+           [ -f packages/agent-core/coverage/coverage-summary.json ] || \
+           [ -f packages/surreal/coverage/coverage-summary.json ]; then
+          ./scripts/automation/coverage-check.sh --ci
+        else
+          echo "⚠️  No coverage reports found. Run 'pnpm test:coverage' first to enforce thresholds."
+        fi
     coderabbit-review:
       run: |
         if command -v coderabbit &>/dev/null || command -v cr &>/dev/null; then

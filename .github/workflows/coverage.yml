@@ -1,0 +1,54 @@
+name: Coverage
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-upload:
+    name: Test with Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: |
+            apps/router/coverage/lcov.info
+            packages/agent-core/coverage/lcov.info
+            packages/surreal/coverage/lcov.info
+            packages/vault-tools/coverage/lcov.info
+            packages/honcho/coverage/lcov.info
+            packages/mem-brain/coverage/lcov.info
+          flags: unit
+          name: aigency-coverage
+          fail_ci_if_error: true
+          verbose: true
+
+      - name: Check coverage thresholds
+        run: ./scripts/automation/coverage-check.sh --ci

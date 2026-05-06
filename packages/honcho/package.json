@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "description": "Honcho peer/identity client for Aigency agents — workspaces, peers, sessions, messages",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
@@ -13,21 +10,28 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
+    "clean": "rimraf dist",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
-    "typecheck": "tsc --noEmit",
     "lint": "eslint src",
-    "clean": "rimraf dist"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "honcho-ai": "^0.2.0"
   },
   "devDependencies": {
-    "@aigency/tsconfig": "workspace:*",
     "@aigency/agent-core": "workspace:*",
+    "@aigency/tsconfig": "workspace:*",
+    "@vitest/coverage-v8": "^2.1.8",
+    "rimraf": "^6.0.1",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
-    "rimraf": "^6.0.1"
+    "vitest": "^2.1.8"
   }
 }

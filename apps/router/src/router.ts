@@ -1,20 +1,11 @@
-/**
- * Intelligent Router - Quota Preservation Strategy
- * 
- * Routes requests to preserve quota by preferring models with larger quotas.
- * Based on ClawRouter's 14-dimension scoring adapted for free tier usage.
- */
+import { getEnabledProviders } from "./config/index.js";
+import { logger } from "./lib/logging/logger.js";
 
-import type { Provider, ModelConfig } from './config/schema.js';
-import { getEnabledProviders } from './config/index.js';
-import { logger } from './lib/logging/logger.js';
-
-
-export type Tier = 'SIMPLE' | 'MEDIUM' | 'COMPLEX' | 'REASONING';
+export type Tier = "SIMPLE" | "MEDIUM" | "COMPLEX" | "REASONING";
 
 export interface RoutingDecision {
   tier: Tier;
-  model: string;  // Full model ID: "provider/model"
+  model: string; // Full model ID: "provider/model"
   confidence: number;
   reasoning: string;
   fallbackChain: string[];
@@ -30,17 +21,17 @@ export interface RequestClassification {
 }
 
 export interface RouterConfig {
-  preferLargeQuota: boolean;      // Prefer models with larger quotas (default: true)
-  enableFallback: boolean;         // Enable automatic fallback on failure
-  rateLimitCooldown: number;       // Seconds to avoid rate-limited models (default: 60)
-  minConfidenceThreshold: number;  // Minimum confidence to use a model (0-1)
+  preferLargeQuota: boolean; // Prefer models with larger quotas (default: true)
+  enableFallback: boolean; // Enable automatic fallback on failure
+  rateLimitCooldown: number; // Seconds to avoid rate-limited models (default: 60)
+  minConfidenceThreshold: number; // Minimum confidence to use a model (0-1)
 }
 
 export const DEFAULT_ROUTER_CONFIG: RouterConfig = {
   preferLargeQuota: true,
   enableFallback: true,
   rateLimitCooldown: 60,
-  minConfidenceThreshold: 0.3
+  minConfidenceThreshold: 0.3,
 };
 
 /**
@@ -51,7 +42,7 @@ export class RateLimitTracker {
   private rateLimitedModels: Map<string, number> = new Map();
   private cooldownMs: number;
 
-  constructor(cooldownSeconds: number = 60) {
+  constructor(cooldownSeconds = 60) {
     this.cooldownMs = cooldownSeconds * 1000;
   }
 
@@ -62,7 +53,9 @@ export class RateLimitTracker {
 
   isRateLimited(modelId: string): boolean {
     const expiry = this.rateLimitedModels.get(modelId);
-    if (!expiry) return false;
+    if (!expiry) {
+      return false;
+    }
 
     if (Date.now() >= expiry) {
       this.rateLimitedModels.delete(modelId);
@@ -93,13 +86,15 @@ export class RateLimitTracker {
  * Classify request into tier using 14-dimension scoring
  * Based on ClawRouter's proven classification system
  */
-export function classifyRequest(messages: Array<{ role: string; content: string }>): RequestClassification {
-  const lastMessage = messages[messages.length - 1]?.content || '';
+export function classifyRequest(
+  messages: Array<{ role: string; content: string }>
+): RequestClassification {
+  const lastMessage = messages[messages.length - 1]?.content || "";
   const conversationLength = messages.length;
-  
+
   // Basic sanitization: take first 100 characters and replace newlines
-  const sanitizedPrompt = lastMessage.substring(0, 100).replace(/\n/g, '\\n');
-  
+  const sanitizedPrompt = lastMessage.substring(0, 100).replace(/\n/g, "\\n");
+
   let score = 0;
   const reasoning: string[] = [];
 
@@ -107,10 +102,10 @@ export function classifyRequest(messages: Array<{ role: string; content: string 
   const tokenEstimate = lastMessage.length / 4;
   if (tokenEstimate > 2000) {
     score += 3;
-    reasoning.push('Long input (>2K tokens)');
+    reasoning.push("Long input (>2K tokens)");
   } else if (tokenEstimate > 500) {
     score += 1;
-    reasoning.push('Medium input (500-2K tokens)');
+    reasoning.push("Medium input (500-2K tokens)");
   }
 
   // 2. Code presence (0-2 points)
@@ -118,90 +113,107 @@ export function classifyRequest(messages: Array<{ role: string; content: string 
   const hasInlineCode = /`[^`]+`/.test(lastMessage);
   if (hasCodeBlock) {
     score += 2;
-    reasoning.push('Contains code blocks');
+    reasoning.push("Contains code blocks");
   } else if (hasInlineCode) {
     score += 1;
   }
 
   // 3. Reasoning keywords (0-3 points)
   const reasoningKeywords = [
-    'analyze', 'compare', 'evaluate', 'explain why', 'reasoning',
-    'step by step', 'think through', 'consider', 'determine',
-    'prove', 'justify', 'logic', 'deduce', 'infer'
+    "analyze",
+    "compare",
+    "evaluate",
+    "explain why",
+    "reasoning",
+    "step by step",
+    "think through",
+    "consider",
+    "determine",
+    "prove",
+    "justify",
+    "logic",
+    "deduce",
+    "infer",
   ];
-  const reasoningCount = reasoningKeywords.filter(kw => 
+  const reasoningCount = reasoningKeywords.filter((kw) =>
     lastMessage.toLowerCase().includes(kw)
   ).length;
   if (reasoningCount >= 3) {
     score += 3;
-    reasoning.push('Multiple reasoning keywords');
+    reasoning.push("Multiple reasoning keywords");
   } else if (reasoningCount >= 1) {
     score += reasoningCount;
-    reasoning.push('Reasoning keywords present');
+    reasoning.push("Reasoning keywords present");
   }
 
   // 4. Math/calculation (0-2 points)
-  const hasMath = /(\d+[\+\-\*\/\^]\d+)|integral|derivative|equation|formula|calculate/i.test(lastMessage);
+  const hasMath = /(\d+[\+\-\*\/\^]\d+)|integral|derivative|equation|formula|calculate/i.test(
+    lastMessage
+  );
   if (hasMath) {
     score += 2;
-    reasoning.push('Math/calculations required');
+    reasoning.push("Math/calculations required");
   }
 
   // 5. Multi-turn conversation (0-2 points)
   if (conversationLength > 5) {
     score += 2;
-    reasoning.push('Multi-turn conversation');
+    reasoning.push("Multi-turn conversation");
   } else if (conversationLength > 2) {
     score += 1;
   }
 
   // 6. Question complexity (0-2 points)
-  const complexQuestionWords = ['how', 'why', 'explain', 'describe', 'what if', 'could you'];
-  const hasComplexQuestion = complexQuestionWords.some(word => 
+  const complexQuestionWords = ["how", "why", "explain", "describe", "what if", "could you"];
+  const hasComplexQuestion = complexQuestionWords.some((word) =>
     lastMessage.toLowerCase().includes(word)
   );
-  if (hasComplexQuestion && lastMessage.includes('?')) {
+  if (hasComplexQuestion && lastMessage.includes("?")) {
     score += 2;
-    reasoning.push('Complex question');
+    reasoning.push("Complex question");
   }
 
   // 7. Technical domain indicators (0-2 points)
   const technicalDomains = [
-    'algorithm', 'architecture', 'database', 'network', 'security',
-    'optimization', 'performance', 'scalability', 'api', 'protocol'
+    "algorithm",
+    "architecture",
+    "database",
+    "network",
+    "security",
+    "optimization",
+    "performance",
+    "scalability",
+    "api",
+    "protocol",
   ];
-  const hasTechnical = technicalDomains.some(term => 
-    lastMessage.toLowerCase().includes(term)
-  );
+  const hasTechnical = technicalDomains.some((term) => lastMessage.toLowerCase().includes(term));
   if (hasTechnical) {
     score += 2;
-    reasoning.push('Technical domain');
+    reasoning.push("Technical domain");
   }
 
   // 8. Creative/generation tasks (0-1 points)
-  const creativeKeywords = ['write', 'create', 'generate', 'draft', 'compose'];
-  const hasCreative = creativeKeywords.some(kw => 
-    lastMessage.toLowerCase().includes(kw)
-  );
+  const creativeKeywords = ["write", "create", "generate", "draft", "compose"];
+  const hasCreative = creativeKeywords.some((kw) => lastMessage.toLowerCase().includes(kw));
   if (hasCreative) {
     score += 1;
-    reasoning.push('Creative generation task');
+    reasoning.push("Creative generation task");
   }
 
   // Classify into tiers based on score
   let tier: Tier;
   if (score >= 10) {
-    tier = 'REASONING';
+    tier = "REASONING";
   } else if (score >= 6) {
-    tier = 'COMPLEX';
+    tier = "COMPLEX";
   } else if (score >= 3) {
-    tier = 'MEDIUM';
+    tier = "MEDIUM";
   } else {
-    tier = 'SIMPLE';
+    tier = "SIMPLE";
   }
 
   if (reasoning.length === 0) {
-    reasoning.push('Simple query');
+    reasoning.push("Simple query");
   }
 
   return {
@@ -209,7 +221,7 @@ export function classifyRequest(messages: Array<{ role: string; content: string 
     sanitizedPrompt,
     tier,
     score,
-    reasoning
+    reasoning,
   };
 }
 
@@ -219,7 +231,7 @@ export function classifyRequest(messages: Array<{ role: string; content: string 
 export function routeRequest(
   classification: RequestClassification,
   rateLimitTracker: RateLimitTracker,
-  config: RouterConfig = DEFAULT_ROUTER_CONFIG
+  _config: RouterConfig = DEFAULT_ROUTER_CONFIG
 ): RoutingDecision {
   const { tier } = classification;
 
@@ -227,41 +239,44 @@ export function routeRequest(
   const providers = getEnabledProviders();
 
   // Get all available models
-  const allModels = providers.flatMap(provider =>
-    provider.models.map(model => ({
+  const allModels = providers.flatMap((provider) =>
+    provider.models.map((model) => ({
       provider,
       model,
-      fullId: `${provider.id}/${model.id}`
+      fullId: `${provider.id}/${model.id}`,
     }))
   );
 
   // Filter out rate-limited models
-  const availableModels = allModels.filter(({ fullId }) => 
-    !rateLimitTracker.isRateLimited(fullId)
-  );
+  const availableModels = allModels.filter(({ fullId }) => !rateLimitTracker.isRateLimited(fullId));
 
   if (availableModels.length === 0) {
-    throw new Error('No models available (all rate-limited). Wait before retrying.');
+    throw new Error("No models available (all rate-limited). Wait before retrying.");
   }
 
   // Filter by tier compatibility
   const tierCompatible = availableModels.filter(({ model }) => {
     // Models can handle their tier or below
-    const tierOrder = { 'simple': 0, 'medium': 1, 'complex': 2, 'reasoning': 3 };
-    return tierOrder[model.tier as keyof typeof tierOrder] >= tierOrder[tier.toLowerCase() as keyof typeof tierOrder];
+    const tierOrder = { simple: 0, medium: 1, complex: 2, reasoning: 3 };
+    return (
+      tierOrder[model.tier as keyof typeof tierOrder] >=
+      tierOrder[tier.toLowerCase() as keyof typeof tierOrder]
+    );
   });
-
 
   const candidateModels = tierCompatible.length > 0 ? tierCompatible : availableModels;
 
   // QUOTA PRESERVATION STRATEGY
   // Sort by: 1) quota size (larger first), 2) tier match (exact match first)
-  const quotaSizeOrder = { 'huge': 5, 'large': 4, 'medium': 3, 'small': 2, 'tiny': 1 };
-  
+  const quotaSizeOrder = { huge: 5, large: 4, medium: 3, small: 2, tiny: 1 };
+
   candidateModels.sort((a, b) => {
     // Primary: Prefer larger quotas
-    const quotaDiff = quotaSizeOrder[b.model.quota.quotaSize] - quotaSizeOrder[a.model.quota.quotaSize];
-    if (quotaDiff !== 0) return quotaDiff;
+    const quotaDiff =
+      quotaSizeOrder[b.model.quota.quotaSize] - quotaSizeOrder[a.model.quota.quotaSize];
+    if (quotaDiff !== 0) {
+      return quotaDiff;
+    }
 
     // Secondary: Prefer exact tier match (don't waste powerful models on simple tasks)
     const aTierMatch = a.model.tier === tier.toLowerCase() ? 1 : 0;
@@ -273,9 +288,7 @@ export function routeRequest(
   const selected = candidateModels[0];
 
   // Build fallback chain (next 3 best models)
-  const fallbackChain = candidateModels
-    .slice(1, 4)
-    .map(({ fullId }) => fullId);
+  const fallbackChain = candidateModels.slice(1, 4).map(({ fullId }) => fullId);
 
   const confidence = tierCompatible.length > 0 ? 0.9 : 0.5;
 
@@ -285,7 +298,7 @@ export function routeRequest(
     confidence,
     reasoning: `Selected ${selected.model.name} (quota: ${selected.model.quota.quotaSize}) for ${tier} tier task`,
     fallbackChain,
-    quotaSize: selected.model.quota.quotaSize
+    quotaSize: selected.model.quota.quotaSize,
   };
 }
 
@@ -318,7 +331,7 @@ export function estimateQuotaUsage(messages: Array<{ role: string; content: stri
 
   return {
     requestCount: 1,
-    tokenEstimate
+    tokenEstimate,
   };
 }
 
@@ -327,14 +340,14 @@ export function estimateQuotaUsage(messages: Array<{ role: string; content: stri
  */
 export function formatRoutingDecision(decision: RoutingDecision): string {
   return [
-    `🎯 Routing Decision:`,
+    "🎯 Routing Decision:",
     `   Tier: ${decision.tier}`,
     `   Model: ${decision.model}`,
     `   Quota: ${decision.quotaSize}`,
     `   Confidence: ${(decision.confidence * 100).toFixed(0)}%`,
     `   Reasoning: ${decision.reasoning}`,
-    decision.fallbackChain.length > 0 
-      ? `   Fallbacks: ${decision.fallbackChain.join(' → ')}`
-      : ''
-  ].filter(Boolean).join('\n');
+    decision.fallbackChain.length > 0 ? `   Fallbacks: ${decision.fallbackChain.join(" → ")}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }

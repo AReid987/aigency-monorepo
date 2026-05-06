@@ -1,0 +1,159 @@
+# Codecov configuration for Aigency monorepo
+# https://docs.codecov.com/docs/codecovyml-reference
+
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
+
+coverage:
+  # Global precision
+  precision: 2
+  round: down
+  range: "50...90"
+
+  status:
+    # Project-level coverage (entire codebase)
+    project:
+      default:
+        target: 70%
+        threshold: 5%
+        if_ci_failed: error
+        only_pulls: false
+        flags:
+          - unit
+      # Package-specific targets
+      router:
+        target: 55%
+        threshold: 5%
+        flags:
+          - router
+      agent-core:
+        target: 80%
+        threshold: 5%
+        flags:
+          - agent-core
+      surreal:
+        target: 10%
+        threshold: 5%
+        flags:
+          - surreal
+      vault-tools:
+        target: 1%
+        threshold: 1%
+        flags:
+          - vault-tools
+      honcho:
+        target: 10%
+        threshold: 5%
+        flags:
+          - honcho
+      mem-brain:
+        target: 15%
+        threshold: 5%
+        flags:
+          - mem-brain
+
+    # Patch-level coverage (changes in PR)
+    patch:
+      default:
+        target: 50%
+        threshold: 5%
+        if_ci_failed: error
+
+    # Change coverage (diff coverage)
+    changes:
+      default:
+        target: 50%
+        if_ci_failed: error
+
+# Component mapping for monorepo packages
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: auto
+        branches:
+          - main
+      - type: patch
+        target: 50%
+  individual_components:
+    - component_id: router
+      name: Router
+      paths:
+        - apps/router/src/**
+    - component_id: agent-core
+      name: Agent Core
+      paths:
+        - packages/agent-core/src/**
+    - component_id: surreal
+      name: SurrealDB Client
+      paths:
+        - packages/surreal/src/**
+    - component_id: vault-tools
+      name: Vault Tools
+      paths:
+        - packages/vault-tools/src/**
+    - component_id: honcho
+      name: Honcho
+      paths:
+        - packages/honcho/src/**
+    - component_id: mem-brain
+      name: Mem Brain
+      paths:
+        - packages/mem-brain/src/**
+
+# Coverage flags for monorepo carryforward
+flags:
+  unit:
+    paths:
+      - apps/router/src/**
+      - packages/*/src/**
+    carryforward: true
+  router:
+    paths:
+      - apps/router/src/**
+    carryforward: true
+  agent-core:
+    paths:
+      - packages/agent-core/src/**
+    carryforward: true
+  surreal:
+    paths:
+      - packages/surreal/src/**
+    carryforward: true
+  vault-tools:
+    paths:
+      - packages/vault-tools/src/**
+    carryforward: true
+  honcho:
+    paths:
+      - packages/honcho/src/**
+    carryforward: true
+  mem-brain:
+    paths:
+      - packages/mem-brain/src/**
+    carryforward: true
+
+# Ignore patterns
+ignore:
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "**/*.d.ts"
+  - "apps/docs/**"
+  - "apps/contracts/**"
+  - "**/llm-wiki/**"
+  - "scripts/**"
+  - ".github/**"
+  - "packages/tsconfig/**"
+
+# Comment configuration
+comment:
+  layout: "header, diff, flags, components, files"
+  behavior: default
+  require_changes: false
+  require_base: true
+  require_head: true
+  hide_project_coverage: false

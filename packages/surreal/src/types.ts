@@ -3,7 +3,7 @@
 import type { AgentCallsign } from "@aigency/agent-core";
 
 export interface AgentRecord {
-  id: string;                   // format: "agent:<callsign>"
+  id: string; // format: "agent:<callsign>"
   callsign: AgentCallsign;
   name: string;
   role: string;
@@ -11,13 +11,13 @@ export interface AgentRecord {
   substrate: string;
   status: "active" | "standby" | "offline" | "dreaming";
   current_focus?: string;
-  soul_hash: string;            // SHA-256 of SOUL.md content
+  soul_hash: string; // SHA-256 of SOUL.md content
   created_at: string;
   updated_at: string;
 }
 
 export interface DirectiveRecord {
-  id: string;                   // format: "directive:<ulid>"
+  id: string; // format: "directive:<ulid>"
   title: string;
   body: string;
   status: "active" | "pending" | "completed" | "superseded";
@@ -30,20 +30,20 @@ export interface DirectiveRecord {
 }
 
 export interface PatternRecord {
-  id: string;                   // format: "pattern:<ulid>"
+  id: string; // format: "pattern:<ulid>"
   title: string;
   body: string;
   category: "decision" | "behavior" | "anti-pattern" | "process";
-  confidence: number;           // 0.0 – 1.0
+  confidence: number; // 0.0 – 1.0
   source_agent: AgentCallsign;
-  embedding: number[];          // float[] — 1536-dim for text-embedding-3-small
+  embedding: number[]; // float[] — 1536-dim for text-embedding-3-small
   occurrence_count: number;
   first_seen: string;
   last_seen: string;
 }
 
 export interface TimelineRecord {
-  id: string;                   // format: "timeline:<ulid>"
+  id: string; // format: "timeline:<ulid>"
   event_type:
     | "session_start"
     | "session_end"
@@ -63,19 +63,19 @@ export interface TimelineRecord {
 // ─── Graph Edge Types ─────────────────────────────────────────────────────────
 
 export interface DecidedByEdge {
-  in: string;   // directive ID
-  out: string;  // agent ID
+  in: string; // directive ID
+  out: string; // agent ID
   context?: string;
   decided_at: string;
 }
 
 export interface InformedByEdge {
-  in: string;   // directive ID
-  out: string;  // pattern ID
+  in: string; // directive ID
+  out: string; // pattern ID
 }
 
 export interface SupersedesEdge {
-  in: string;   // new directive ID
-  out: string;  // old directive ID
+  in: string; // new directive ID
+  out: string; // old directive ID
   reason?: string;
 }

@@ -2,8 +2,8 @@
 // Reads raw/ session docs and compiles them into wiki/ articles via LLM.
 // Respects config.llmBackend: mlx | llama_cpp | claude
 
-import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { join, basename } from "node:path";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import type { VaultConfig } from "./config.js";
 
 const COMPILE_SYSTEM_PROMPT = `You are the LIBRARIAN (Ren Nakamura), knowledge graph curator for Aigency.
@@ -17,7 +17,7 @@ Your task: transform a raw session note into a polished wiki article.
 async function callLLM(config: VaultConfig, prompt: string): Promise<string> {
   const endpoint =
     config.llmBackend === "mlx" || config.llmBackend === "llama_cpp"
-      ? config.mlxEndpoint ?? "http://localhost:8080"
+      ? (config.mlxEndpoint ?? "http://localhost:8080")
       : "https://api.anthropic.com/v1";
 
   if (config.llmBackend === "claude") {
@@ -53,9 +53,9 @@ async function callLLM(config: VaultConfig, prompt: string): Promise<string> {
 
 export async function compile(
   config: VaultConfig,
-  target: string = "_global"
+  target = "_global"
 ): Promise<{ compiled: number; skipped: number }> {
-  const targetRaw  = join(config.vaultRoot, target, "raw");
+  const targetRaw = join(config.vaultRoot, target, "raw");
   const targetWiki = join(config.vaultRoot, target, "wiki");
 
   if (!existsSync(targetRaw)) {
@@ -67,21 +67,20 @@ export async function compile(
 
   const rawFiles = readdirSync(targetRaw).filter((f) => f.endsWith(".md"));
   let compiled = 0;
-  let skipped  = 0;
+  let skipped = 0;
 
   for (const file of rawFiles) {
     const wikiFile = join(targetWiki, file.replace(/^session-/, "wiki-"));
-    if (existsSync(wikiFile)) { skipped++; continue; }
+    if (existsSync(wikiFile)) {
+      skipped++;
+      continue;
+    }
 
     const raw = readFileSync(join(targetRaw, file), "utf-8");
     const prompt = `Transform this raw session note into a wiki article:\n\n${raw}`;
-
-    console.log(`[compile] Processing ${file}...`);
     const article = await callLLM(config, prompt);
     writeFileSync(wikiFile, article, "utf-8");
     compiled++;
   }
-
-  console.log(`[compile] Done. ${compiled} compiled, ${skipped} skipped.`);
   return { compiled, skipped };
 }

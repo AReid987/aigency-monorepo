@@ -1,13 +1,13 @@
 // src/lib/logging/logger.ts
-import pino from 'pino';
+import pino from "pino";
 
 export let logger: pino.Logger;
 
 export function initLogger(options: { level: string }) {
   logger = pino({
-    level: options.level || 'info',
+    level: options.level || "info",
     transport: {
-      target: 'pino-pretty',
+      target: "pino-pretty",
       options: {
         colorize: true,
       },
@@ -16,4 +16,4 @@ export function initLogger(options: { level: string }) {
 }
 
 // Initialize with default level
-initLogger({ level: 'info' });
+initLogger({ level: "info" });

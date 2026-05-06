@@ -6,10 +6,10 @@
   "type": "module",
   "scripts": {
     "build": "echo 'Docs site build not yet implemented — see README roadmap'",
+    "clean": "rimraf dist",
     "dev": "echo 'Docs dev server not yet implemented — see README roadmap'",
-    "typecheck": "echo 'No TypeScript to check yet'",
     "lint": "echo 'No lint configured yet'",
-    "clean": "rimraf dist"
+    "typecheck": "echo 'No TypeScript to check yet'"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"

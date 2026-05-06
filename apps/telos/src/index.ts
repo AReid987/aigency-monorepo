@@ -24,7 +24,7 @@ export interface TelosContextFile {
   activityLog: string[];
 }
 
-export function parseTelos(markdown: string): TelosContextFile {
+export function parseTelos(_markdown: string): TelosContextFile {
   // TODO: implement markdown parser
   throw new Error("Not implemented — see Roadmap Phase 2");
 }

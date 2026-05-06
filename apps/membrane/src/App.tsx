@@ -1,8 +1,8 @@
 // App — root component for the Membraned Interface
 // Layout: fullscreen Three.js canvas + floating glass panels
 
-import { Canvas } from "@react-three/fiber";
 import { tokens } from "@aigency/design-tokens";
+import { Canvas } from "@react-three/fiber";
 
 export function App() {
   const bg = tokens.atoms.color.base.canvas.$value as string;

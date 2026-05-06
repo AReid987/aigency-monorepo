@@ -5,7 +5,7 @@
  * Allows runtime configuration without modifying config files.
  */
 
-import type { AppConfig } from './schema.js';
+import type { AppConfig } from "./schema.js";
 
 /**
  * Applies environment variable overrides to the application configuration.
@@ -18,10 +18,7 @@ import type { AppConfig } from './schema.js';
  * @param prefix - Environment variable prefix (default: 'PROVIDER')
  * @returns Configuration with environment overrides applied
  */
-export function applyEnvOverrides(
-  config: AppConfig,
-  prefix: string = 'PROVIDER'
-): AppConfig {
+export function applyEnvOverrides(config: AppConfig, prefix = "PROVIDER"): AppConfig {
   const overriddenConfig = { ...config };
   const providerConfigOverrides: Record<string, Record<string, unknown>> = {};
 
@@ -36,7 +33,7 @@ export function applyEnvOverrides(
 
     // Parse the environment variable key
     // Format: PREFIX_PROVIDERID_PROPERTY or PREFIX_PROVIDERID_PROPERTY_NAME
-    const parts = key.split('_');
+    const parts = key.split("_");
     if (parts.length < 3) {
       continue;
     }
@@ -47,24 +44,27 @@ export function applyEnvOverrides(
     let property: string;
 
     // Check if the key ends with common patterns
-    if (key.endsWith('_ENABLED')) {
+    if (key.endsWith("_ENABLED")) {
       // PROVIDER_MISTRAL_ENABLED → providerId: MISTRAL, property: ENABLED
-      providerId = parts.slice(1, -1).join('_');
-      property = 'enabled';
-    } else if (key.endsWith('_API_KEY') || key.endsWith('_APIKEY')) {
+      providerId = parts.slice(1, -1).join("_");
+      property = "enabled";
+    } else if (key.endsWith("_API_KEY") || key.endsWith("_APIKEY")) {
       // PROVIDER_MISTRAL_API_KEY → providerId: MISTRAL, property: API_KEY
-      providerId = parts.slice(1, -2).join('_');
-      property = 'apiKey';
+      providerId = parts.slice(1, -2).join("_");
+      property = "apiKey";
     } else {
       // Try to parse: last part is property, middle is provider ID
       property = parts[parts.length - 1].toLowerCase();
-      providerId = parts.slice(1, -1).join('_');
+      providerId = parts.slice(1, -1).join("_");
     }
 
     const normalizedProviderId = providerId.toLowerCase();
 
     // Skip if provider doesn't exist in config
-    if (!overriddenConfig.providers[normalizedProviderId] && !overriddenConfig.providerConfig?.[normalizedProviderId]) {
+    if (
+      !overriddenConfig.providers[normalizedProviderId] &&
+      !overriddenConfig.providerConfig?.[normalizedProviderId]
+    ) {
       continue;
     }
 
@@ -75,14 +75,14 @@ export function applyEnvOverrides(
 
     // Apply the override based on property type
     switch (property.toLowerCase()) {
-      case 'apikey':
-      case 'api_key':
+      case "apikey":
+      case "api_key":
         providerConfigOverrides[normalizedProviderId].apiKey = value;
         break;
 
-      case 'enabled':
+      case "enabled":
         // Convert string "true"/"false" to boolean
-        providerConfigOverrides[normalizedProviderId].enabled = value?.toLowerCase() === 'true';
+        providerConfigOverrides[normalizedProviderId].enabled = value?.toLowerCase() === "true";
         break;
 
       default:

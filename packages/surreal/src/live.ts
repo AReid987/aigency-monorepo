@@ -38,10 +38,7 @@ export const LIVE = {
   },
 
   /** Convenience: subscribe to the timeline for a specific event_type. */
-  async onEvent<T>(
-    eventType: string,
-    callback: LiveCallback<T>
-  ): Promise<() => void> {
+  async onEvent<T>(eventType: string, callback: LiveCallback<T>): Promise<() => void> {
     return LIVE.subscribe<T>("timeline", callback, `event_type = '${eventType}'`);
   },
 

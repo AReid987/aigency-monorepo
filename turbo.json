@@ -12,7 +12,9 @@
       "persistent": true
     },
     "test": {
-      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.test*"]
+    },
+    "test:coverage": {
       "inputs": ["$TURBO_DEFAULT$", ".env.test*"],
       "outputs": ["coverage/**"]
     },

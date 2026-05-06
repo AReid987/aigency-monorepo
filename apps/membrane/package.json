@@ -6,34 +6,34 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "clean": "rimraf dist",
     "dev": "vite",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "clean": "rimraf dist"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@aigency/agent-core": "workspace:*",
-    "@aigency/surreal": "workspace:*",
     "@aigency/design-tokens": "workspace:*",
-    "three": "^0.170.0",
+    "@aigency/surreal": "workspace:*",
+    "@react-three/drei": "^9.117.3",
+    "@react-three/fiber": "^8.17.10",
+    "@react-three/postprocessing": "^2.16.3",
+    "@tanstack/react-query": "^5.62.3",
+    "d3-force-3d": "^3.0.5",
+    "framer-motion": "^11.14.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "@react-three/fiber": "^8.17.10",
-    "@react-three/drei": "^9.117.3",
-    "@react-three/postprocessing": "^2.16.3",
-    "d3-force-3d": "^3.0.5",
-    "zustand": "^5.0.2",
-    "@tanstack/react-query": "^5.62.3",
-    "framer-motion": "^11.14.1"
+    "three": "^0.170.0",
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@aigency/tsconfig": "workspace:*",
-    "@types/three": "^0.170.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
+    "@types/three": "^0.170.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.0.6",
+    "rimraf": "^6.0.1",
     "typescript": "^5.7.2",
-    "rimraf": "^6.0.1"
+    "vite": "^6.0.6"
   }
 }

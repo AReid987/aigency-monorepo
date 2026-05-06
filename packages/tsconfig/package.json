@@ -2,6 +2,8 @@
   "name": "@aigency/tsconfig",
   "version": "0.1.0",
   "private": true,
-  "files": ["*.json"],
-  "license": "MIT"
+  "license": "MIT",
+  "files": [
+    "*.json"
+  ]
 }

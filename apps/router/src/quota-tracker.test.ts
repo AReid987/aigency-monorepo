@@ -1,20 +1,20 @@
+import { existsSync, readFileSync } from "node:fs";
+import type { ModelConfig } from "./config/schema.js";
+import { logger } from "./lib/logging/logger.js";
 // src/quota-tracker.test.ts
-import { QuotaTracker, QuotaUsage, QuotaAlert } from './quota-tracker.js';
-import { logger } from './lib/logging/logger.js';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import type { ModelConfig } from './config/schema.js';
+import { QuotaTracker } from "./quota-tracker.js";
 
 // Mock setInterval and clearInterval to prevent background tasks from keeping tests alive
 jest.useFakeTimers();
 
-jest.mock('node:fs', () => ({
+jest.mock("node:fs", () => ({
   existsSync: jest.fn(),
   readFileSync: jest.fn(),
   writeFileSync: jest.fn(),
   mkdirSync: jest.fn(),
 }));
 
-jest.mock('./lib/logging/logger.js', () => ({
+jest.mock("./lib/logging/logger.js", () => ({
   logger: {
     info: jest.fn(),
     error: jest.fn(),
@@ -23,15 +23,15 @@ jest.mock('./lib/logging/logger.js', () => ({
   initLogger: jest.fn(),
 }));
 
-describe('QuotaTracker', () => {
+describe("QuotaTracker", () => {
   let tracker: QuotaTracker;
-  const mockDataDir = './.test-simplellmrouter';
-  const mockDataFile = `${mockDataDir}/quota-usage.json`;
+  const mockDataDir = "./.test-simplellmrouter";
+  const _mockDataFile = `${mockDataDir}/quota-usage.json`;
 
   beforeEach(() => {
     jest.clearAllMocks();
     (existsSync as jest.Mock).mockReturnValue(false); // Assume no file exists by default
-    (readFileSync as jest.Mock).mockReturnValue('[]'); // Empty array by default
+    (readFileSync as jest.Mock).mockReturnValue("[]"); // Empty array by default
     tracker = new QuotaTracker(mockDataDir);
   });
 
@@ -43,12 +43,12 @@ describe('QuotaTracker', () => {
     jest.useRealTimers(); // Restore real timers after all tests in this suite
   });
 
-  it('should log warning when quota is approaching limits', () => {
+  it("should log warning when quota is approaching limits", () => {
     // Given
-    const modelId = 'test-provider/test-model';
-    const quotaConfig: ModelConfig['quota'] = {
+    const modelId = "test-provider/test-model";
+    const quotaConfig: ModelConfig["quota"] = {
       dailyRequests: 10,
-      quotaSize: 'tiny',
+      quotaSize: "tiny",
     };
 
     // When
@@ -66,12 +66,12 @@ describe('QuotaTracker', () => {
     expect(logger.error).not.toHaveBeenCalled(); // Ensure no critical error is logged
   });
 
-  it('should log critical alert when quota is exceeded', () => {
+  it("should log critical alert when quota is exceeded", () => {
     // Given
-    const modelId = 'test-provider/test-model';
-    const quotaConfig: ModelConfig['quota'] = {
+    const modelId = "test-provider/test-model";
+    const quotaConfig: ModelConfig["quota"] = {
       dailyRequests: 10,
-      quotaSize: 'tiny',
+      quotaSize: "tiny",
     };
 
     // When

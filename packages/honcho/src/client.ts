@@ -2,13 +2,13 @@
 // One workspace per environment (dev / staging / prod).
 // One peer per Aigency agent callsign.
 
-import Honcho from "honcho-ai";
 import type { AgentCallsign } from "@aigency/agent-core";
+import Honcho from "honcho-ai";
 
 export interface HonchoClientConfig {
   apiKey: string;
-  workspaceId: string;   // "aigency-dev" | "aigency-prod"
-  baseUrl?: string;      // default: https://demo.honcho.dev
+  workspaceId: string; // "aigency-dev" | "aigency-prod"
+  baseUrl?: string; // default: https://demo.honcho.dev
 }
 
 export class HonchoClient {
@@ -29,7 +29,9 @@ export class HonchoClient {
       filter: JSON.stringify({ callsign }),
     });
 
-    if (peers.items.length > 0) return peers.items[0];
+    if (peers.items.length > 0) {
+      return peers.items[0];
+    }
 
     return this.client.apps.users.create(this.workspaceId, {
       metadata: { callsign },
@@ -53,19 +55,20 @@ export class HonchoClient {
     metadata?: Record<string, unknown>
   ) {
     const peer = await this.getPeer(callsign);
-    return this.client.apps.users.sessions.messages.create(
-      this.workspaceId,
-      peer.id,
-      sessionId,
-      { content, is_user: isUser, metadata }
-    );
+    return this.client.apps.users.sessions.messages.create(this.workspaceId, peer.id, sessionId, {
+      content,
+      is_user: isUser,
+      metadata,
+    });
   }
 
   /** Trigger Honcho "dreaming" — async background inference for a peer. */
   async dream(callsign: AgentCallsign, query: string): Promise<string> {
     const peer = await this.getPeer(callsign);
     const sessions = await this.client.apps.users.sessions.list(this.workspaceId, peer.id);
-    if (sessions.items.length === 0) throw new Error(`No sessions for ${callsign}`);
+    if (sessions.items.length === 0) {
+      throw new Error(`No sessions for ${callsign}`);
+    }
 
     const latestSession = sessions.items[0];
     const result = await this.client.apps.users.sessions.chat(

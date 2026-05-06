@@ -5,10 +5,10 @@
  * Provides type-safe access to application configuration.
  */
 
-import { loadConfigFile } from './loader.js';
-import { applyEnvOverrides } from './env-override.js';
-import { validateConfigOrThrow, formatValidationErrors } from './validator.js';
-import type { AppConfig, Provider as ConfigProvider, Provider, RuntimeProvider } from './schema.js';
+import { applyEnvOverrides } from "./env-override.js";
+import { loadConfigFile } from "./loader.js";
+import type { AppConfig, Provider, RuntimeProvider } from "./schema.js";
+import { validateConfigOrThrow } from "./validator.js";
 
 /**
  * Internal configuration storage (singleton pattern)
@@ -22,10 +22,10 @@ let isInitialized = false;
 export class ConfigNotInitializedError extends Error {
   constructor() {
     super(
-      'getConfig() called before initializeConfig(). ' +
-      'Call initializeConfig() at application entry point.'
+      "getConfig() called before initializeConfig(). " +
+        "Call initializeConfig() at application entry point."
     );
-    this.name = 'ConfigNotInitializedError';
+    this.name = "ConfigNotInitializedError";
   }
 }
 
@@ -35,10 +35,9 @@ export class ConfigNotInitializedError extends Error {
 export class ConfigAlreadyInitializedError extends Error {
   constructor() {
     super(
-      'initializeConfig() can only be called once. ' +
-      'Configuration has already been initialized.'
+      "initializeConfig() can only be called once. " + "Configuration has already been initialized."
     );
-    this.name = 'ConfigAlreadyInitializedError';
+    this.name = "ConfigAlreadyInitializedError";
   }
 }
 
@@ -62,9 +61,9 @@ export class ConfigAlreadyInitializedError extends Error {
  * @throws Error if configuration file cannot be loaded
  * @throws Error with formatted validation errors if config is invalid
  */
-export async function initializeConfig(
-  options?: { environment?: 'development' | 'production' | string }
-): Promise<AppConfig> {
+export async function initializeConfig(options?: {
+  environment?: "development" | "production" | string;
+}): Promise<AppConfig> {
   // Check if already initialized (singleton pattern)
   if (isInitialized) {
     throw new ConfigAlreadyInitializedError();
@@ -88,52 +87,42 @@ export async function initializeConfig(
 
     for (const [providerId, configProvider] of Object.entries(configWithOverrides.providers)) {
       const providerConfig = configWithOverrides.providerConfig?.[providerId];
-      const hasApiKey = providerConfig?.apiKey != null && providerConfig.apiKey !== '';
+      const hasApiKey = providerConfig?.apiKey != null && providerConfig.apiKey !== "";
 
       // Check both config file enabled status and providerConfig override
       // providerConfig.enabled takes precedence over configProvider.enabled
-      const isEnabled = providerConfig?.enabled !== undefined
-        ? providerConfig.enabled
-        : configProvider.enabled;
+      const isEnabled =
+        providerConfig?.enabled !== undefined ? providerConfig.enabled : configProvider.enabled;
 
       if (hasApiKey && isEnabled) {
         providersWithKeys[providerId] = {
           ...configProvider,
-          enabled: true,  // Ensure enabled is true for providers with API keys
+          enabled: true, // Ensure enabled is true for providers with API keys
           apiKey: providerConfig.apiKey,
         } as Provider;
         providerIds.push(providerId);
       } else if (!hasApiKey && isEnabled) {
-        // Provider is enabled but has no API key - skip it
-        continue;
       }
     }
 
     // Store filtered providers
     internalConfig = {
-      ...configWithOverrides,  // Use configWithOverrides to preserve providerConfig from env vars
+      ...configWithOverrides, // Use configWithOverrides to preserve providerConfig from env vars
       providers: providersWithKeys,
     };
 
     isInitialized = true;
 
     // Step 5: Log configuration summary
-    const serverHost = internalConfig.server.host;
-    const serverPort = internalConfig.server.port;
-    const providerCount = providerIds.length;
-    const providerList = providerIds.length > 0
-      ? ` (${providerIds.join(', ')})`
-      : '';
-
-    console.log('Configuration loaded:');
-    console.log(`  Environment: ${environment || 'development'}`);
-    console.log(`  Providers: ${providerCount}${providerList}`);
-    console.log(`  Server: ${serverHost}:${serverPort}`);
+    const _serverHost = internalConfig.server.host;
+    const _serverPort = internalConfig.server.port;
+    const _providerCount = providerIds.length;
+    const _providerList = providerIds.length > 0 ? ` (${providerIds.join(", ")})` : "";
 
     return internalConfig;
   } catch (error) {
     // If validation failed, format and display errors
-    if (error instanceof Error && error.message.includes('Configuration validation failed')) {
+    if (error instanceof Error && error.message.includes("Configuration validation failed")) {
       // Error is already formatted from validateConfigOrThrow
       throw error;
     }
@@ -183,7 +172,7 @@ export function getEnabledProviders(): Readonly<RuntimeProvider[]> {
       const providerConfig = config.providerConfig?.[provider.id];
       return {
         ...provider,
-        apiKey: providerConfig?.apiKey || '',
+        apiKey: providerConfig?.apiKey || "",
       } as RuntimeProvider;
     });
 

@@ -5,18 +5,24 @@
  * Integrates seamlessly with OpenClaw.
  */
 
-import { createServer, type IncomingMessage, type ServerResponse, Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
-import { randomUUID } from 'node:crypto';
-import { getConfig, getEnabledProviders } from './config/index.js';
-import type { RuntimeProvider, ModelConfig, AppConfig } from './config/schema.js';
-import { routeRequest, RateLimitTracker, DEFAULT_ROUTER_CONFIG, type RouterConfig, classifyRequest } from './router.js';
-import { logger } from './lib/logging/logger.js';
+import { randomUUID } from "node:crypto";
+import { type IncomingMessage, type ServerResponse, createServer } from "node:http";
+import type { AddressInfo } from "node:net";
+import { getConfig, getEnabledProviders } from "./config/index.js";
+import type { AppConfig, RuntimeProvider } from "./config/schema.js";
+import { logger } from "./lib/logging/logger.js";
+import {
+  DEFAULT_ROUTER_CONFIG,
+  RateLimitTracker,
+  type RouterConfig,
+  classifyRequest,
+  routeRequest,
+} from "./router.js";
 
-const connections = new Set<import('node:net').Socket>();
+const connections = new Set<import("node:net").Socket>();
 
 const DEFAULT_PORT = 8402;
-const DEFAULT_HOST = '127.0.0.1';
+const DEFAULT_HOST = "127.0.0.1";
 
 export interface ServerConfig {
   port?: number;
@@ -48,23 +54,23 @@ async function makeProviderRequest(
   const url = `${provider.baseUrl}/chat/completions`;
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${provider.apiKey}`
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${provider.apiKey}`,
   };
 
   // Special handling for different providers
-  if (provider.id === 'openrouter') {
-    headers['HTTP-Referer'] = 'https://github.com/yourusername/simplellmrouter';
+  if (provider.id === "openrouter") {
+    headers["HTTP-Referer"] = "https://github.com/yourusername/simplellmrouter";
   }
 
   const response = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers,
     body: JSON.stringify({
       ...requestBody,
-      model // Use the provider-specific model ID
+      model, // Use the provider-specific model ID
     }),
-    signal
+    signal,
   });
 
   return response;
@@ -74,9 +80,13 @@ async function makeProviderRequest(
  * Check if error indicates a provider issue worth retrying
  */
 function isProviderError(status: number, body: string): boolean {
-  if (status >= 500) return true; // Server errors
+  if (status >= 500) {
+    return true; // Server errors
+  }
 
-  if (status === 429) return true; // Rate limit
+  if (status === 429) {
+    return true; // Rate limit
+  }
 
   // Check for provider-specific error patterns
   const errorPatterns = [
@@ -85,10 +95,10 @@ function isProviderError(status: number, body: string): boolean {
     /rate.*limit/i,
     /model.*unavailable/i,
     /service.*unavailable/i,
-    /overloaded/i
+    /overloaded/i,
   ];
 
-  return errorPatterns.some(pattern => pattern.test(body));
+  return errorPatterns.some((pattern) => pattern.test(body));
 }
 
 /**
@@ -100,7 +110,7 @@ async function handleChatCompletion(
   providers: RuntimeProvider[],
   rateLimitTracker: RateLimitTracker,
   routerConfig: RouterConfig,
-  config: AppConfig  // Add this parameter
+  _config: AppConfig // Add this parameter
 ): Promise<void> {
   const correlationId = randomUUID();
 
@@ -115,36 +125,36 @@ async function handleChatCompletion(
   try {
     requestData = JSON.parse(body) as ChatCompletionRequest;
   } catch {
-    logger.info({ correlationId, error: 'Invalid JSON', body }, 'Request error');
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Invalid JSON' }));
+    logger.info({ correlationId, error: "Invalid JSON", body }, "Request error");
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Invalid JSON" }));
     return;
   }
 
   // Extract prompt from messages
-  const lastUserMessage = requestData.messages
-    .filter(m => m.role === 'user')
-    .slice(-1)[0];
-  const systemMessage = requestData.messages.find(m => m.role === 'system');
+  const lastUserMessage = requestData.messages.filter((m) => m.role === "user").slice(-1)[0];
+  const _systemMessage = requestData.messages.find((m) => m.role === "system");
 
   if (!lastUserMessage) {
-    logger.info({ correlationId, error: 'No user message found' }, 'Request error');
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'No user message found' }));
+    logger.info({ correlationId, error: "No user message found" }, "Request error");
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "No user message found" }));
     return;
   }
 
   const classification = classifyRequest(requestData.messages);
-  logger.info({ correlationId, prompt: classification.sanitizedPrompt }, 'Incoming chat completion request');
+  logger.info(
+    { correlationId, prompt: classification.sanitizedPrompt },
+    "Incoming chat completion request"
+  );
   const routing = routeRequest(classification, rateLimitTracker, routerConfig);
 
+  logger.info(
+    { correlationId, ...routing },
+    `Routing Decision: ${routing.tier} -> ${routing.model} (${routing.reasoning})`
+  );
 
-  logger.info({ correlationId, ...routing }, `Routing Decision: ${routing.tier} -> ${routing.model} (${routing.reasoning})`);
-
-  const modelsToTry = [
-    routing.model,
-    ...routing.fallbackChain
-  ];
+  const modelsToTry = [routing.model, ...routing.fallbackChain];
 
   // Try each model until success
   const controller = new AbortController();
@@ -156,23 +166,29 @@ async function handleChatCompletion(
     const modelId = modelsToTry[i];
     const isLastAttempt = i === modelsToTry.length - 1;
 
-    logger.info({ correlationId, attempt: i + 1, totalAttempts: modelsToTry.length, modelId }, `Trying ${i + 1}/${modelsToTry.length}: ${modelId}`);
+    logger.info(
+      { correlationId, attempt: i + 1, totalAttempts: modelsToTry.length, modelId },
+      `Trying ${i + 1}/${modelsToTry.length}: ${modelId}`
+    );
 
     // Parse modelId: "provider/model" or just "model"
-    const [providerId, ...modelParts] = modelId.split('/');
-    const modelName = modelParts.join('/');
+    const [providerId, ...modelParts] = modelId.split("/");
+    const modelName = modelParts.join("/");
 
     // Find provider in config
-    const providerObj = providers.find(p => p.id === providerId);
+    const providerObj = providers.find((p) => p.id === providerId);
     if (!providerObj) {
       logger.warn({ correlationId, modelId }, `Provider ${providerId} not found, skipping`);
       continue;
     }
 
     // Find model in provider
-    const model = providerObj.models.find(m => m.id === modelName || m.id === modelId);
+    const model = providerObj.models.find((m) => m.id === modelName || m.id === modelId);
     if (!model) {
-      logger.warn({ correlationId, modelId }, `Model ${modelId} not found in provider ${providerId}, skipping`);
+      logger.warn(
+        { correlationId, modelId },
+        `Model ${modelId} not found in provider ${providerId}, skipping`
+      );
       continue;
     }
 
@@ -190,7 +206,7 @@ async function handleChatCompletion(
         // Forward successful response
         const responseHeaders: Record<string, string> = {};
         response.headers.forEach((value, key) => {
-          if (key !== 'transfer-encoding' && key !== 'connection') {
+          if (key !== "transfer-encoding" && key !== "connection") {
             responseHeaders[key] = value;
           }
         });
@@ -202,7 +218,9 @@ async function handleChatCompletion(
           try {
             while (true) {
               const { done, value } = await reader.read();
-              if (done) break;
+              if (done) {
+                break;
+              }
               res.write(Buffer.from(value));
             }
           } finally {
@@ -226,21 +244,26 @@ async function handleChatCompletion(
 
       // Check if we should retry with next model
       if (isProviderError(response.status, errorBody) && !isLastAttempt) {
-        logger.warn({ correlationId, modelId, error: 'Provider error', status: response.status, errorBody }, `Provider error from ${modelId}, trying fallback`);
+        logger.warn(
+          { correlationId, modelId, error: "Provider error", status: response.status, errorBody },
+          `Provider error from ${modelId}, trying fallback`
+        );
         continue;
       }
 
       // Not a retryable error or last attempt
       break;
-
     } catch (error) {
       lastError = {
         status: 500,
-        body: error instanceof Error ? error.message : String(error)
+        body: error instanceof Error ? error.message : String(error),
       };
 
       if (!isLastAttempt) {
-        logger.error({ correlationId, modelId, error: lastError.body }, `Error from ${modelId}: ${lastError.body}, trying fallback`);
+        logger.error(
+          { correlationId, modelId, error: lastError.body },
+          `Error from ${modelId}: ${lastError.body}, trying fallback`
+        );
         continue;
       }
 
@@ -252,24 +275,28 @@ async function handleChatCompletion(
 
   // All models failed
   const status = lastError?.status || 502;
-  const errorMessage = lastError?.body || 'All models failed';
+  const errorMessage = lastError?.body || "All models failed";
 
-  res.writeHead(status, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({
-    error: {
-      message: errorMessage,
-      type: 'provider_error',
-      code: status
-    }
-  }));
+  res.writeHead(status, { "Content-Type": "application/json" });
+  res.end(
+    JSON.stringify({
+      error: {
+        message: errorMessage,
+        type: "provider_error",
+        code: status,
+      },
+    })
+  );
 }
 
 /**
  * Start the SimpleLLMRouter server
  */
-export async function startServer(serverConfig: ServerConfig = {}): Promise<import('node:http').Server> {
-  const port = serverConfig.port || DEFAULT_PORT;
-  const host = serverConfig.host || DEFAULT_HOST;
+export async function startServer(
+  serverConfig: ServerConfig = {}
+): Promise<import("node:http").Server> {
+  const _port = serverConfig.port || DEFAULT_PORT;
+  const _host = serverConfig.host || DEFAULT_HOST;
   const routerConfig = serverConfig.routerConfig || DEFAULT_ROUTER_CONFIG;
 
   // Get configuration and enabled providers
@@ -277,98 +304,108 @@ export async function startServer(serverConfig: ServerConfig = {}): Promise<impo
   const providers = [...getEnabledProviders()]; // Convert readonly to mutable
 
   if (providers.length === 0) {
-    logger.error('[Server] ERROR: No providers configured!');
-    logger.error('[Server] Add API keys via environment variables:');
-    logger.error('[Server]   PROVIDER_MISTRAL_API_KEY, PROVIDER_GROQ_API_KEY,');
-    logger.error('[Server]   PROVIDER_GEMINI_API_KEY, PROVIDER_CEREBRAS_API_KEY, etc.');
-    throw new Error('No providers configured. Server cannot start.');
+    logger.error("[Server] ERROR: No providers configured!");
+    logger.error("[Server] Add API keys via environment variables:");
+    logger.error("[Server]   PROVIDER_MISTRAL_API_KEY, PROVIDER_GROQ_API_KEY,");
+    logger.error("[Server]   PROVIDER_GEMINI_API_KEY, PROVIDER_CEREBRAS_API_KEY, etc.");
+    throw new Error("No providers configured. Server cannot start.");
   }
 
   const rateLimitTracker = new RateLimitTracker();
 
   const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
     // CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-    if (req.method === 'OPTIONS') {
+    if (req.method === "OPTIONS") {
       res.writeHead(200);
       res.end();
       return;
     }
 
     // Health check
-    if (req.url === '/health') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({
-        status: 'ok',
-        providers: providers.length,
-        models: providers.reduce((sum, p) => sum + p.models.length, 0)
-      }));
+    if (req.url === "/health") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          status: "ok",
+          providers: providers.length,
+          models: providers.reduce((sum, p) => sum + p.models.length, 0),
+        })
+      );
       return;
     }
 
     // List models (OpenAI-compatible)
-    if (req.url === '/v1/models' && req.method === 'GET') {
+    if (req.url === "/v1/models" && req.method === "GET") {
       const models = [
-        ...providers.flatMap(p =>
-          p.models.map(m => ({
+        ...providers.flatMap((p) =>
+          p.models.map((m) => ({
             id: `${p.id}/${m.id}`,
-            object: 'model',
+            object: "model",
             created: Date.now(),
-            owned_by: p.id
+            owned_by: p.id,
           }))
         ),
         // Add virtual router models
         {
-          id: 'llm-router',
-          object: 'model',
+          id: "llm-router",
+          object: "model",
           created: Date.now(),
-          owned_by: 'system'
+          owned_by: "system",
         },
         {
-          id: 'auto',
-          object: 'model',
+          id: "auto",
+          object: "model",
           created: Date.now(),
-          owned_by: 'system'
-        }
+          owned_by: "system",
+        },
       ];
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ object: 'list', data: models }));
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ object: "list", data: models }));
       return;
     }
 
     // Chat completions (OpenAI-compatible)
-    if (req.url === '/v1/chat/completions' && req.method === 'POST') {
+    if (req.url === "/v1/chat/completions" && req.method === "POST") {
       try {
         await handleChatCompletion(req, res, providers, rateLimitTracker, routerConfig, config);
       } catch (error) {
-        logger.error({ correlationId: 'N/A', error }, '[Server] Unhandled error in chat completion');
+        logger.error(
+          { correlationId: "N/A", error },
+          "[Server] Unhandled error in chat completion"
+        );
         if (!res.headersSent) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({
-            error: {
-              message: error instanceof Error ? error.message : String(error),
-              type: 'server_error'
-            }
-          }));
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: {
+                message: error instanceof Error ? error.message : String(error),
+                type: "server_error",
+              },
+            })
+          );
         } else {
-          logger.error({ correlationId: 'N/A', error }, '[Server] Headers already sent, cannot send error response.');
+          logger.error(
+            { correlationId: "N/A", error },
+            "[Server] Headers already sent, cannot send error response."
+          );
         }
       }
       return;
     }
 
     // Not found
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Not found' }));
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Not found" }));
   });
 
-  server.on('connection', (socket) => {
+  server.on("connection", (socket) => {
     connections.add(socket);
-    socket.on('close', () => connections.delete(socket));
+    socket.on("close", () => connections.delete(socket));
   });
 
   return new Promise((resolve) => {
@@ -377,19 +414,19 @@ export async function startServer(serverConfig: ServerConfig = {}): Promise<impo
     server.listen(serverPort, serverHost, () => {
       const addr = server.address() as AddressInfo;
       logger.info(`✓ SimpleLLMRouter listening on http://${addr.address}:${addr.port}`);
-      logger.info(`\nConfigure OpenClaw to use this router:`);
+      logger.info("\nConfigure OpenClaw to use this router:");
       logger.info(`  export OPENAI_API_BASE="http://127.0.0.1:${addr.port}/v1"`);
       logger.info(`  export OPENAI_API_KEY="dummy"`);
-      logger.info(`  openclaw gateway\n`);
+      logger.info("  openclaw gateway\n");
       resolve(server);
     });
   });
 
   // Graceful shutdown
   const shutdownHandler = () => {
-    logger.info('\n[Server] Shutting down...');
+    logger.info("\n[Server] Shutting down...");
     server.close(() => {
-      logger.info('[Server] Server closed');
+      logger.info("[Server] Server closed");
       process.exit(0);
     });
     // Force close any open connections
@@ -399,7 +436,7 @@ export async function startServer(serverConfig: ServerConfig = {}): Promise<impo
     }
   };
 
-  process.on('SIGINT', shutdownHandler);
+  process.on("SIGINT", shutdownHandler);
 
   // Store handler for cleanup in tests
   (server as any)._shutdownHandler = shutdownHandler;

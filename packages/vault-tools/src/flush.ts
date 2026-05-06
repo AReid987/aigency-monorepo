@@ -4,7 +4,7 @@
 
 import type { VaultConfig } from "./config.js";
 
-export async function flush(config: VaultConfig): Promise<{ flushed: number }> {
+export async function flush(_config: VaultConfig): Promise<{ flushed: number }> {
   // TODO: wire up @aigency/surreal SurrealClient
   // 1. Walk agents/<callsign>/session-logs/*.md
   // 2. Parse frontmatter for event_type, agent, summary, metadata

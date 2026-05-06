@@ -1,12 +1,12 @@
 // src/lib/logging/logger.test.ts
-import { logger, initLogger } from './logger.js';
+import { initLogger, logger } from "./logger.js";
 
-describe('Logger', () => {
-  it('should be initialized without errors', () => {
-    expect(() => initLogger({ level: 'info' })).not.toThrow();
+describe("Logger", () => {
+  it("should be initialized without errors", () => {
+    expect(() => initLogger({ level: "info" })).not.toThrow();
   });
 
-  it('should have a log method', () => {
-    expect(logger).toHaveProperty('info');
+  it("should have a log method", () => {
+    expect(logger).toHaveProperty("info");
   });
 });
