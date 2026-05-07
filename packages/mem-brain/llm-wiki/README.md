@@ -1,4 +1,4 @@
-# Aigency LLM-Wiki v2
+# Aigency LLM-Wiki v3
 
 > **Human-facing documentation.** For agent instructions, see [`AGENTS.md`](./AGENTS.md).
 
@@ -6,7 +6,7 @@
 
 ## What is this?
 
-The Aigency LLM-Wiki is a **persistent, compounding knowledge base** maintained by AI agents. It is an implementation of [Karpathy's LLM-Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f), extended with v2 enhancements from production experience: confidence scoring, knowledge graphs, memory lifecycle management, and event-driven automation.
+The Aigency LLM-Wiki is a **persistent, compounding knowledge base** maintained by AI agents. It is an implementation of [Karpathy's LLM-Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f), extended with v2/v3 enhancements from production experience: confidence scoring, knowledge graphs, memory lifecycle management, and event-driven automation.
 
 This is **not** a RAG system. RAG retrieves and forgets. The LLM-Wiki accumulates and compounds. Knowledge is compiled once and kept current — not re-derived on every query.
 
@@ -23,17 +23,23 @@ This is **not** a RAG system. RAG retrieves and forgets. The LLM-Wiki accumulate
 │  LLM-generated markdown pages           │
 │  — summaries, entity pages, concepts    │
 ├─────────────────────────────────────────┤
-│  Layer 1: RAW SOURCES (raw/)            │
-│  Immutable source documents             │
-│  — articles, specs, transcripts, data   │
+│  Layer 1: RAW SOURCES (apps/docs/)      │
+│  Canonical system documentation         │
+│  — architecture, agents, services       │
 └─────────────────────────────────────────┘
 ```
 
 ### Layer 1: Raw Sources
 
-Your curated collection of source documents. Articles, specs, meeting transcripts, data files. These are **immutable** — the LLM reads from them but never modifies them. This is your source of truth.
+The canonical source documents live in `apps/docs/` — the documentation app for the Aigency system. These include:
 
-Current sources: [raw/aigency-specs/](./raw/aigency-specs/) — ingested from the [aigency-specs](https://github.com/AReid987/aigency-specs) repository.
+- `01-getting-started/` — Overview, setup, quick reference
+- `02-deep-dive/` — Architecture, agent system, data layer, frontend
+- `02-deep-dive/apps/` — Router, Membrane, ORACLE, Librarian, Contracts, TELOS
+- `03-agents/` — Per-agent deep dives
+- `onboarding/` — Role-specific onboarding guides
+
+These are **immutable** from the wiki's perspective — the LLM reads from them but does not modify them.
 
 ### Layer 2: The Wiki
 
@@ -53,15 +59,16 @@ You read it; the LLM writes it.
 |------|-------------|
 | [wiki/index.md](./wiki/index.md) | Content catalog of all wiki pages |
 | [wiki/log.md](./wiki/log.md) | Chronological activity log |
-| [wiki/constitution.md](./wiki/constitution.md) | AI Coder Constitution (prominent) |
-| [wiki/org/human-layer.md](./wiki/org/human-layer.md) | Human executive org chart |
-| [wiki/org/agent-network.md](./wiki/org/agent-network.md) | AI agent network hierarchy |
-| [wiki/architecture/memory-tiers.md](./wiki/architecture/memory-tiers.md) | 3-tier memory architecture |
-| [wiki/architecture/integrations.md](./wiki/architecture/integrations.md) | External service integrations |
-| [wiki/squads/meta-code-squad.md](./wiki/squads/meta-code-squad.md) | Core development squad |
-| [wiki/squads/agile-squad.md](./wiki/squads/agile-squad.md) | Product & agile squad |
-| [wiki/squads/landing-page-squad.md](./wiki/squads/landing-page-squad.md) | LP generation squad |
-| [wiki/squads/nexus-trading.md](./wiki/squads/nexus-trading.md) | Trading intelligence squad |
+| [wiki/architecture/overview.md](./wiki/architecture/overview.md) | High-level system architecture |
+| [wiki/architecture/data-layer.md](./wiki/architecture/data-layer.md) | SurrealDB + Honcho + MemBrain |
+| [wiki/agents/registry.md](./wiki/agents/registry.md) | 11 registered agent identities |
+| [wiki/services/router.md](./wiki/services/router.md) | LLM Router (OpenAI-compatible proxy) |
+| [wiki/services/membrane.md](./wiki/services/membrane.md) | 3D spatial frontend |
+| [wiki/services/oracle.md](./wiki/services/oracle.md) | Persistent memory agent service |
+| [wiki/services/librarian.md](./wiki/services/librarian.md) | Knowledge graph curator |
+| [wiki/services/contracts.md](./wiki/services/contracts.md) | On-chain quality gates |
+| [wiki/services/telos.md](./wiki/services/telos.md) | Deep Context Framework |
+| [wiki/frontend/design-tokens.md](./wiki/frontend/design-tokens.md) | Design system & Membrane UI |
 
 ---
 
@@ -69,10 +76,10 @@ You read it; the LLM writes it.
 
 ### Ingest
 
-Drop a new source into `raw/` and tell the LLM to process it. The LLM will:
-1. Read the source
+When `apps/docs/` is updated, tell the LLM to process the changes. The LLM will:
+1. Read the updated sources
 2. Discuss key takeaways
-3. Write a summary page
+3. Write or update summary pages
 4. Update relevant entity and concept pages
 5. Append an entry to `log.md`
 
@@ -91,7 +98,7 @@ Periodically ask the LLM to health-check the wiki:
 
 ---
 
-## Memory Lifecycle (v2 Enhancements)
+## Memory Lifecycle (v2/v3 Enhancements)
 
 Beyond Karpathy's original pattern, Aigency LLM-Wiki implements:
 
@@ -110,7 +117,7 @@ Beyond Karpathy's original pattern, Aigency LLM-Wiki implements:
 ## Tooling
 
 - **Obsidian** — Recommended viewer for the wiki (graph view, wikilinks)
-- **Git** — Version history, branching, collaboration (the wiki is just a git repo of markdown)
+- **Git** — Version history, branching, collaboration
 - **qmd** — Optional local search engine when pages grow past ~100
 
 ---

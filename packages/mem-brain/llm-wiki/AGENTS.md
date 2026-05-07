@@ -14,9 +14,9 @@ You are the **librarian** of the Aigency LLM-Wiki. Your job is to maintain a per
 ## Three-Layer Architecture
 
 ```
-raw/      — Layer 1: Immutable sources (YOU READ ONLY)
-wiki/     — Layer 2: LLM-maintained pages (YOU OWN THIS)
-AGENTS.md — Layer 3: This schema (FOLLOW THESE RULES)
+apps/docs/  — Layer 1: Canonical system docs (YOU READ ONLY)
+wiki/       — Layer 2: LLM-maintained pages (YOU OWN THIS)
+AGENTS.md   — Layer 3: This schema (FOLLOW THESE RULES)
 ```
 
 ---
@@ -25,30 +25,25 @@ AGENTS.md — Layer 3: This schema (FOLLOW THESE RULES)
 
 ```
 llm-wiki/
-├── raw/                        # Immutable sources
-│   └── aigency-specs/          # Canonical specs from aigency-specs repo
-│       ├── AI-CODER-CONSTITUTION.md
-│       ├── CLAUDE.md
-│       ├── org-core.md
-│       ├── org-agents.md
-│       ├── memory-architecture.md
-│       └── integrations-spec.md
+├── README.md                   # Human-facing wiki overview
+├── AGENTS.md                   # This file — agent instructions
 ├── wiki/                       # LLM-maintained pages
 │   ├── index.md                # Content catalog (update on every ingest)
 │   ├── log.md                  # Chronological log (append-only)
-│   ├── constitution.md         # AI Constitution synthesis
-│   ├── org/
-│   │   ├── human-layer.md      # Human org chart
-│   │   └── agent-network.md    # Agent network hierarchy
 │   ├── architecture/
-│   │   ├── memory-tiers.md     # Memory architecture
-│   │   └── integrations.md     # Service integrations
-│   └── squads/
-│       ├── meta-code-squad.md  # Dev harness squad
-│       ├── agile-squad.md      # Product/agile squad
-│       ├── landing-page-squad.md
-│       └── nexus-trading.md    # Trading intelligence
-└── AGENTS.md                   # This file
+│   │   ├── overview.md         # System architecture, monorepo, design principles
+│   │   └── data-layer.md       # SurrealDB, Honcho, MemBrain
+│   ├── agents/
+│   │   └── registry.md         # 11 agents, callsigns, substrates, routing
+│   ├── services/
+│   │   ├── router.md           # LLM Router (port 8402)
+│   │   ├── membrane.md         # 3D frontend (Three.js)
+│   │   ├── oracle.md           # Persistent memory agent
+│   │   ├── librarian.md        # Knowledge graph curator
+│   │   ├── contracts.md        # On-chain quality gates
+│   │   └── telos.md            # Deep Context Framework
+│   └── frontend/
+│       └── design-tokens.md    # Design system, SynapTree UI
 ```
 
 ---
@@ -60,10 +55,10 @@ Every wiki page MUST include this frontmatter:
 ```markdown
 # Page Title
 
-> **Confidence:** [0.0–1.0]  
-> **Last confirmed:** [YYYY-MM-DD]  
-> **Sources:** [list of raw sources]  
-> **Supersedes:** [page link or "N/A"]  
+> **Confidence:** [0.0–1.0]
+> **Last confirmed:** [YYYY-MM-DD]
+> **Sources:** [list of source files]
+> **Supersedes:** [page link or "N/A"]
 > **Related:** [cross-reference links]
 
 ---
@@ -85,17 +80,17 @@ Confidence decays over time. Reduce by 0.1 per month since last confirmation. Re
 
 ### 1. INGEST — Process a New Source
 
-When a new source arrives in `raw/`:
+When `apps/docs/` is updated:
 
-1. **Read** the source completely
+1. **Read** the updated source completely
 2. **Discuss** key takeaways with the user (if interactive)
-3. **Write** a summary page in `wiki/` (if source warrants its own page)
+3. **Write** or update summary pages in `wiki/` (if source warrants)
 4. **Update** relevant entity and concept pages across the wiki
 5. **Update** `wiki/index.md` with new page entries
 6. **Append** an entry to `wiki/log.md` with consistent prefix:
    ```markdown
    ## [YYYY-MM-DD] ingest | [Source Title]
-   **Source:** `raw/...`
+   **Source:** `apps/docs/...`
    **Derived pages:** [links]
    **Key extractions:** [bullet list]
    ```
@@ -147,23 +142,26 @@ Beyond flat pages, maintain typed relationships:
 
 ### Entity Types
 
-- **person** — Antonio Reid, agent callsigns
-- **agent** — Ruflo, Gemini CLI, Kimi, etc.
-- **squad** — Meta Code Squad, Agile Squad, etc.
-- **system** — SimpleLLMRouter, Letta, Sugar
-- **concept** — Quality Gates, Decide-Act-Verify, TELOS
-- **document** — Constitution, specs, PRDs
+- **person** — Antonio Reid (THE_ARCHITECT), agent callsigns
+- **agent** — ZENITH, CIPHER, VECTOR, ORACLE, LIBRARIAN, etc.
+- **service** — Router, Membrane, ORACLE, Librarian, Contracts, TELOS
+- **package** — agent-core, surreal, honcho, mem-brain, vault-tools, design-tokens
+- **system** — SurrealDB, Honcho, MemBrain, HarvestMoon.sol
+- **concept** — AgentRoutingContext, TELOS, SynapTree, Harvest Moon
+- **document** — TELOS files, agent.yaml, SOUL.md, RULES.md
 
 ### Relationship Types
 
 Use explicit verbs in cross-references:
 
-- `uses` — Agent uses System
-- `depends_on` — System depends on System
-- `owns` — Squad owns Domain
+- `uses` — Agent uses Service/System
+- `depends_on` — Service depends_on Package
+- `owns` — Agent owns Directory
 - `reports_to` — Agent reports_to Agent/Person
 - `supersedes` — Page supersedes Page
 - `contradicts` — Claim contradicts Claim
+- `emits` — Service emits Event
+- `subscribes_to` — Service subscribes_to Event
 
 ---
 
@@ -188,7 +186,7 @@ Every piece of content you write must meet:
 
 1. **Structure** — Proper heading hierarchy, frontmatter, cross-references
 2. **Citations** — Every claim links to its source(s)
-3. **Consistency** — Terminology matches existing wiki pages
+3. **Consistency** — Terminology matches existing wiki pages and `apps/docs/`
 4. **Completeness** — Update ALL pages affected by a source, not just one
 
 Self-evaluate before writing. If quality < 0.7, rewrite.
@@ -228,7 +226,7 @@ Parseable with: `grep "^## \[" wiki/log.md | tail -5`
 
 ## Golden Rules
 
-1. **Never modify raw sources.** They are immutable.
+1. **Never modify raw sources in `apps/docs/`.** They are immutable.
 2. **Update index.md on every ingest.** No exceptions.
 3. **Append to log.md on every operation.** No exceptions.
 4. **Cross-reference aggressively.** Every page should link to related pages.
