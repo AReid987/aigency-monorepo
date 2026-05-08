@@ -29,6 +29,24 @@ export interface HybridSearchResult {
   source: "vector" | "keyword" | "fused";
 }
 
+// ─── GBrain-Enhanced Search Types ─────────────────────────────────────────────
+
+export type QueryIntent = "entity" | "temporal" | "event" | "general";
+
+export interface IntentClassification {
+  intent: QueryIntent;
+  confidence: number;
+  detailLevel: "low" | "medium" | "high";
+  temporalRange?: { from?: string; to?: string };
+}
+
+export interface DedupConfig {
+  perPageCap: number;        // Max results per page (default 3 → 2)
+  jaccardThreshold: number;  // Text similarity cutoff (default 0.85)
+  typeDiversityMax: number;  // Max % of one type (default 0.60)
+  compiledTruthRequired: boolean; // Always include compiled_truth match
+}
+
 export interface LintReport {
   contradictions: ContradictionFinding[];
   stalePages: StalePageFinding[];
@@ -447,6 +465,218 @@ export class WikiEngine {
     }
 
     return results;
+  }
+
+  // ─── GBrain-Enhanced Search Patterns ────────────────────────────────────────
+
+  /**
+   * Zero-LLM intent classification for search queries.
+   * Routes queries to appropriate detail levels without API cost.
+   */
+  classifyIntent(queryText: string): IntentClassification {
+    const lower = queryText.toLowerCase();
+
+    // Temporal patterns
+    const temporalPatterns = /\b(last|recent|latest|this week|this month|this year|since|ago|before|after|between)\b/;
+    const datePatterns = /\b\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4}|january|february|march|april|may|june|july|august|september|october|november|december\b/;
+
+    // Entity patterns
+    const entityPatterns = /\b(who is|what is|where is|about|profile of|details on)\b/;
+
+    // Event patterns
+    const eventPatterns = /\b(what happened|when did|how did|why did|outcome of|result of|decision on)\b/;
+
+    if (temporalPatterns.test(lower) || datePatterns.test(lower)) {
+      return {
+        intent: "temporal",
+        confidence: 0.85,
+        detailLevel: "high",
+      };
+    }
+
+    if (eventPatterns.test(lower)) {
+      return {
+        intent: "event",
+        confidence: 0.80,
+        detailLevel: "high",
+      };
+    }
+
+    if (entityPatterns.test(lower)) {
+      return {
+        intent: "entity",
+        confidence: 0.90,
+        detailLevel: "low",
+      };
+    }
+
+    return {
+      intent: "general",
+      confidence: 0.60,
+      detailLevel: "medium",
+    };
+  }
+
+  /**
+   * 4-layer dedup pipeline:
+   * 1. Per-page cap (max results per page)
+   * 2. Jaccard text similarity (>0.85 = duplicate)
+   * 3. Type diversity (max 60% of one type)
+   * 4. Compiled truth guarantee (always keep best compiled_truth match)
+   */
+  dedupResults(
+    results: HybridSearchResult[],
+    config: Partial<DedupConfig> = {}
+  ): HybridSearchResult[] {
+    const cfg: DedupConfig = {
+      perPageCap: 2,
+      jaccardThreshold: 0.85,
+      typeDiversityMax: 0.60,
+      compiledTruthRequired: true,
+      ...config,
+    };
+
+    // Layer 1: Per-page cap
+    const pageCounts = new Map<string, number>();
+    const capped = results.filter((r) => {
+      const count = (pageCounts.get(r.page.id) ?? 0) + 1;
+      pageCounts.set(r.page.id, count);
+      return count <= cfg.perPageCap;
+    });
+
+    // Layer 2: Jaccard similarity dedup
+    const jaccard = (a: string, b: string): number => {
+      const setA = new Set(a.toLowerCase().split(/\s+/));
+      const setB = new Set(b.toLowerCase().split(/\s+/));
+      const intersection = new Set([...setA].filter((x) => setB.has(x)));
+      const union = new Set([...setA, ...setB]);
+      return intersection.size / union.size;
+    };
+
+    const deduped: HybridSearchResult[] = [];
+    for (const result of capped) {
+      const isDuplicate = deduped.some(
+        (d) =>
+          d.page.id === result.page.id ||
+          jaccard(d.page.compiled_truth, result.page.compiled_truth) > cfg.jaccardThreshold
+      );
+      if (!isDuplicate) deduped.push(result);
+    }
+
+    // Layer 3: Type diversity enforcement
+    const typeCounts = new Map<string, number>();
+    for (const r of deduped) {
+      const t = r.page.type;
+      typeCounts.set(t, (typeCounts.get(t) ?? 0) + 1);
+    }
+
+    const total = deduped.length;
+    const filtered = deduped.filter((r) => {
+      const typeCount = typeCounts.get(r.page.type) ?? 0;
+      const typeRatio = typeCount / total;
+      if (typeRatio > cfg.typeDiversityMax && typeCount > 1) {
+        typeCounts.set(r.page.type, typeCount - 1);
+        return false;
+      }
+      return true;
+    });
+
+    // Layer 4: Compiled truth guarantee
+    if (cfg.compiledTruthRequired) {
+      const hasCompiledTruth = filtered.some((r) => r.page.compiled_truth && r.page.compiled_truth.length > 100);
+      if (!hasCompiledTruth && results.length > 0) {
+        // Add highest-scoring result with substantial compiled_truth
+        const best = results
+          .filter((r) => r.page.compiled_truth && r.page.compiled_truth.length > 100)
+          .sort((a, b) => b.score - a.score)[0];
+        if (best && !filtered.some((r) => r.page.id === best.page.id)) {
+          filtered.push(best);
+        }
+      }
+    }
+
+    return filtered.sort((a, b) => b.score - a.score);
+  }
+
+  /**
+   * Backlink boost: use graph topology as retrieval signal.
+   * Well-connected entities (many incoming links) rank higher.
+   */
+  async applyBacklinkBoost(results: HybridSearchResult[]): Promise<HybridSearchResult[]> {
+    const boosted = await Promise.all(
+      results.map(async (result) => {
+        const { incoming } = await this.getLinks(result.page.slug);
+        const linkCount = incoming.length;
+        // Log-weighted boost: log2(linkCount + 1) * 0.1
+        const boost = Math.log2(linkCount + 1) * 0.1;
+        return {
+          ...result,
+          score: result.score + boost,
+        };
+      })
+    );
+
+    return boosted.sort((a, b) => b.score - a.score);
+  }
+
+  /**
+   * Source-aware ranking: boost canonical docs, damp chat noise.
+   * Hard-exclude test/archive prefixes at SQL layer.
+   */
+  applySourceRanking(results: HybridSearchResult[]): HybridSearchResult[] {
+    const sourceBoosts: Record<string, number> = {
+      concept: 1.3,
+      agent: 1.2,
+      system: 1.1,
+      document: 1.0,
+      project: 0.9,
+      meeting: 0.7,
+      idea: 0.6,
+    };
+
+    return results
+      .map((r) => {
+        const boost = sourceBoosts[r.page.type] ?? 1.0;
+        return {
+          ...r,
+          score: r.score * boost,
+        };
+      })
+      .sort((a, b) => b.score - a.score);
+  }
+
+  /**
+   * Full GBrain-enhanced search pipeline.
+   * Intent classification → hybrid search → backlink boost → source ranking → dedup.
+   */
+  async search(
+    queryText: string,
+    queryEmbedding: number[],
+    limit = 5
+  ): Promise<HybridSearchResult[]> {
+    const intent = this.classifyIntent(queryText);
+
+    // Adjust limit based on intent detail level
+    const adjustedLimit = intent.detailLevel === "high" ? limit * 2 : limit;
+
+    // Run hybrid search
+    let results = await this.hybridSearch(queryText, queryEmbedding, adjustedLimit);
+
+    // Apply backlink boost
+    results = await this.applyBacklinkBoost(results);
+
+    // Apply source-aware ranking
+    results = this.applySourceRanking(results);
+
+    // Apply 4-layer dedup
+    results = this.dedupResults(results, {
+      perPageCap: intent.detailLevel === "low" ? 1 : 2,
+      jaccardThreshold: 0.85,
+      typeDiversityMax: 0.60,
+      compiledTruthRequired: true,
+    });
+
+    return results.slice(0, limit);
   }
 
   // ─── Auto-Link Extraction (Zero-LLM) ────────────────────────────────────────

@@ -10,6 +10,8 @@ export { WikiEngine } from "./wiki-engine.js";
 export type {
   WikiEngineConfig,
   HybridSearchResult,
+  IntentClassification,
+  DedupConfig,
   LintReport,
   ContradictionFinding,
   StalePageFinding,
@@ -19,3 +21,11 @@ export type {
   LowConfidenceFinding,
   EntityMention,
 } from "./wiki-engine.js";
+
+// Job queue (Minions-style)
+export { JobQueue } from "./job-queue.js";
+export type { JobRecord, JobQueueConfig, JobHandler } from "./job-queue.js";
+
+// MCP server
+export { MCPServer } from "./mcp-server.js";
+export type { MCPRequest, MCPResponse, MCPScope } from "./mcp-server.js";

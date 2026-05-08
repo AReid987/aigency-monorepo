@@ -3,4 +3,25 @@
 
 export { SurrealClient } from "./client.js";
 export { LIVE } from "./live.js";
-export type { AgentRecord, DirectiveRecord, PatternRecord, TimelineRecord, WikiPageRecord, WikiChunkRecord, WikiLinkRecord, WikiTimelineEntryRecord, WikiIngestLogRecord } from "./types.js";
+export type {
+  AgentRecord,
+  DirectiveRecord,
+  PatternRecord,
+  TimelineRecord,
+  PeerRecord,
+  AgentMemoryRecord,
+  AgentMemoryRelationRecord,
+  AgentMemoryRecallTraceRecord,
+  JobRecord,
+  WikiPageRecord,
+  WikiChunkRecord,
+  WikiLinkRecord,
+  WikiTimelineEntryRecord,
+  WikiIngestLogRecord,
+  DecidedByEdge,
+  InformedByEdge,
+  InvolvesEdge,
+  ReferencesEdge,
+  SupersedesEdge,
+  GeneratedEdge,
+} from "./types.js";

@@ -53,7 +53,9 @@ export interface TimelineRecord {
     | "lint_run"
     | "compile_run"
     | "graft_harvested"
-    | "agent_status_change";
+    | "agent_status_change"
+    | "memory_created"
+    | "memory_recall";
   agent: AgentCallsign;
   summary: string;
   metadata: Record<string, unknown>;
@@ -119,6 +121,21 @@ export interface WikiIngestLogRecord {
   created_at: string;
 }
 
+// ─── Peer Record ──────────────────────────────────────────────────────────────
+
+export interface PeerRecord {
+  id: string; // format: "peer:<handle>"
+  handle: string;
+  name: string;
+  relationship: "colleague" | "client" | "advisor" | "stakeholder" | "contractor";
+  interaction_count: number;
+  tags: string[];
+  last_interaction: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
 // ─── Graph Edge Types ─────────────────────────────────────────────────────────
 
 export interface DecidedByEdge {
@@ -131,10 +148,91 @@ export interface DecidedByEdge {
 export interface InformedByEdge {
   in: string; // directive ID
   out: string; // pattern ID
+  confidence?: number;
+}
+
+export interface InvolvesEdge {
+  in: string; // directive or pattern ID
+  out: string; // peer or agent ID
+  role?: string;
+}
+
+export interface ReferencesEdge {
+  in: string; // any record
+  out: string; // any record
+  context?: string;
+  weight?: number;
 }
 
 export interface SupersedesEdge {
   in: string; // new directive ID
   out: string; // old directive ID
   reason?: string;
+  superseded_at: string;
+}
+
+export interface GeneratedEdge {
+  in: string; // artifact/timeline ID
+  out: string; // agent ID
+  tool?: string;
+}
+
+// ─── Agent Memory Sidecar (OB1-style governance) ──────────────────────────────
+
+export interface AgentMemoryRecord {
+  id: string; // format: "agent_memory:<ulid>"
+  agent: AgentCallsign;
+  content: string;
+  provenance: "observed" | "inferred" | "user_confirmed" | "imported" | "generated";
+  lifecycle: "active" | "stale" | "superseded" | "disputed" | "rejected";
+  review_status: "pending" | "confirmed" | "evidence_only" | "restricted" | "rejected";
+  confidence: number; // 0.00 – 1.00
+  can_use_as_instruction: boolean;
+  can_use_as_evidence: boolean;
+  requires_user_confirmation: boolean;
+  embedding?: number[];
+  source_refs: string[];
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AgentMemoryRelationRecord {
+  id: string;
+  from_memory_id: string;
+  to_memory_id: string;
+  relation_type: "supersedes" | "conflicts" | "merges" | "supports" | "contradicts";
+  context?: string;
+  created_at: string;
+}
+
+export interface AgentMemoryRecallTraceRecord {
+  id: string;
+  query_embedding: number[];
+  query_text: string;
+  agent: AgentCallsign;
+  results_returned: string[];
+  results_used: string[];
+  results_ignored: string[];
+  latency_ms: number;
+  created_at: string;
+}
+
+// ─── Job Queue Record (Minions-style) ─────────────────────────────────────────
+
+export interface JobRecord {
+  id: string;
+  job_type: string;
+  payload: Record<string, unknown>;
+  status: "pending" | "running" | "complete" | "failed" | "cancelled";
+  priority: number;
+  parent_id?: string;
+  child_ids: string[];
+  attempt_count: number;
+  max_attempts: number;
+  error_message?: string;
+  started_at?: string;
+  completed_at?: string;
+  created_at: string;
+  updated_at: string;
 }
