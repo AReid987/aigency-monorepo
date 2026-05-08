@@ -3,4 +3,4 @@
 
 export { SurrealClient } from "./client.js";
 export { LIVE } from "./live.js";
-export type { AgentRecord, DirectiveRecord, PatternRecord, TimelineRecord } from "./types.js";
+export type { AgentRecord, DirectiveRecord, PatternRecord, TimelineRecord, WikiPageRecord, WikiChunkRecord, WikiLinkRecord, WikiTimelineEntryRecord, WikiIngestLogRecord } from "./types.js";

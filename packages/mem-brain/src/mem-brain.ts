@@ -30,7 +30,7 @@ export class MemBrain {
   }
 
   async connect(): Promise<void> {
-    await SurrealClient.connect(config.surreal);
+    await SurrealClient.connect(this.config.surreal);
   }
 
   // ─── Directive Operations ──────────────────────────────────────────────────
@@ -47,12 +47,12 @@ export class MemBrain {
     data: Omit<DirectiveRecord, "id" | "created_at">
   ): Promise<DirectiveRecord> {
     const db = SurrealClient.db;
-    const [record] = await db.create<DirectiveRecord>("directive", {
+    const [record] = await db.create("directive", {
       ...data,
       created_at: new Date().toISOString(),
-    });
+    } as any);
     await this.logEvent("directive_created", data.owner, `Directive created: ${data.title}`);
-    return record;
+    return record as unknown as DirectiveRecord;
   }
 
   // ─── Pattern Operations ────────────────────────────────────────────────────

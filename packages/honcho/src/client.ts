@@ -27,7 +27,7 @@ export class HonchoClient {
   async getPeer(callsign: AgentCallsign) {
     const peers = await this.client.apps.users.list(this.workspaceId, {
       filter: JSON.stringify({ callsign }),
-    });
+    } as any);
 
     if (peers.items.length > 0) {
       return peers.items[0];
@@ -35,7 +35,7 @@ export class HonchoClient {
 
     return this.client.apps.users.create(this.workspaceId, {
       metadata: { callsign },
-    });
+    } as any);
   }
 
   /** Start a new session for an agent. */

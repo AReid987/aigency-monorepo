@@ -28,12 +28,12 @@ export const LIVE = {
 
     const [uuid] = await db.query<[string]>(query);
 
-    db.subscribeLive<T>(uuid, (action, data) => {
-      callback(action as "CREATE" | "UPDATE" | "DELETE", data);
+    db.subscribeLive(uuid as any, (action: any, data: any) => {
+      callback(action as "CREATE" | "UPDATE" | "DELETE", data as T);
     });
 
     return async () => {
-      await db.kill(uuid);
+      await db.kill(uuid as any);
     };
   },
 

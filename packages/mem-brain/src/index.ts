@@ -4,3 +4,18 @@
 
 export { MemBrain } from "./mem-brain.js";
 export type { MemBrainConfig } from "./mem-brain.js";
+
+// LLM-Wiki v2 runtime
+export { WikiEngine } from "./wiki-engine.js";
+export type {
+  WikiEngineConfig,
+  HybridSearchResult,
+  LintReport,
+  ContradictionFinding,
+  StalePageFinding,
+  OrphanFinding,
+  MissingPageFinding,
+  BrokenLinkFinding,
+  LowConfidenceFinding,
+  EntityMention,
+} from "./wiki-engine.js";
