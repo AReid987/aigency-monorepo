@@ -82,6 +82,16 @@
           }
         }
       }
+    },
+    {
+      "include": ["packages/commit-agent/src/**/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsoleLog": "off"
+          }
+        }
+      }
     }
   ]
 }
