@@ -82,6 +82,7 @@ pnpm commit                               # interactive commit with cz-git
 | DB | SurrealDB 3.0 | Multi-model: graph + vector + document + LIVE queries |
 | Peer identity | Honcho ^0.2.0 | Cross-session reasoning, "dreaming" inference |
 | LLM inference | MLX (M1 Pro) + Llama.cpp (Intel ×3 on Tailnet) | Local-first, no Ollama |
+| Commit message AI | Ollama (primary) → mlx-lm / llama-cpp (auto-install fallback) | Cross-platform, zero manual setup |
 | LLM router | apps/router (aigency-router v1 migrated) | OpenAI-compat proxy, quota-aware |
 | Chain | Base L2 (chain ID 8453) | EVM, low gas, Coinbase alignment |
 | Contracts | Foundry | forge + cast + anvil; deploy target Base + Base Sepolia |
@@ -99,6 +100,33 @@ Persistent knowledge base at `packages/mem-brain/llm-wiki/`:
 - **Key knowledge:** Constitution, org charts, memory architecture, squad details
 - **Ingest sources:** Drop files into `llm-wiki/raw/`, tell the LLM to process
 - **Query:** Ask the LLM questions against the wiki
+
+---
+
+## Local SLM for Commit Messages
+
+The `prepare-commit-msg` hook auto-generates conventional commit messages using a local SLM with automatic backend selection:
+
+```bash
+# Priority order (auto-detected):
+# 1. Ollama — if installed and model available (qwen2.5:0.5b)
+# 2. Python backend — auto-installed on first run:
+#    - macOS arm64 (Apple Silicon) → mlx-lm (Metal GPU)
+#    - Intel Mac / Linux / Windows → llama-cpp-python (CPU)
+# 3. Heuristic fallback — pattern-based message from diff stats
+```
+
+**Manual setup** (if you want a specific backend):
+```bash
+# Install Python backend explicitly (auto-detects platform)
+./scripts/automation/setup-slm.sh
+
+# Or force reinstall
+./scripts/automation/setup-slm.sh --force
+```
+
+**Backend metadata:** `scripts/automation/.slm/backend.json`
+**Model:** Qwen2.5-0.5B-Instruct GGUF (~350MB)
 
 ---
 
@@ -144,7 +172,7 @@ Agents' SOUL.md + RULES.md are in the vault. The `agent.yaml` in each `agents/<c
 
 ---
 
-*Maintained by THE ARCHITECT. Last updated: 2026-05-01.*
+*Maintained by THE ARCHITECT. Last updated: 2026-05-03.*
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
