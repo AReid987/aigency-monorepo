@@ -12,6 +12,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    reporter: ["default", "junit"],
+    outputFile: {
+      junit: "./coverage/junit.xml",
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "text-summary", "lcov", "json"],

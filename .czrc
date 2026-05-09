@@ -35,7 +35,10 @@
     ],
     "useEmoji": true,
     "emojiAlign": "center",
-    "useAI": false,
+    "useAI": true,
+    "aiType": "ollama",
+    "aiModel": "qwen2.5:0.5b",
+    "aiTimeout": 30000,
     "aiNumber": 1,
     "themeColorCode": "",
     "scopes": [

@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WikiEngine } from "./wiki-engine.js";
-import { SurrealClient } from "@aigency/surreal";
 
 // Mock SurrealDB client
 const mockDb = {
@@ -89,6 +88,8 @@ describe("WikiEngine", () => {
         type: "concept",
         title: "New Page",
         compiled_truth: "Content",
+        timeline: "",
+        frontmatter: {},
         confidence: 0.7,
         last_confirmed: "2026-05-01",
         sources: ["source.md"],
@@ -96,10 +97,13 @@ describe("WikiEngine", () => {
       });
 
       expect(page).toBeDefined();
-      expect(mockDb.create).toHaveBeenCalledWith("wiki_page", expect.objectContaining({
-        slug: "new-page",
-        source: "test-wiki",
-      }));
+      expect(mockDb.create).toHaveBeenCalledWith(
+        "wiki_page",
+        expect.objectContaining({
+          slug: "new-page",
+          source: "test-wiki",
+        })
+      );
     });
 
     it("should update a page", async () => {
@@ -110,7 +114,10 @@ describe("WikiEngine", () => {
 
       const page = await engine.updatePage("update-me", { confidence: 0.9 });
       expect(page).toBeDefined();
-      expect(mockDb.merge).toHaveBeenCalledWith("wiki_page:update-me", expect.objectContaining({ confidence: 0.9 }));
+      expect(mockDb.merge).toHaveBeenCalledWith(
+        "wiki_page:update-me",
+        expect.objectContaining({ confidence: 0.9 })
+      );
     });
 
     it("should delete a page and cascade", async () => {
@@ -218,7 +225,11 @@ describe("WikiEngine", () => {
 
   describe("Link Type Inference", () => {
     it("should infer depends_on from context", () => {
-      const type = engine.inferLinkType("service", "package", "The Router depends on @aigency/surreal");
+      const type = engine.inferLinkType(
+        "service",
+        "package",
+        "The Router depends on @aigency/surreal"
+      );
       expect(type).toBe("depends_on");
     });
 
@@ -245,9 +256,30 @@ describe("WikiEngine", () => {
         { id: "wiki_page:c", slug: "c", title: "C", compiled_truth: "baz content", score: 0.75 },
       ];
 
-      const pageA = { id: "wiki_page:a", slug: "a", title: "A", type: "concept", confidence: 0.8, compiled_truth: "foo" };
-      const pageB = { id: "wiki_page:b", slug: "b", title: "B", type: "concept", confidence: 0.8, compiled_truth: "bar" };
-      const pageC = { id: "wiki_page:c", slug: "c", title: "C", type: "concept", confidence: 0.8, compiled_truth: "baz" };
+      const pageA = {
+        id: "wiki_page:a",
+        slug: "a",
+        title: "A",
+        type: "concept",
+        confidence: 0.8,
+        compiled_truth: "foo",
+      };
+      const pageB = {
+        id: "wiki_page:b",
+        slug: "b",
+        title: "B",
+        type: "concept",
+        confidence: 0.8,
+        compiled_truth: "bar",
+      };
+      const pageC = {
+        id: "wiki_page:c",
+        slug: "c",
+        title: "C",
+        type: "concept",
+        confidence: 0.8,
+        compiled_truth: "baz",
+      };
 
       mockDb.query
         .mockResolvedValueOnce([vectorResults])
@@ -286,11 +318,11 @@ describe("WikiEngine", () => {
       ];
 
       mockDb.query
-        .mockResolvedValueOnce([pages])       // listPages
-        .mockResolvedValueOnce([[pages[0]]])   // getPage inside getLinks
-        .mockResolvedValueOnce([[]])           // getLinks outgoing
-        .mockResolvedValueOnce([[]])           // getLinks incoming
-        .mockResolvedValueOnce([[]]);          // allLinks
+        .mockResolvedValueOnce([pages]) // listPages
+        .mockResolvedValueOnce([[pages[0]]]) // getPage inside getLinks
+        .mockResolvedValueOnce([[]]) // getLinks outgoing
+        .mockResolvedValueOnce([[]]) // getLinks incoming
+        .mockResolvedValueOnce([[]]); // allLinks
 
       const report = await engine.lint();
       expect(report.stalePages).toHaveLength(1);
@@ -314,11 +346,11 @@ describe("WikiEngine", () => {
       ];
 
       mockDb.query
-        .mockResolvedValueOnce([pages])       // listPages
-        .mockResolvedValueOnce([[pages[0]]])   // getPage inside getLinks
-        .mockResolvedValueOnce([[]])           // getLinks outgoing
-        .mockResolvedValueOnce([[]])           // getLinks incoming
-        .mockResolvedValueOnce([[]]);          // allLinks
+        .mockResolvedValueOnce([pages]) // listPages
+        .mockResolvedValueOnce([[pages[0]]]) // getPage inside getLinks
+        .mockResolvedValueOnce([[]]) // getLinks outgoing
+        .mockResolvedValueOnce([[]]) // getLinks incoming
+        .mockResolvedValueOnce([[]]); // allLinks
 
       const report = await engine.lint();
       expect(report.lowConfidence).toHaveLength(1);
@@ -342,11 +374,11 @@ describe("WikiEngine", () => {
       ];
 
       mockDb.query
-        .mockResolvedValueOnce([pages])       // listPages
-        .mockResolvedValueOnce([[pages[0]]])   // getPage inside getLinks
-        .mockResolvedValueOnce([[]])           // getLinks outgoing
-        .mockResolvedValueOnce([[]])           // getLinks incoming
-        .mockResolvedValueOnce([[]]);          // allLinks
+        .mockResolvedValueOnce([pages]) // listPages
+        .mockResolvedValueOnce([[pages[0]]]) // getPage inside getLinks
+        .mockResolvedValueOnce([[]]) // getLinks outgoing
+        .mockResolvedValueOnce([[]]) // getLinks incoming
+        .mockResolvedValueOnce([[]]); // allLinks
 
       const report = await engine.lint();
       expect(report.orphans).toHaveLength(1);

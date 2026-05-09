@@ -21,9 +21,6 @@ import {
 
 const connections = new Set<import("node:net").Socket>();
 
-const DEFAULT_PORT = 8402;
-const DEFAULT_HOST = "127.0.0.1";
-
 export interface ServerConfig {
   port?: number;
   host?: string;
@@ -133,7 +130,6 @@ async function handleChatCompletion(
 
   // Extract prompt from messages
   const lastUserMessage = requestData.messages.filter((m) => m.role === "user").slice(-1)[0];
-  const _systemMessage = requestData.messages.find((m) => m.role === "system");
 
   if (!lastUserMessage) {
     logger.info({ correlationId, error: "No user message found" }, "Request error");
@@ -295,8 +291,6 @@ async function handleChatCompletion(
 export async function startServer(
   serverConfig: ServerConfig = {}
 ): Promise<import("node:http").Server> {
-  const _port = serverConfig.port || DEFAULT_PORT;
-  const _host = serverConfig.host || DEFAULT_HOST;
   const routerConfig = serverConfig.routerConfig || DEFAULT_ROUTER_CONFIG;
 
   // Get configuration and enabled providers
@@ -418,26 +412,27 @@ export async function startServer(
       logger.info(`  export OPENAI_API_BASE="http://127.0.0.1:${addr.port}/v1"`);
       logger.info(`  export OPENAI_API_KEY="dummy"`);
       logger.info("  openclaw gateway\n");
+
+      // Graceful shutdown
+      const shutdownHandler = () => {
+        logger.info("\n[Server] Shutting down...");
+        server.close(() => {
+          logger.info("[Server] Server closed");
+          process.exit(0);
+        });
+        // Force close any open connections
+        const sockets = Array.from(connections);
+        for (const socket of sockets) {
+          socket.destroy();
+        }
+      };
+
+      process.on("SIGINT", shutdownHandler);
+
+      // biome-ignore lint/suspicious/noExplicitAny: test cleanup accessor
+      (server as any)._shutdownHandler = shutdownHandler;
+
       resolve(server);
     });
   });
-
-  // Graceful shutdown
-  const shutdownHandler = () => {
-    logger.info("\n[Server] Shutting down...");
-    server.close(() => {
-      logger.info("[Server] Server closed");
-      process.exit(0);
-    });
-    // Force close any open connections
-    const sockets = Array.from(connections);
-    for (const socket of sockets) {
-      socket.destroy();
-    }
-  };
-
-  process.on("SIGINT", shutdownHandler);
-
-  // Store handler for cleanup in tests
-  (server as any)._shutdownHandler = shutdownHandler;
 }

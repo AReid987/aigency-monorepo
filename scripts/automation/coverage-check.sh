@@ -22,7 +22,7 @@ declare -A THRESHOLDS=(
   ["packages/surreal"]=10
   ["packages/vault-tools"]=1
   ["packages/honcho"]=10
-  ["packages/mem-brain"]=15
+  ["packages/mem-brain"]=20
 )
 
 # Parse istanbul coverage-final.json for line coverage percentage

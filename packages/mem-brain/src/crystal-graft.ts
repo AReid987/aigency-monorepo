@@ -3,7 +3,7 @@
 // Ports: Aigency Core Mem_Brain v1 Crystal Graft concept to the monorepo.
 
 import { SurrealClient } from "@aigency/surreal";
-import type { WikiPageRecord, WikiLinkRecord, WikiChunkRecord } from "@aigency/surreal";
+import type { WikiChunkRecord, WikiLinkRecord, WikiPageRecord } from "@aigency/surreal";
 
 export interface GraftMetrics {
   lintHealthScore: number; // 0-100
@@ -35,7 +35,7 @@ export interface HarvestThresholds {
 
 export const DEFAULT_THRESHOLDS: HarvestThresholds = {
   minLintHealthScore: 85,
-  minWikiDensity: 0.70,
+  minWikiDensity: 0.7,
   minVaultAgeDays: 90,
 };
 
@@ -92,7 +92,11 @@ export class CrystalGraft {
        WHERE status = 'active'`
     );
 
-    const stats = pageStats?.[0] ?? { count: 0, avgConfidence: 0, oldest: new Date().toISOString() };
+    const stats = pageStats?.[0] ?? {
+      count: 0,
+      avgConfidence: 0,
+      oldest: new Date().toISOString(),
+    };
 
     const [[linkCount]] = await this.db.query<[[{ count: number }]]>(
       "SELECT count() AS count FROM wiki_link"
@@ -116,7 +120,8 @@ export class CrystalGraft {
 
     // Calculate lint health score
     const issueCount = orphanCountVal + staleCountVal;
-    const lintHealthScore = totalPages > 0 ? Math.max(0, 100 - (issueCount / totalPages) * 100) : 100;
+    const lintHealthScore =
+      totalPages > 0 ? Math.max(0, 100 - (issueCount / totalPages) * 100) : 100;
 
     // Calculate wiki density (wiki pages / total knowledge items)
     const [[chunkCount]] = await this.db.query<[[{ count: number }]]>(
@@ -204,12 +209,8 @@ export class CrystalGraft {
     const [pages] = await this.db.query<[WikiPageRecord[]]>(
       "SELECT * FROM wiki_page WHERE status = 'active'"
     );
-    const [links] = await this.db.query<[WikiLinkRecord[]]>(
-      "SELECT * FROM wiki_link"
-    );
-    const [chunks] = await this.db.query<[WikiChunkRecord[]]>(
-      "SELECT * FROM wiki_chunk"
-    );
+    const [links] = await this.db.query<[WikiLinkRecord[]]>("SELECT * FROM wiki_link");
+    const [chunks] = await this.db.query<[WikiChunkRecord[]]>("SELECT * FROM wiki_chunk");
 
     return {
       pages: pages ?? [],
@@ -223,10 +224,18 @@ export class CrystalGraft {
   validateManifest(manifest: GraftManifest): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    if (!manifest.version) errors.push("Missing version");
-    if (!manifest.vaultGenesis) errors.push("Missing vaultGenesis");
-    if (!manifest.harvestDate) errors.push("Missing harvestDate");
-    if (!manifest.librarianHash) errors.push("Missing librarianHash");
+    if (!manifest.version) {
+      errors.push("Missing version");
+    }
+    if (!manifest.vaultGenesis) {
+      errors.push("Missing vaultGenesis");
+    }
+    if (!manifest.harvestDate) {
+      errors.push("Missing harvestDate");
+    }
+    if (!manifest.librarianHash) {
+      errors.push("Missing librarianHash");
+    }
 
     if (manifest.metrics.lintHealthScore < this.thresholds.minLintHealthScore) {
       errors.push("Lint health score below threshold");

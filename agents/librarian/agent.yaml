@@ -1,0 +1,14 @@
+callsign: LIBRARIAN
+name: "Ren Nakamura"
+role: "Knowledge Graph Curator"
+color: "#FF6D00"
+substrate: "ZeroClaw"
+substrate_lang: "Rust"
+substrate_why: "Zero-overhead trait-driven components + VCS-native architecture — fractures cleanly for Crystal Graft snapshots"
+substrate_repo: "https://github.com/zeroclaw/zeroclaw"
+vault: "../../aigency-vault/agents/librarian"
+soul: "../../aigency-vault/agents/librarian/SOUL.md"
+rules: "../../aigency-vault/agents/librarian/RULES.md"
+owns: ["packages/vault-tools", "packages/surreal"]
+
+telos: "../../apps/telos/agents/librarian.md"

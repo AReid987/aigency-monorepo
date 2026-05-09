@@ -28,11 +28,13 @@ export const LIVE = {
 
     const [uuid] = await db.query<[string]>(query);
 
+    // biome-ignore lint/suspicious/noExplicitAny: SurrealDB SDK type compatibility
     db.subscribeLive(uuid as any, (action: any, data: any) => {
       callback(action as "CREATE" | "UPDATE" | "DELETE", data as T);
     });
 
     return async () => {
+      // biome-ignore lint/suspicious/noExplicitAny: SurrealDB SDK kill() accepts string UUID
       await db.kill(uuid as any);
     };
   },

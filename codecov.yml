@@ -5,6 +5,14 @@ codecov:
   require_ci_to_pass: true
   notify:
     wait_for_ci: true
+  # Test ingestion configuration
+  # https://docs.codecov.com/docs/test-analytics
+  test_analytics:
+    enabled: true
+    # Short-term (last 7 days) and long-term (last 30 days) flaky test detection
+    flaky_detection:
+      enabled: true
+      threshold: 0.05  # 5% failure rate threshold
 
 coverage:
   # Global precision
@@ -49,7 +57,7 @@ coverage:
         flags:
           - honcho
       mem-brain:
-        target: 15%
+        target: 20%
         threshold: 5%
         flags:
           - mem-brain
@@ -144,16 +152,25 @@ ignore:
   - "**/*.d.ts"
   - "apps/docs/**"
   - "apps/contracts/**"
+  - "apps/membrane/**"
+  - "apps/telos/**"
   - "**/llm-wiki/**"
   - "scripts/**"
   - ".github/**"
   - "packages/tsconfig/**"
+  - "packages/design-tokens/**"
 
 # Comment configuration
 comment:
-  layout: "header, diff, flags, components, files"
+  layout: "header, diff, flags, components, files, tests"
   behavior: default
   require_changes: false
   require_base: true
   require_head: true
   hide_project_coverage: false
+
+# Test ingestion configuration
+# Upload test results for flaky test detection
+# See: https://docs.codecov.com/docs/test-analytics
+# Individual package test results are uploaded via CI
+# using the codecov/test-results-action

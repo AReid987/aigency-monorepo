@@ -11,7 +11,7 @@
     "build": "tsup src/index.ts src/cli.ts --format esm --dts",
     "clean": "rimraf dist",
     "dev": "tsx watch src/dev-server.ts",
-    "lint": "eslint src",
+    "lint": "biome check src",
     "start": "node dist/dev-server.js",
     "typecheck": "tsc --noEmit"
   },

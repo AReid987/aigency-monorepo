@@ -9,6 +9,7 @@
     "build": "turbo run build",
     "clean": "turbo run clean && rimraf node_modules",
     "commit": "cz",
+    "commit:ai": "./scripts/automation/generate-commit-msg.sh",
     "coverage:check": "./scripts/automation/coverage-check.sh",
     "dev": "turbo run dev",
     "format": "biome format --write .",
@@ -23,11 +24,18 @@
     "review:committed": "./scripts/automation/coderabbit-review.sh committed",
     "review:staged": "./scripts/automation/coderabbit-review.sh staged",
     "router": "turbo run dev --filter=@aigency/router",
+    "slice": "./scripts/automation/agent-slice-commit.sh",
+    "slice:fast": "./scripts/automation/agent-slice-commit.sh --no-verify",
+    "slice:gt": "./scripts/automation/agent-slice-commit.sh --graphite",
+    "slice:gt:push": "./scripts/automation/agent-slice-commit.sh --graphite --push",
+    "slice:push": "./scripts/automation/agent-slice-commit.sh --push",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
     "typecheck": "turbo run typecheck",
+    "wiki:check": "./scripts/automation/wiki-check.sh",
     "wiki:ingest": "echo 'Run: tell the LLM to ingest a new source into packages/mem-brain/llm-wiki/raw/'",
-    "wiki:lint": "echo 'Run: tell the LLM to lint packages/mem-brain/llm-wiki/'"
+    "wiki:lint": "echo 'Run: tell the LLM to lint packages/mem-brain/llm-wiki/'",
+    "wiki:update": "./scripts/automation/wiki-check.sh --auto-fix"
   },
   "config": {
     "commitizen": {

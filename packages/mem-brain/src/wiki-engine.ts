@@ -4,9 +4,9 @@
 
 import { SurrealClient } from "@aigency/surreal";
 import type {
-  WikiPageRecord,
   WikiChunkRecord,
   WikiLinkRecord,
+  WikiPageRecord,
   WikiTimelineEntryRecord,
 } from "@aigency/surreal";
 
@@ -41,9 +41,9 @@ export interface IntentClassification {
 }
 
 export interface DedupConfig {
-  perPageCap: number;        // Max results per page (default 3 → 2)
-  jaccardThreshold: number;  // Text similarity cutoff (default 0.85)
-  typeDiversityMax: number;  // Max % of one type (default 0.60)
+  perPageCap: number; // Max results per page (default 3 → 2)
+  jaccardThreshold: number; // Text similarity cutoff (default 0.85)
+  typeDiversityMax: number; // Max % of one type (default 0.60)
   compiledTruthRequired: boolean; // Always include compiled_truth match
 }
 
@@ -130,8 +130,9 @@ export class WikiEngine {
       source: this.config.source,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      // biome-ignore lint/suspicious/noExplicitAny: existing code
     } as any);
-    return (record as unknown) as WikiPageRecord;
+    return record as unknown as WikiPageRecord;
   }
 
   async updatePage(
@@ -142,7 +143,9 @@ export class WikiEngine {
       "SELECT id FROM wiki_page WHERE slug = $slug AND source = $source",
       { slug, source: this.config.source }
     );
-    if (!existing) return null;
+    if (!existing) {
+      return null;
+    }
 
     await this.db.merge(existing.id, {
       ...data,
@@ -157,12 +160,21 @@ export class WikiEngine {
       "SELECT id FROM wiki_page WHERE slug = $slug AND source = $source",
       { slug, source: this.config.source }
     );
-    if (!existing) return false;
+    if (!existing) {
+      return false;
+    }
 
     // Cascade: delete chunks, links, timeline entries
-    await this.db.query("DELETE FROM wiki_chunk WHERE page_id = $page_id", { page_id: existing.id });
-    await this.db.query("DELETE FROM wiki_link WHERE from_page_id = $page_id OR to_page_id = $page_id", { page_id: existing.id });
-    await this.db.query("DELETE FROM wiki_timeline_entry WHERE page_id = $page_id", { page_id: existing.id });
+    await this.db.query("DELETE FROM wiki_chunk WHERE page_id = $page_id", {
+      page_id: existing.id,
+    });
+    await this.db.query(
+      "DELETE FROM wiki_link WHERE from_page_id = $page_id OR to_page_id = $page_id",
+      { page_id: existing.id }
+    );
+    await this.db.query("DELETE FROM wiki_timeline_entry WHERE page_id = $page_id", {
+      page_id: existing.id,
+    });
     await this.db.delete(existing.id);
     return true;
   }
@@ -202,7 +214,9 @@ export class WikiEngine {
 
   async updateConfidence(slug: string, delta: number): Promise<number | null> {
     const page = await this.getPage(slug);
-    if (!page) return null;
+    if (!page) {
+      return null;
+    }
 
     const newConfidence = Math.max(0.1, Math.min(1.0, page.confidence + delta));
     await this.db.merge(page.id, {
@@ -214,7 +228,9 @@ export class WikiEngine {
 
   async decayConfidence(slug: string): Promise<number | null> {
     const page = await this.getPage(slug);
-    if (!page) return null;
+    if (!page) {
+      return null;
+    }
 
     const monthsOld = Math.floor(
       (Date.now() - new Date(page.last_confirmed ?? page.updated_at).getTime()) /
@@ -251,7 +267,9 @@ export class WikiEngine {
     entry: Omit<WikiTimelineEntryRecord, "id" | "page_id">
   ): Promise<WikiTimelineEntryRecord | null> {
     const page = await this.getPage(slug);
-    if (!page) return null;
+    if (!page) {
+      return null;
+    }
 
     const [record] = await this.db.create("wiki_timeline_entry", {
       ...entry,
@@ -270,7 +288,9 @@ export class WikiEngine {
 
   async getTimeline(slug: string): Promise<WikiTimelineEntryRecord[]> {
     const page = await this.getPage(slug);
-    if (!page) return [];
+    if (!page) {
+      return [];
+    }
 
     const [rows] = await this.db.query<[WikiTimelineEntryRecord[]]>(
       "SELECT * FROM wiki_timeline_entry WHERE page_id = $page_id ORDER BY date DESC",
@@ -289,14 +309,18 @@ export class WikiEngine {
   ): Promise<WikiLinkRecord | null> {
     const fromPage = await this.getPage(fromSlug);
     const toPage = await this.getPage(toSlug);
-    if (!fromPage || !toPage) return null;
+    if (!fromPage || !toPage) {
+      return null;
+    }
 
     // Check for existing link to avoid duplicates
     const [existing] = await this.db.query<[[WikiLinkRecord]]>(
       "SELECT * FROM wiki_link WHERE from_page_id = $from AND to_page_id = $to AND link_type = $type",
       { from: fromPage.id, to: toPage.id, type: linkType }
     );
-    if (existing?.[0]) return existing[0];
+    if (existing?.[0]) {
+      return existing[0];
+    }
 
     const [record] = await this.db.create("wiki_link", {
       from_page_id: fromPage.id,
@@ -304,13 +328,18 @@ export class WikiEngine {
       link_type: linkType,
       context,
       created_at: new Date().toISOString(),
+      // biome-ignore lint/suspicious/noExplicitAny: existing code
     } as any);
     return record as unknown as WikiLinkRecord;
   }
 
-  async getLinks(slug: string): Promise<{ outgoing: WikiLinkRecord[]; incoming: WikiLinkRecord[] }> {
+  async getLinks(
+    slug: string
+  ): Promise<{ outgoing: WikiLinkRecord[]; incoming: WikiLinkRecord[] }> {
     const page = await this.getPage(slug);
-    if (!page) return { outgoing: [], incoming: [] };
+    if (!page) {
+      return { outgoing: [], incoming: [] };
+    }
 
     const [outgoing] = await this.db.query<[WikiLinkRecord[]]>(
       "SELECT * FROM wiki_link WHERE from_page_id = $page_id",
@@ -326,7 +355,9 @@ export class WikiEngine {
 
   async getLinkedPages(slug: string, _depth = 1): Promise<WikiPageRecord[]> {
     const page = await this.getPage(slug);
-    if (!page) return [];
+    if (!page) {
+      return [];
+    }
 
     // Use SurrealDB graph traversal
     const [rows] = await this.db.query<[WikiPageRecord[]]>(
@@ -343,7 +374,9 @@ export class WikiEngine {
   async deleteLink(fromSlug: string, toSlug: string, linkType: string): Promise<boolean> {
     const fromPage = await this.getPage(fromSlug);
     const toPage = await this.getPage(toSlug);
-    if (!fromPage || !toPage) return false;
+    if (!fromPage || !toPage) {
+      return false;
+    }
 
     await this.db.query(
       "DELETE FROM wiki_link WHERE from_page_id = $from AND to_page_id = $to AND link_type = $type",
@@ -359,16 +392,22 @@ export class WikiEngine {
     data: Omit<WikiChunkRecord, "id" | "page_id">
   ): Promise<WikiChunkRecord | null> {
     const page = await this.getPage(slug);
-    if (!page) return null;
+    if (!page) {
+      return null;
+    }
 
     const [record] = await this.db.create("wiki_chunk", {
       ...data,
       page_id: page.id,
+      // biome-ignore lint/suspicious/noExplicitAny: existing code
     } as any);
     return record as unknown as WikiChunkRecord;
   }
 
-  async searchSimilarChunks(embedding: number[], limit = 5): Promise<(WikiChunkRecord & { page: WikiPageRecord; similarity: number })[]> {
+  async searchSimilarChunks(
+    embedding: number[],
+    limit = 5
+  ): Promise<(WikiChunkRecord & { page: WikiPageRecord; similarity: number })[]> {
     const threshold = this.config.similarityThreshold ?? 0.7;
 
     const [rows] = await this.db.query<
@@ -387,7 +426,9 @@ export class WikiEngine {
 
   async deleteChunksForPage(slug: string): Promise<void> {
     const page = await this.getPage(slug);
-    if (!page) return;
+    if (!page) {
+      return;
+    }
     await this.db.query("DELETE FROM wiki_chunk WHERE page_id = $page_id", { page_id: page.id });
   }
 
@@ -443,8 +484,12 @@ export class WikiEngine {
     const fused = Array.from(scores.entries())
       .map(([pageId, ranks]) => {
         let rrfScore = 0;
-        if (ranks.vectorRank) rrfScore += 1 / (rrfK + ranks.vectorRank);
-        if (ranks.keywordRank) rrfScore += 1 / (rrfK + ranks.keywordRank);
+        if (ranks.vectorRank) {
+          rrfScore += 1 / (rrfK + ranks.vectorRank);
+        }
+        if (ranks.keywordRank) {
+          rrfScore += 1 / (rrfK + ranks.keywordRank);
+        }
         return { pageId, rrfScore, ranks };
       })
       .sort((a, b) => b.rrfScore - a.rrfScore)
@@ -453,13 +498,21 @@ export class WikiEngine {
     // Fetch full page records
     const results: HybridSearchResult[] = [];
     for (const { pageId, rrfScore, ranks } of fused) {
-      const [[page]] = await this.db.query<[[WikiPageRecord]]>("SELECT * FROM wiki_page WHERE id = $id", { id: pageId });
+      const [[page]] = await this.db.query<[[WikiPageRecord]]>(
+        "SELECT * FROM wiki_page WHERE id = $id",
+        { id: pageId }
+      );
       if (page) {
         results.push({
           page,
           score: rrfScore,
           rank: results.length + 1,
-          source: ranks.vectorRank && ranks.keywordRank ? "fused" : ranks.vectorRank ? "vector" : "keyword",
+          source:
+            ranks.vectorRank && ranks.keywordRank
+              ? "fused"
+              : ranks.vectorRank
+                ? "vector"
+                : "keyword",
         });
       }
     }
@@ -477,14 +530,17 @@ export class WikiEngine {
     const lower = queryText.toLowerCase();
 
     // Temporal patterns
-    const temporalPatterns = /\b(last|recent|latest|this week|this month|this year|since|ago|before|after|between)\b/;
-    const datePatterns = /\b\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4}|january|february|march|april|may|june|july|august|september|october|november|december\b/;
+    const temporalPatterns =
+      /\b(last|recent|latest|this week|this month|this year|since|ago|before|after|between)\b/;
+    const datePatterns =
+      /\b\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4}|january|february|march|april|may|june|july|august|september|october|november|december\b/;
 
     // Entity patterns
     const entityPatterns = /\b(who is|what is|where is|about|profile of|details on)\b/;
 
     // Event patterns
-    const eventPatterns = /\b(what happened|when did|how did|why did|outcome of|result of|decision on)\b/;
+    const eventPatterns =
+      /\b(what happened|when did|how did|why did|outcome of|result of|decision on)\b/;
 
     if (temporalPatterns.test(lower) || datePatterns.test(lower)) {
       return {
@@ -497,7 +553,7 @@ export class WikiEngine {
     if (eventPatterns.test(lower)) {
       return {
         intent: "event",
-        confidence: 0.80,
+        confidence: 0.8,
         detailLevel: "high",
       };
     }
@@ -505,14 +561,14 @@ export class WikiEngine {
     if (entityPatterns.test(lower)) {
       return {
         intent: "entity",
-        confidence: 0.90,
+        confidence: 0.9,
         detailLevel: "low",
       };
     }
 
     return {
       intent: "general",
-      confidence: 0.60,
+      confidence: 0.6,
       detailLevel: "medium",
     };
   }
@@ -531,7 +587,7 @@ export class WikiEngine {
     const cfg: DedupConfig = {
       perPageCap: 2,
       jaccardThreshold: 0.85,
-      typeDiversityMax: 0.60,
+      typeDiversityMax: 0.6,
       compiledTruthRequired: true,
       ...config,
     };
@@ -560,7 +616,9 @@ export class WikiEngine {
           d.page.id === result.page.id ||
           jaccard(d.page.compiled_truth, result.page.compiled_truth) > cfg.jaccardThreshold
       );
-      if (!isDuplicate) deduped.push(result);
+      if (!isDuplicate) {
+        deduped.push(result);
+      }
     }
 
     // Layer 3: Type diversity enforcement
@@ -583,7 +641,9 @@ export class WikiEngine {
 
     // Layer 4: Compiled truth guarantee
     if (cfg.compiledTruthRequired) {
-      const hasCompiledTruth = filtered.some((r) => r.page.compiled_truth && r.page.compiled_truth.length > 100);
+      const hasCompiledTruth = filtered.some(
+        (r) => r.page.compiled_truth && r.page.compiled_truth.length > 100
+      );
       if (!hasCompiledTruth && results.length > 0) {
         // Add highest-scoring result with substantial compiled_truth
         const best = results
@@ -672,7 +732,7 @@ export class WikiEngine {
     results = this.dedupResults(results, {
       perPageCap: intent.detailLevel === "low" ? 1 : 2,
       jaccardThreshold: 0.85,
-      typeDiversityMax: 0.60,
+      typeDiversityMax: 0.6,
       compiledTruthRequired: true,
     });
 
@@ -689,8 +749,10 @@ export class WikiEngine {
     const mentions: EntityMention[] = [];
 
     // Aigency agent callsigns (ALL_CAPS)
-    const agentPattern = /\b(ZENITH|CIPHER|VECTOR|ECHO|ATLAS|COMPASS|IRIS|HERALD|ORACLE|LIBRARIAN|NEXUS|THE_ARCHITECT)\b/g;
+    const agentPattern =
+      /\b(ZENITH|CIPHER|VECTOR|ECHO|ATLAS|COMPASS|IRIS|HERALD|ORACLE|LIBRARIAN|NEXUS|THE_ARCHITECT)\b/g;
     let match: RegExpExecArray | null;
+    // biome-ignore lint/suspicious/noAssignInExpressions: standard regex loop pattern
     while ((match = agentPattern.exec(text)) !== null) {
       mentions.push({
         name: match[1],
@@ -700,7 +762,9 @@ export class WikiEngine {
     }
 
     // Service names (capitalized, known list)
-    const servicePattern = /\b(Router|Membrane|ORACLE|Librarian|Contracts|TELOS|Honcho|SurrealDB|HarvestMoon)\b/g;
+    const servicePattern =
+      /\b(Router|Membrane|ORACLE|Librarian|Contracts|TELOS|Honcho|SurrealDB|HarvestMoon)\b/g;
+    // biome-ignore lint/suspicious/noAssignInExpressions: standard regex loop pattern
     while ((match = servicePattern.exec(text)) !== null) {
       mentions.push({
         name: match[1],
@@ -711,6 +775,7 @@ export class WikiEngine {
 
     // Package names (@aigency/ prefix)
     const packagePattern = /@aigency\/([a-z-]+)/g;
+    // biome-ignore lint/suspicious/noAssignInExpressions: standard regex loop pattern
     while ((match = packagePattern.exec(text)) !== null) {
       mentions.push({
         name: match[1],
@@ -723,7 +788,9 @@ export class WikiEngine {
     const seen = new Set<string>();
     return mentions.filter((m) => {
       const key = `${m.type}:${m.name}`;
-      if (seen.has(key)) return false;
+      if (seen.has(key)) {
+        return false;
+      }
       seen.add(key);
       return true;
     });
@@ -735,14 +802,38 @@ export class WikiEngine {
   inferLinkType(_fromType: string, _toType: string, context: string): WikiLinkRecord["link_type"] {
     const lower = context.toLowerCase();
 
-    if (lower.includes("depends on") || lower.includes("requires")) return "depends_on";
-    if (lower.includes("owns") || lower.includes("maintains") || lower.includes("responsible for")) return "owns";
-    if (lower.includes("reports to") || lower.includes("reports_to")) return "reports_to";
-    if (lower.includes("supersedes") || lower.includes("replaces") || lower.includes("deprecated")) return "supersedes";
-    if (lower.includes("contradicts") || lower.includes("conflicts with")) return "contradicts";
-    if (lower.includes("emits") || lower.includes("publishes") || lower.includes("broadcasts")) return "emits";
-    if (lower.includes("subscribes") || lower.includes("listens to")) return "subscribes_to";
-    if (lower.includes("uses") || lower.includes("utilizes")) return "uses";
+    if (lower.includes("depends on") || lower.includes("requires")) {
+      return "depends_on";
+    }
+    if (
+      lower.includes("owns") ||
+      lower.includes("maintains") ||
+      lower.includes("responsible for")
+    ) {
+      return "owns";
+    }
+    if (lower.includes("reports to") || lower.includes("reports_to")) {
+      return "reports_to";
+    }
+    if (
+      lower.includes("supersedes") ||
+      lower.includes("replaces") ||
+      lower.includes("deprecated")
+    ) {
+      return "supersedes";
+    }
+    if (lower.includes("contradicts") || lower.includes("conflicts with")) {
+      return "contradicts";
+    }
+    if (lower.includes("emits") || lower.includes("publishes") || lower.includes("broadcasts")) {
+      return "emits";
+    }
+    if (lower.includes("subscribes") || lower.includes("listens to")) {
+      return "subscribes_to";
+    }
+    if (lower.includes("uses") || lower.includes("utilizes")) {
+      return "uses";
+    }
 
     return "references";
   }
@@ -752,7 +843,9 @@ export class WikiEngine {
    */
   async autoLinkPage(slug: string): Promise<WikiLinkRecord[]> {
     const page = await this.getPage(slug);
-    if (!page) return [];
+    if (!page) {
+      return [];
+    }
 
     const text = `${page.title} ${page.compiled_truth}`;
     const mentions = this.extractEntities(text);
@@ -772,8 +865,15 @@ export class WikiEngine {
 
       if (target && target.id !== page.id) {
         const linkType = this.inferLinkType(page.type, target.type, mention.context);
-        const link = await this.createLink(slug, target.slug, linkType, mention.context.slice(0, 200));
-        if (link) created.push(link);
+        const link = await this.createLink(
+          slug,
+          target.slug,
+          linkType,
+          mention.context.slice(0, 200)
+        );
+        if (link) {
+          created.push(link);
+        }
       }
     }
 
@@ -817,7 +917,10 @@ export class WikiEngine {
           type: "low_confidence",
           slug: page.slug,
           confidence: page.confidence,
-          reason: page.confidence < 0.3 ? "Speculative, needs confirmation" : "Synthesized, single source",
+          reason:
+            page.confidence < 0.3
+              ? "Speculative, needs confirmation"
+              : "Synthesized, single source",
         });
       }
     }
@@ -862,9 +965,15 @@ export class WikiEngine {
     );
 
     for (const link of allLinks ?? []) {
-      const [[toPage]] = await this.db.query<[[WikiPageRecord]]>("SELECT * FROM wiki_page WHERE id = $id", { id: link.to_page_id });
+      const [[toPage]] = await this.db.query<[[WikiPageRecord]]>(
+        "SELECT * FROM wiki_page WHERE id = $id",
+        { id: link.to_page_id }
+      );
       if (!toPage) {
-        const [[fromPage]] = await this.db.query<[[WikiPageRecord]]>("SELECT * FROM wiki_page WHERE id = $id", { id: link.from_page_id });
+        const [[fromPage]] = await this.db.query<[[WikiPageRecord]]>(
+          "SELECT * FROM wiki_page WHERE id = $id",
+          { id: link.from_page_id }
+        );
         report.brokenLinks.push({
           type: "broken_link",
           fromSlug: fromPage?.slug ?? link.from_page_id,
@@ -929,6 +1038,7 @@ export class WikiEngine {
       pages_updated: [...created, ...updated],
       summary: `Ingested ${created.length} new, ${updated.length} updated pages from ${sourceType}`,
       created_at: new Date().toISOString(),
+      // biome-ignore lint/suspicious/noExplicitAny: existing code
     } as any);
 
     return { created, updated, links: allLinks };
@@ -1012,7 +1122,7 @@ export class WikiEngine {
     const pages = await this.listPages();
     const staleCount = pages.filter((p) => {
       const lastConfirmed = new Date(p.last_confirmed ?? p.updated_at).getTime();
-      return (now - lastConfirmed) > 30 * 24 * 60 * 60 * 1000;
+      return now - lastConfirmed > 30 * 24 * 60 * 60 * 1000;
     }).length;
 
     const byType: Record<string, number> = {};

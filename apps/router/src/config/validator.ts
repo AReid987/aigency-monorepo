@@ -148,7 +148,7 @@ function formatErrorMessage(error: z.ZodIssue): string {
       return baseError.message || "Invalid type";
     }
 
-    case "invalid_value": {
+    case "invalid_value" as z.ZodIssueCode: {
       // Handle enum and literal errors in Zod v4
       return baseError.message || "Invalid value";
     }
@@ -173,16 +173,18 @@ function formatErrorMessage(error: z.ZodIssue): string {
       return baseError.message || "Value too big";
     }
 
-    case "invalid_format": {
+    case "invalid_format" as z.ZodIssueCode: {
       // Zod v4 uses 'invalid_format' instead of 'invalid_string'
-      if ("validation" in error) {
-        if (error.validation === "url") {
+      // biome-ignore lint/suspicious/noExplicitAny: Zod v4 compatibility
+      const fmtError = error as any;
+      if ("validation" in fmtError) {
+        if (fmtError.validation === "url") {
           return "Must be a valid URL";
         }
-        if (error.validation === "email") {
+        if (fmtError.validation === "email") {
           return "Must be a valid email address";
         }
-        return `Invalid format: ${error.validation}`;
+        return `Invalid format: ${fmtError.validation}`;
       }
       return baseError.message || "Invalid format";
     }

@@ -68,7 +68,17 @@ export interface WikiPageRecord {
   id: string; // format: "wiki_page:<slug>"
   slug: string; // unique canonical slug
   source: string; // source repo within brain (e.g., "aigency-wiki")
-  type: "person" | "agent" | "service" | "package" | "system" | "concept" | "document" | "meeting" | "project" | "idea";
+  type:
+    | "person"
+    | "agent"
+    | "service"
+    | "package"
+    | "system"
+    | "concept"
+    | "document"
+    | "meeting"
+    | "project"
+    | "idea";
   title: string;
   compiled_truth: string; // current best understanding (above the line)
   timeline: string; // append-only evidence trail (below the line)
@@ -98,7 +108,18 @@ export interface WikiLinkRecord {
   id: string; // format: "wiki_link:<ulid>"
   from_page_id: string;
   to_page_id: string;
-  link_type: "uses" | "depends_on" | "owns" | "reports_to" | "supersedes" | "contradicts" | "emits" | "subscribes_to" | "references" | "informed_by" | "involves";
+  link_type:
+    | "uses"
+    | "depends_on"
+    | "owns"
+    | "reports_to"
+    | "supersedes"
+    | "contradicts"
+    | "emits"
+    | "subscribes_to"
+    | "references"
+    | "informed_by"
+    | "involves";
   context?: string;
   created_at: string;
 }

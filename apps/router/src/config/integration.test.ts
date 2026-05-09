@@ -143,7 +143,7 @@ providers:
     // No API key for groq
 
     try {
-      const _config = await initializeConfig({ environment: testConfigPath });
+      await initializeConfig({ environment: testConfigPath });
       const providers = getEnabledProviders();
 
       // Should only have mistral (groq filtered out due to no API key)

@@ -1,140 +1,47 @@
 # @aigency/mem-brain
 
-> **Aigency Mem_Brain — Unified Memory Layer**
->
-> Combines SurrealDB (knowledge graph + temporal state) and Honcho (peer identity + cross-session reasoning) with an LLM-Wiki for persistent, compounding organizational knowledge.
+> Unified memory layer combining SurrealDB (knowledge graph) and Honcho (peer identity).
 
----
+## Overview
 
-## Architecture
+MemBrain is the central memory system for Aigency agents. It provides:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    MEM-BRAIN UNIFIED LAYER                   │
-├─────────────────────────┬───────────────────────────────────┤
-│  Runtime Memory (DB)    │  Persistent Knowledge (Files)     │
-│  ─────────────────────  │  ─────────────────────────────    │
-│  SurrealDB              │  LLM-Wiki (Karpathy pattern v2)   │
-│  ├── directives         │  ├── raw/ (immutable sources)     │
-│  ├── patterns           │  ├── wiki/ (LLM-maintained)       │
-│  └── timeline           │  └── AGENTS.md (schema)           │
-│                         │                                   │
-│  Honcho                 │  GitNexus (knowledge graph)       │
-│  ├── peer sessions      │  └── .gitnexus/                   │
-│  ├── cross-session chat │                                   │
-│  └── ORACLE dreams      │                                   │
-└─────────────────────────┴───────────────────────────────────┘
-```
+- **LLM-Wiki v2** — Hybrid search (BM25 + vector + RRF), auto-linking, lint, crystallization
+- **ORACLE Runtime** — Agents, directives, patterns, timeline
+- **OB1 Governance** — Agent memory with provenance, lifecycle, and review status
+- **Job Queue** — Minions-style Postgres-native queue with DAG support
+- **MCP Server** — OAuth 2.1 scoped remote access (15 methods)
+- **Crystal Graft** — Cryptographically-signed knowledge graph snapshots
 
----
-
-## Runtime API
-
-The `MemBrain` class provides the runtime interface for agent memory operations:
+## Usage
 
 ```typescript
 import { MemBrain } from "@aigency/mem-brain";
 
-const mb = new MemBrain(config);
-await mb.connect();
+const brain = new MemBrain({
+  surreal: { url: "ws://localhost:8000/rpc", namespace: "aigency", database: "mem_brain", username: "root", password: "root" },
+  honcho: { apiKey: "...", workspaceId: "aigency-dev" },
+});
 
-// Directives
-const directives = await mb.getActiveDirectives();
-await mb.createDirective({ title: "...", owner: "ATLAS", priority: 1 });
+await brain.connect();
 
-// Pattern search (vector similarity)
-const patterns = await mb.searchPatterns(embedding, 5);
+// Wiki operations
+const page = await brain.wiki.createPage({ slug: "atlas", type: "agent", title: "ATLAS", compiled_truth: "...", ... });
+const results = await brain.wiki.hybridSearch("routing logic", embedding);
 
-// Timeline events
-await mb.logEvent("milestone", "RUFLO", "Phase 1 complete", { gate: 4 });
-
-// Honcho sessions
-const session = await mb.startAgentSession("CIPHER");
-await mb.addAgentMessage("CIPHER", session.id, "Analysis complete");
-
-// ORACLE dream
-const insight = await mb.oracleDream("What patterns exist in recent failures?");
+// Agent memory (OB1 governance)
+await brain.createAgentMemory("vector", { content: "New insight...", agent: "atlas", provenance: "observed" });
 ```
 
-See [`src/mem-brain.ts`](./src/mem-brain.ts) for full API.
-
----
-
-## LLM-Wiki
-
-The [`llm-wiki/`](./llm-wiki/) directory implements the [Karpathy LLM-Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) extended with v2 production enhancements (confidence scoring, knowledge graphs, memory lifecycle, event-driven automation).
-
-### Quick Start
+## Commands
 
 ```bash
-# Ingest a new source
-cp my-source.md packages/mem-brain/llm-wiki/raw/
-# Then tell the LLM: "ingest raw/my-source.md"
-
-# Query the wiki
-# Ask the LLM: "what does the wiki say about memory tiers?"
-
-# Run lint
-# Ask the LLM: "lint the wiki for contradictions and orphans"
+pnpm test          # run tests
+pnpm test:coverage # run tests with coverage
+pnpm typecheck     # TypeScript check
+pnpm build         # build with tsup
 ```
 
-### Structure
+## Schema
 
-| Path | Purpose |
-|------|---------|
-| [`llm-wiki/raw/`](./llm-wiki/raw/) | Immutable source documents |
-| [`llm-wiki/wiki/`](./llm-wiki/wiki/) | LLM-maintained knowledge pages |
-| [`llm-wiki/AGENTS.md`](./llm-wiki/AGENTS.md) | Agent schema for wiki maintenance |
-| [`llm-wiki/README.md`](./llm-wiki/README.md) | Human documentation |
-
-### Current Knowledge
-
-- **AI Coder Constitution** — Five pillars, Decide-Act-Verify loop, Quality Gates
-- **Organization** — Human exec chart + AI agent network (8 squads, 25+ agents)
-- **Architecture** — 3-tier memory (Volatile/Long-Term/On-Demand), integration specs
-- **Squads** — Meta Code, Agile, Landing Page, NEXUS Trading
-
----
-
-## GitNexus Integration
-
-The monorepo is indexed by GitNexus (`.gitnexus/` at repo root). The knowledge graph provides:
-- Semantic code search across 144 files
-- 1,321 nodes, 1,567 edges, 19 clusters
-- Cross-reference detection between code and wiki
-
-Sync: `pnpm turbo run gitnexus:sync`
-
----
-
-## Development
-
-```bash
-# Build
-pnpm --filter @aigency/mem-brain build
-
-# Dev (watch)
-pnpm --filter @aigency/mem-brain dev
-
-# Type check
-pnpm --filter @aigency/mem-brain typecheck
-```
-
----
-
-## Package Structure
-
-```
-packages/mem-brain/
-├── src/
-│   ├── index.ts          # Public exports
-│   └── mem-brain.ts      # MemBrain class
-├── llm-wiki/             # Persistent knowledge base
-│   ├── raw/              # Immutable sources
-│   ├── wiki/             # LLM-maintained pages
-│   ├── AGENTS.md         # Agent maintenance schema
-│   └── README.md         # Human documentation
-├── package.json
-├── tsconfig.json
-└── README.md             # This file
-```
+See [`src/schema.surql`](./src/schema.surql) for the full SurrealDB schema including ORACLE tables, wiki tables, graph edges, agent memory sidecar, and job queue.

@@ -43,49 +43,49 @@ export const AGENT_REGISTRY: Record<AgentCallsign, AgentIdentity> = {
     name: "Dominique Osei",
     role: "Strategy & Intelligence",
     color: "#7B2FFF",
-    substrate: "gptme",
+    substrate: "NullClaw", // Zig — 678KB binary, sub-2ms boot, pure signal / zero overhead
   },
   CIPHER: {
     callsign: "CIPHER",
     name: "Roman Voss",
     role: "Engineering & DevOps",
     color: "#39FF14",
-    substrate: "gptme",
+    substrate: "GitClaw", // git-native runtime — agent IS a git repo; SOUL.md/RULES.md/skills/ in VCS
   },
   ECHO: {
     callsign: "ECHO",
     name: "Selene Navarro",
     role: "Marketing & Content",
     color: "#FF2D78",
-    substrate: "TBD",
+    substrate: "DenchClaw", // TypeScript — CRM automation + outreach agents + knowledge work
   },
   ATLAS: {
     callsign: "ATLAS",
     name: "Jordan Mercer",
     role: "Revenue & Sales Ops",
     color: "#FFB300",
-    substrate: "TBD",
+    substrate: "Paperclip", // Node.js — orchestrates AI teams into a company w/ budgets + governance
   },
   COMPASS: {
     callsign: "COMPASS",
     name: "Imara Adeyemi",
     role: "Finance & Operations",
     color: "#00BFA5",
-    substrate: "TBD",
+    substrate: "IronClaw", // Rust — WASM sandbox, AES-256-GCM, zero-trust, no telemetry
   },
   IRIS: {
     callsign: "IRIS",
     name: "Vivienne Calloway",
     role: "Design & Brand Systems",
     color: "#C77DFF",
-    substrate: "TBD",
+    substrate: "OpenFang", // Rust Agent OS — autonomous scheduling 24/7, brand monitoring
   },
   HERALD: {
     callsign: "HERALD",
     name: "Dax Okafor",
     role: "Communications",
     color: "#FFFFFF",
-    substrate: "Motia",
+    substrate: "Hermes", // Python — only claw-family substrate with built-in learning loop (Nous Research)
   },
   ORACLE: {
     callsign: "ORACLE",

@@ -2,8 +2,8 @@
 // ORACLE is the memory agent that dreams, compacts, and maintains long-term state.
 // Ports: Letta architecture (https://github.com/letta-ai/letta) to Aigency stack.
 
-import { SurrealClient } from "@aigency/surreal";
 import type { AgentCallsign } from "@aigency/agent-core";
+import { SurrealClient } from "@aigency/surreal";
 import type { AgentMemoryRecord, PatternRecord, TimelineRecord } from "@aigency/surreal";
 
 export interface LettaConfig {
@@ -55,7 +55,7 @@ export class OracleSubstrate {
     const context = await this.gatherContext(request.context);
 
     // Call Letta API
-    const response = await this.callLetta("/v1/agents/" + this.lettaConfig.agentId + "/messages", {
+    const response = await this.callLetta(`/v1/agents/${this.lettaConfig.agentId}/messages`, {
       messages: [
         {
           role: "user",
@@ -143,9 +143,7 @@ export class OracleSubstrate {
 
   // ─── Context Gathering ──────────────────────────────────────────────────────
 
-  private async gatherContext(
-    overrides?: DreamRequest["context"]
-  ): Promise<{
+  private async gatherContext(overrides?: DreamRequest["context"]): Promise<{
     directives: string[];
     patterns: string[];
     peers: string[];
@@ -172,9 +170,7 @@ export class OracleSubstrate {
     if (overrides?.sessionHistory && overrides.sessionHistory.length > 0) {
       const lastMessage = overrides.sessionHistory[overrides.sessionHistory.length - 1].content;
       const embedding = await this.embedText(lastMessage);
-      const [rows] = await this.db.query<
-        [AgentMemoryRecord[]]
-      >(
+      const [rows] = await this.db.query<[AgentMemoryRecord[]]>(
         `SELECT *, vector::similarity::cosine(embedding, $vec) AS similarity
          FROM agent_memory
          WHERE lifecycle = 'active' AND can_use_as_evidence = true
@@ -202,7 +198,7 @@ export class OracleSubstrate {
       "Content-Type": "application/json",
     };
     if (this.lettaConfig.apiKey) {
-      headers["Authorization"] = `Bearer ${this.lettaConfig.apiKey}`;
+      headers.Authorization = `Bearer ${this.lettaConfig.apiKey}`;
     }
 
     const response = await fetch(`${this.lettaConfig.baseUrl}${path}`, {
@@ -220,7 +216,10 @@ export class OracleSubstrate {
 
   // ─── Prompt Engineering ─────────────────────────────────────────────────────
 
-  private buildDreamPrompt(query: string, context: ReturnType<typeof this.gatherContext> extends Promise<infer T> ? T : never): string {
+  private buildDreamPrompt(
+    query: string,
+    context: ReturnType<typeof this.gatherContext> extends Promise<infer T> ? T : never
+  ): string {
     return `You are ORACLE, the persistent memory agent for Aigency. Review the current state and answer the query.
 
 ## Active Directives
@@ -239,11 +238,17 @@ Respond with a structured insight and suggested actions.`;
   }
 
   private extractInsight(response: unknown): string {
-    if (typeof response === "string") return response;
+    if (typeof response === "string") {
+      return response;
+    }
     if (response && typeof response === "object") {
       const r = response as Record<string, unknown>;
-      if (typeof r.content === "string") return r.content;
-      if (typeof r.insight === "string") return r.insight;
+      if (typeof r.content === "string") {
+        return r.content;
+      }
+      if (typeof r.insight === "string") {
+        return r.insight;
+      }
       if (Array.isArray(r.messages) && r.messages.length > 0) {
         const last = r.messages[r.messages.length - 1] as Record<string, unknown>;
         return String(last.content ?? last.message ?? "");
@@ -257,6 +262,7 @@ Respond with a structured insight and suggested actions.`;
     const actions: DreamResponse["suggestedActions"] = [];
     const actionPattern = /(?:SUGGESTED ACTION|ACTION):?\s*(\w+)\s*→\s*([^\n]+)/gi;
     let match: RegExpExecArray | null;
+    // biome-ignore lint/suspicious/noAssignInExpressions: standard regex loop pattern
     while ((match = actionPattern.exec(insight)) !== null) {
       const type = match[1].toLowerCase();
       const target = match[2].trim();

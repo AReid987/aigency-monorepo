@@ -4,4 +4,5 @@
 export { compile } from "./compile.js";
 export { lint, type LintResult } from "./lint.js";
 export { flush } from "./flush.js";
+export { loadConfig } from "./config.js";
 export type { VaultConfig } from "./config.js";

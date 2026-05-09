@@ -26,7 +26,6 @@ jest.mock("./lib/logging/logger.js", () => ({
 describe("QuotaTracker", () => {
   let tracker: QuotaTracker;
   const mockDataDir = "./.test-simplellmrouter";
-  const _mockDataFile = `${mockDataDir}/quota-usage.json`;
 
   beforeEach(() => {
     jest.clearAllMocks();

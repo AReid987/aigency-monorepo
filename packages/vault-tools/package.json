@@ -27,6 +27,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
     "glob": "^11.0.0",
     "gray-matter": "^4.0.3"
   },

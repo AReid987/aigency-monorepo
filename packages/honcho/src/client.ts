@@ -27,6 +27,7 @@ export class HonchoClient {
   async getPeer(callsign: AgentCallsign) {
     const peers = await this.client.apps.users.list(this.workspaceId, {
       filter: JSON.stringify({ callsign }),
+      // biome-ignore lint/suspicious/noExplicitAny: Honcho SDK filter type mismatch
     } as any);
 
     if (peers.items.length > 0) {
@@ -35,6 +36,7 @@ export class HonchoClient {
 
     return this.client.apps.users.create(this.workspaceId, {
       metadata: { callsign },
+      // biome-ignore lint/suspicious/noExplicitAny: Honcho SDK create params type mismatch
     } as any);
   }
 

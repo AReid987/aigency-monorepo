@@ -2,10 +2,10 @@
 // compile, lint, flush, compact as JobQueue handlers.
 // Ports: Aigency Core Mem_Brain v1 automation to the monorepo stack.
 
-import type { WikiEngine } from "./wiki-engine.js";
-import type { MemBrain } from "./mem-brain.js";
-import type { JobQueue } from "./job-queue.js";
 import type { AgentCallsign } from "@aigency/agent-core";
+import type { JobQueue } from "./job-queue.js";
+import type { MemBrain } from "./mem-brain.js";
+import type { WikiEngine } from "./wiki-engine.js";
 
 // ─── Compile Job — raw/ → wiki/ ───────────────────────────────────────────────
 
@@ -62,14 +62,21 @@ function parseRawContent(
   const sections = content.split(/^#{2,3}\s+/m);
 
   for (const section of sections) {
-    if (!section.trim()) continue;
+    if (!section.trim()) {
+      continue;
+    }
     const lines = section.split("\n");
     const title = lines[0].trim();
     const body = lines.slice(1).join("\n").trim();
 
-    if (!title || !body) continue;
+    if (!title || !body) {
+      continue;
+    }
 
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
     const type = inferPageType(title, body, sourceType);
 
     pages.push({
@@ -92,15 +99,31 @@ function inferPageType(
 ): Parameters<WikiEngine["ingest"]>[2][0]["type"] {
   const lower = title.toLowerCase();
 
-  if (sourceType === "meeting-notes") return "meeting";
-  if (sourceType === "research") return "concept";
+  if (sourceType === "meeting-notes") {
+    return "meeting";
+  }
+  if (sourceType === "research") {
+    return "concept";
+  }
 
-  if (lower.includes("agent") || lower.includes("bot")) return "agent";
-  if (lower.includes("service") || lower.includes("api")) return "service";
-  if (lower.includes("project") || lower.includes("initiative")) return "project";
-  if (lower.includes("person") || lower.includes("user") || lower.includes("team")) return "person";
-  if (lower.includes("system") || lower.includes("architecture")) return "system";
-  if (lower.includes("decision") || lower.includes("adr")) return "document";
+  if (lower.includes("agent") || lower.includes("bot")) {
+    return "agent";
+  }
+  if (lower.includes("service") || lower.includes("api")) {
+    return "service";
+  }
+  if (lower.includes("project") || lower.includes("initiative")) {
+    return "project";
+  }
+  if (lower.includes("person") || lower.includes("user") || lower.includes("team")) {
+    return "person";
+  }
+  if (lower.includes("system") || lower.includes("architecture")) {
+    return "system";
+  }
+  if (lower.includes("decision") || lower.includes("adr")) {
+    return "document";
+  }
 
   return "concept";
 }
@@ -250,12 +273,14 @@ function extractFromSessionLog(log: string): {
   // Extract decisions (patterns like "Decided:", "Decision:", "We agreed:")
   const decisionPatterns = /(?:decided|decision|we agreed|concluded|resolved):\s*([^\n]+)/gi;
   let match: RegExpExecArray | null;
+  // biome-ignore lint/suspicious/noAssignInExpressions: standard regex loop pattern
   while ((match = decisionPatterns.exec(log)) !== null) {
     decisions.push(match[1].trim());
   }
 
   // Extract lessons (patterns like "Lesson:", "Learned:", "Takeaway:")
   const lessonPatterns = /(?:lesson|learned|takeaway|insight|realization):\s*([^\n]+)/gi;
+  // biome-ignore lint/suspicious/noAssignInExpressions: standard regex loop pattern
   while ((match = lessonPatterns.exec(log)) !== null) {
     lessons.push(match[1].trim());
   }
@@ -263,6 +288,7 @@ function extractFromSessionLog(log: string): {
   // Extract people mentions (capitalized names, 2-3 words)
   const peoplePattern = /\b([A-Z][a-z]+\s[A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\b/g;
   const seen = new Set<string>();
+  // biome-ignore lint/suspicious/noAssignInExpressions: standard regex loop pattern
   while ((match = peoplePattern.exec(log)) !== null) {
     const name = match[1].trim();
     if (!seen.has(name) && name.length > 3) {
@@ -305,18 +331,13 @@ export function registerCompactJob(queue: JobQueue, memBrain: MemBrain): void {
     }
 
     // Log completion
-    await memBrain.logEvent(
-      "session_end",
-      data.agent,
-      `Session ${data.sessionId} compacted`,
-      {
-        sessionId: data.sessionId,
-        decisions: data.decisions.length,
-        blockers: data.blockers.length,
-        lessons: data.lessons.length,
-        nextSteps: data.nextSteps.length,
-      }
-    );
+    await memBrain.logEvent("session_end", data.agent, `Session ${data.sessionId} compacted`, {
+      sessionId: data.sessionId,
+      decisions: data.decisions.length,
+      blockers: data.blockers.length,
+      lessons: data.lessons.length,
+      nextSteps: data.nextSteps.length,
+    });
 
     return {
       crystallized: !!result,

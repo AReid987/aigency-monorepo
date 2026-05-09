@@ -11,6 +11,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Collect test results in JUnit format for Codecov test analytics
+  VITEST_JUNIT_OUTPUT_DIR: ./coverage
+  VITEST_JUNIT_OUTPUT_FILE: junit.xml
+
 jobs:
   test-and-upload:
     name: Test with Coverage
@@ -34,21 +39,76 @@ jobs:
       - name: Run tests with coverage
         run: pnpm test:coverage
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+      # Upload per-package coverage with flags for component tracking
+      - name: Upload agent-core coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: packages/agent-core/coverage/lcov.info
+          flags: agent-core
+          name: agent-core
+          fail_ci_if_error: false
+
+      - name: Upload honcho coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: packages/honcho/coverage/lcov.info
+          flags: honcho
+          name: honcho
+          fail_ci_if_error: false
+
+      - name: Upload mem-brain coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: packages/mem-brain/coverage/lcov.info
+          flags: mem-brain
+          name: mem-brain
+          fail_ci_if_error: false
+
+      - name: Upload surreal coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: packages/surreal/coverage/lcov.info
+          flags: surreal
+          name: surreal
+          fail_ci_if_error: false
+
+      - name: Upload vault-tools coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: packages/vault-tools/coverage/lcov.info
+          flags: vault-tools
+          name: vault-tools
+          fail_ci_if_error: false
+
+      - name: Upload router coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: apps/router/coverage/lcov.info
+          flags: router
+          name: router
+          fail_ci_if_error: false
+
+      # Upload test results for flaky test detection
+      # https://docs.codecov.com/docs/test-analytics
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: |
-            apps/router/coverage/lcov.info
-            packages/agent-core/coverage/lcov.info
-            packages/surreal/coverage/lcov.info
-            packages/vault-tools/coverage/lcov.info
-            packages/honcho/coverage/lcov.info
-            packages/mem-brain/coverage/lcov.info
-          flags: unit
-          name: aigency-coverage
-          fail_ci_if_error: true
-          verbose: true
+            packages/agent-core/coverage/junit.xml
+            packages/honcho/coverage/junit.xml
+            packages/mem-brain/coverage/junit.xml
+            packages/surreal/coverage/junit.xml
+            packages/vault-tools/coverage/junit.xml
+            apps/router/coverage/junit.xml
+          fail_ci_if_error: false
 
       - name: Check coverage thresholds
         run: ./scripts/automation/coverage-check.sh --ci

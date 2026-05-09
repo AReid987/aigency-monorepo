@@ -83,7 +83,9 @@ export class JobQueue {
 
   async getStatus(jobId: string): Promise<JobRecord | null> {
     const db = SurrealClient.db;
-    const [[job]] = await db.query<[[JobRecord]]>("SELECT * FROM job WHERE id = $id", { id: jobId });
+    const [[job]] = await db.query<[[JobRecord]]>("SELECT * FROM job WHERE id = $id", {
+      id: jobId,
+    });
     return job ?? null;
   }
 
@@ -102,7 +104,9 @@ export class JobQueue {
   // ─── Worker Loop ─────────────────────────────────────────────────────────────
 
   start(): void {
-    if (this.running) return;
+    if (this.running) {
+      return;
+    }
     this.running = true;
     this.poll();
   }
@@ -116,11 +120,15 @@ export class JobQueue {
   }
 
   private async poll(): Promise<void> {
-    if (!this.running) return;
+    if (!this.running) {
+      return;
+    }
 
     while (this.activeJobs < (this.config.maxConcurrent ?? 3)) {
       const job = await this.claimNextJob();
-      if (!job) break;
+      if (!job) {
+        break;
+      }
       this.processJob(job);
     }
 
@@ -140,7 +148,9 @@ export class JobQueue {
        LIMIT 1`
     );
 
-    if (!job) return null;
+    if (!job) {
+      return null;
+    }
 
     // Mark as running
     await db.merge(job.id, {
@@ -191,7 +201,9 @@ export class JobQueue {
   private async failJob(jobId: string, errorMessage: string): Promise<void> {
     const db = SurrealClient.db;
     const job = await this.getStatus(jobId);
-    if (!job) return;
+    if (!job) {
+      return;
+    }
 
     const shouldRetry = job.attempt_count < job.max_attempts;
     const delay = this.config.retryDelays?.[job.attempt_count - 1] ?? 60000;
@@ -253,7 +265,10 @@ export class JobQueue {
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
       const job = await this.getStatus(jobId);
-      if (job && (job.status === "complete" || job.status === "failed" || job.status === "cancelled")) {
+      if (
+        job &&
+        (job.status === "complete" || job.status === "failed" || job.status === "cancelled")
+      ) {
         return job;
       }
       await new Promise((r) => setTimeout(r, 500));

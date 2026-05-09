@@ -1,0 +1,13 @@
+callsign: ORACLE
+name: "Sable Quinn"
+role: "Persistent Memory Agent"
+color: "#1A237E"
+substrate: "Letta"
+substrate_lang: "Python"
+substrate_why: "Purpose-built stateful cross-session memory — no equivalent in claw ecosystem; Letta's entire architecture is designed for this"
+substrate_repo: "https://github.com/letta-ai/letta"
+vault: "../../aigency-vault/agents/oracle"
+soul: "../../aigency-vault/agents/oracle/SOUL.md"
+rules: "../../aigency-vault/agents/oracle/RULES.md"
+
+telos: "../../apps/telos/agents/oracle.md"

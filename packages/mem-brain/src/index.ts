@@ -32,11 +32,21 @@ export type { MCPRequest, MCPResponse, MCPScope } from "./mcp-server.js";
 
 // ORACLE / Letta substrate
 export { OracleSubstrate } from "./oracle-substrate.js";
-export type { LettaConfig, DreamRequest, DreamResponse, CompactRequest } from "./oracle-substrate.js";
+export type {
+  LettaConfig,
+  DreamRequest,
+  DreamResponse,
+  CompactRequest,
+} from "./oracle-substrate.js";
 
 // Automation jobs
 export { registerAllAutomationJobs } from "./automation-jobs.js";
-export type { CompileJobPayload, LintJobPayload, FlushJobPayload, CompactJobPayload } from "./automation-jobs.js";
+export type {
+  CompileJobPayload,
+  LintJobPayload,
+  FlushJobPayload,
+  CompactJobPayload,
+} from "./automation-jobs.js";
 
 // Crystal Graft
 export { CrystalGraft, DEFAULT_THRESHOLDS } from "./crystal-graft.js";

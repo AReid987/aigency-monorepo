@@ -34,22 +34,6 @@ import { applyEnvOverrides } from "./env-override.js";
 import { loadConfigFile } from "./loader.js";
 import { validateConfigOrThrow } from "./validator.js";
 
-/**
- * Test helper function to validate provider structure
- */
-function validateProvider(provider: unknown, _providerId?: string): void {
-  expect(provider).toBeDefined();
-  expect(provider).toBeInstanceOf(Object);
-
-  const p = provider as Record<string, unknown>;
-
-  expect(p.id).toBeDefined();
-  expect(p.name).toBeDefined();
-  expect(p.baseUrl).toBeDefined();
-  expect(p.models).toBeInstanceOf(Array);
-  expect((p.models as unknown[]).length).toBeGreaterThan(0);
-}
-
 describe("Config Module", () => {
   beforeEach(() => {
     // Reset config state before each test

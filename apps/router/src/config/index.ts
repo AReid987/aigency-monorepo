@@ -113,12 +113,6 @@ export async function initializeConfig(options?: {
 
     isInitialized = true;
 
-    // Step 5: Log configuration summary
-    const _serverHost = internalConfig.server.host;
-    const _serverPort = internalConfig.server.port;
-    const _providerCount = providerIds.length;
-    const _providerList = providerIds.length > 0 ? ` (${providerIds.join(", ")})` : "";
-
     return internalConfig;
   } catch (error) {
     // If validation failed, format and display errors

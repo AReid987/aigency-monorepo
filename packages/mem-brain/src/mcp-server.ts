@@ -2,8 +2,8 @@
 // Enables any AI client (Claude Desktop, ChatGPT, Cursor) to access MemBrain.
 // Remote HTTP with OAuth 2.1 scoped access. No local stdio.
 
-import type { MemBrain } from "./mem-brain.js";
 import type { WikiPageRecord } from "@aigency/surreal";
+import type { MemBrain } from "./mem-brain.js";
 
 export interface MCPRequest {
   id: string;
@@ -40,7 +40,9 @@ export class MCPServer {
 
   private verifyToken(token: string, operation: string): MCPScope {
     const scope = this.scopes.get(token);
-    if (!scope) throw new Error("Invalid token");
+    if (!scope) {
+      throw new Error("Invalid token");
+    }
 
     const opType = this.classifyOperation(operation);
     if (!scope.operations.includes(opType)) {
@@ -51,11 +53,24 @@ export class MCPServer {
   }
 
   private classifyOperation(method: string): "read" | "write" | "admin" {
-    const readOps = ["wiki/search", "wiki/get", "wiki/stats", "directive/list", "pattern/search", "memory/search", "timeline/get", "peer/get"];
+    const readOps = [
+      "wiki/search",
+      "wiki/get",
+      "wiki/stats",
+      "directive/list",
+      "pattern/search",
+      "memory/search",
+      "timeline/get",
+      "peer/get",
+    ];
     const adminOps = ["admin/revoke", "admin/scope", "job/cancel"];
 
-    if (readOps.includes(method)) return "read";
-    if (adminOps.includes(method)) return "admin";
+    if (readOps.includes(method)) {
+      return "read";
+    }
+    if (adminOps.includes(method)) {
+      return "admin";
+    }
     return "write";
   }
 
@@ -131,7 +146,10 @@ export class MCPServer {
       }
 
       case "directive/create": {
-        const data = params.data as Omit<import("@aigency/surreal").DirectiveRecord, "id" | "created_at">;
+        const data = params.data as Omit<
+          import("@aigency/surreal").DirectiveRecord,
+          "id" | "created_at"
+        >;
         return this.memBrain.createDirective(data);
       }
 
@@ -147,11 +165,18 @@ export class MCPServer {
         const agent = String(params.agent ?? "");
         const embedding = params.embedding as number[];
         const limit = Number(params.limit ?? 5);
-        return this.memBrain.searchAgentMemory(agent as import("@aigency/agent-core").AgentCallsign, embedding, limit);
+        return this.memBrain.searchAgentMemory(
+          agent as import("@aigency/agent-core").AgentCallsign,
+          embedding,
+          limit
+        );
       }
 
       case "memory/create": {
-        const data = params.data as Omit<import("@aigency/surreal").AgentMemoryRecord, "id" | "created_at" | "updated_at">;
+        const data = params.data as Omit<
+          import("@aigency/surreal").AgentMemoryRecord,
+          "id" | "created_at" | "updated_at"
+        >;
         return this.memBrain.createAgentMemory(data);
       }
 
@@ -159,7 +184,10 @@ export class MCPServer {
       case "timeline/get": {
         const agent = String(params.agent ?? "");
         const limit = Number(params.limit ?? 50);
-        return this.memBrain.getTimelineForAgent(agent as import("@aigency/agent-core").AgentCallsign, limit);
+        return this.memBrain.getTimelineForAgent(
+          agent as import("@aigency/agent-core").AgentCallsign,
+          limit
+        );
       }
 
       // Peer operations
@@ -169,7 +197,10 @@ export class MCPServer {
       }
 
       case "peer/upsert": {
-        const data = params.data as Omit<import("@aigency/surreal").PeerRecord, "id" | "created_at" | "updated_at" | "interaction_count">;
+        const data = params.data as Omit<
+          import("@aigency/surreal").PeerRecord,
+          "id" | "created_at" | "updated_at" | "interaction_count"
+        >;
         return this.memBrain.upsertPeer(data);
       }
 

@@ -2,6 +2,20 @@
 # Replaces Husky. Runs fast, parallel-safe, no node_modules pollution.
 # Docs: https://evilmartians.github.io/lefthook/
 
+# prepare-commit-msg: Auto-generate commit messages with Ollama
+prepare-commit-msg:
+  commands:
+    ai-commit-msg:
+      interactive: true
+      run: |
+        # Only run if no message provided (message file contains commented template)
+        if grep -q '^#' {1} 2>/dev/null && ! grep -v '^#' {1} | grep -q '[a-zA-Z]'; then
+          if command -v ollama &>/dev/null && [ -n "$(git diff --cached --name-only)" ]; then
+            echo "🤖 Generating commit message with Ollama..."
+            ./scripts/automation/generate-commit-msg.sh > {1} 2>/dev/null || true
+          fi
+        fi
+
 commit-msg:
   commands:
     commitlint:

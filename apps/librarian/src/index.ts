@@ -32,7 +32,7 @@ async function main() {
       created_at: new Date().toISOString(),
     });
   }
-  const _compileResult = await compile(config);
+  await compile(config);
 }
 
 main().catch(console.error);

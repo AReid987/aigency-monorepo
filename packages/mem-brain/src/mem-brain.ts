@@ -7,12 +7,12 @@ import type { AgentCallsign } from "@aigency/agent-core";
 import { HonchoClient } from "@aigency/honcho";
 import { LIVE, SurrealClient } from "@aigency/surreal";
 import type {
-  DirectiveRecord,
-  PatternRecord,
-  TimelineRecord,
-  PeerRecord,
   AgentMemoryRecord,
   AgentMemoryRelationRecord,
+  DirectiveRecord,
+  PatternRecord,
+  PeerRecord,
+  TimelineRecord,
   WikiPageRecord,
 } from "@aigency/surreal";
 import { WikiEngine, type WikiEngineConfig } from "./wiki-engine.js";
@@ -74,7 +74,7 @@ export class MemBrain {
       created_at: new Date().toISOString(),
     } as Record<string, unknown>);
     await this.logEvent("directive_created", data.owner, `Directive created: ${data.title}`);
-    return (record as unknown) as DirectiveRecord;
+    return record as unknown as DirectiveRecord;
   }
 
   async completeDirective(id: string, agent: AgentCallsign): Promise<void> {
@@ -130,7 +130,7 @@ export class MemBrain {
       first_seen: new Date().toISOString(),
       last_seen: new Date().toISOString(),
     } as Record<string, unknown>);
-    return (record as unknown) as PatternRecord;
+    return record as unknown as PatternRecord;
   }
 
   async incrementPatternOccurrence(id: string): Promise<void> {
@@ -166,6 +166,7 @@ export class MemBrain {
         last_interaction: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
+      // biome-ignore lint/style/noNonNullAssertion: existing code, safe assumption
       return (await this.getPeer(data.handle))!;
     }
 
@@ -176,7 +177,7 @@ export class MemBrain {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     } as Record<string, unknown>);
-    return (record as unknown) as PeerRecord;
+    return record as unknown as PeerRecord;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════════
@@ -192,8 +193,12 @@ export class MemBrain {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     } as Record<string, unknown>);
-    await this.logEvent("memory_created", data.agent, `Memory created: ${data.content.slice(0, 100)}`);
-    return (record as unknown) as AgentMemoryRecord;
+    await this.logEvent(
+      "memory_created",
+      data.agent,
+      `Memory created: ${data.content.slice(0, 100)}`
+    );
+    return record as unknown as AgentMemoryRecord;
   }
 
   async searchAgentMemory(
@@ -202,9 +207,7 @@ export class MemBrain {
     limit = 5
   ): Promise<(AgentMemoryRecord & { similarity: number })[]> {
     const db = SurrealClient.db;
-    const [rows] = await db.query<
-      [(AgentMemoryRecord & { similarity: number })[]]
-    >(
+    const [rows] = await db.query<[(AgentMemoryRecord & { similarity: number })[]]>(
       `SELECT *, vector::similarity::cosine(embedding, $vec) AS similarity
        FROM agent_memory
        WHERE agent = $agent
@@ -245,7 +248,7 @@ export class MemBrain {
       context,
       created_at: new Date().toISOString(),
     } as Record<string, unknown>);
-    return (record as unknown) as AgentMemoryRelationRecord;
+    return record as unknown as AgentMemoryRelationRecord;
   }
 
   async reviewMemory(
@@ -281,10 +284,7 @@ export class MemBrain {
     } as Record<string, unknown>);
   }
 
-  async getTimelineForAgent(
-    agent: AgentCallsign,
-    limit = 50
-  ): Promise<TimelineRecord[]> {
+  async getTimelineForAgent(agent: AgentCallsign, limit = 50): Promise<TimelineRecord[]> {
     const db = SurrealClient.db;
     const [rows] = await db.query<[TimelineRecord[]]>(
       "SELECT * FROM timeline WHERE agent = $agent ORDER BY created_at DESC LIMIT $limit",

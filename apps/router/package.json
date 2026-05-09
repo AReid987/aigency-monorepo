@@ -9,7 +9,7 @@
     "build": "tsup src/server.ts src/cli.ts --format esm --dts",
     "clean": "rimraf dist",
     "dev": "tsx watch src/server.ts",
-    "lint": "eslint src",
+    "lint": "biome check src",
     "start": "node dist/server.js",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@aigency/agent-core": "workspace:*",
+    "dotenv": "^16.4.0",
     "js-yaml": "^4.1.0",
     "pino": "^9.5.0",
     "pino-pretty": "^13.0.0",
