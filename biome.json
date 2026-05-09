@@ -76,6 +76,9 @@
           },
           "correctness": {
             "noUnusedVariables": "off"
+          },
+          "performance": {
+            "noDelete": "off"
           }
         }
       }

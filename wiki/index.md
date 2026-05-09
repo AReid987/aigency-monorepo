@@ -1,6 +1,6 @@
 # Aigency Monorepo Wiki
 
-> Auto-generated knowledge base. Last updated: 2026-05-09T06:09:19.378Z
+> Auto-generated knowledge base. Last updated: 2026-05-09T06:22:21.873Z
 
 ## Packages
 
