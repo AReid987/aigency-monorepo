@@ -12,7 +12,7 @@ prepare-commit-msg:
         if grep -q '^#' {1} 2>/dev/null && ! grep -v '^#' {1} | grep -q '[a-zA-Z]'; then
           if [ -n "$(git diff --cached --name-only)" ]; then
             echo "🤖 Generating commit message..."
-            ./scripts/automation/generate-commit-msg.sh > {1} 2>/dev/null || true
+            node packages/commit-agent/dist/cli.mjs --mode auto --prepare-commit-msg-file {1} 2>/dev/null || true
           fi
         fi
 
