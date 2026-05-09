@@ -77,18 +77,10 @@ info "Detected platform: $PLATFORM"
 # Create directories
 mkdir -p "$MODEL_DIR"
 
-# Determine backend
-BACKEND=""
-case "$PLATFORM" in
-  macos-arm64)
-    BACKEND="mlx"
-    ;;
-  *)
-    BACKEND="llama-cpp"
-    ;;
-esac
-
-info "Selected backend: $BACKEND"
+# Use llama-cpp-python universally — works on all platforms with GGUF models
+# Apple Silicon gets Metal GPU acceleration automatically when available
+BACKEND="llama-cpp"
+info "Selected backend: llama-cpp-python (universal GGUF support)"
 
 # Check Python availability
 PYTHON_CMD=""
@@ -132,17 +124,12 @@ install_backend() {
   # Upgrade pip first
   "$pip" install --quiet --upgrade pip setuptools wheel
 
-  case "$BACKEND" in
-    mlx)
-      info "Installing mlx and mlx-lm (Apple Silicon optimized)..."
-      "$pip" install --quiet mlx mlx-lm huggingface-hub
-      ;;
-    llama-cpp)
-      info "Installing llama-cpp-python (CPU backend)..."
-      # Use CMAKE_ARGS to enable optimizations
-      CMAKE_ARGS="-DLLAMA_AVX2=ON" "$pip" install --quiet llama-cpp-python huggingface-hub
-      ;;
-  esac
+  info "Installing llama-cpp-python (with Metal/AVX2 optimizations)..."
+  # CMAKE_ARGS enable platform-specific acceleration:
+  # - macOS arm64: Metal GPU automatically enabled
+  # - macOS Intel / Linux: AVX2 vector instructions
+  # - Windows: MSVC optimizations
+  CMAKE_ARGS="-DLLAMA_METAL=ON -DLLAMA_AVX2=ON" "$pip" install --quiet llama-cpp-python
 
   ok "Backend packages installed"
 }
@@ -196,24 +183,12 @@ verify() {
 
   info "Verifying installation..."
 
-  case "$BACKEND" in
-    mlx)
-      if "$python" -c "import mlx_lm" 2>/dev/null; then
-        ok "mlx-lm import successful"
-      else
-        err "mlx-lm import failed"
-        exit 1
-      fi
-      ;;
-    llama-cpp)
-      if "$python" -c "from llama_cpp import Llama" 2>/dev/null; then
-        ok "llama-cpp-python import successful"
-      else
-        err "llama-cpp-python import failed"
-        exit 1
-      fi
-      ;;
-  esac
+  if "$python" -c "from llama_cpp import Llama" 2>/dev/null; then
+    ok "llama-cpp-python import successful"
+  else
+    err "llama-cpp-python import failed"
+    exit 1
+  fi
 
   if [ ! -f "${MODEL_DIR}/${MODEL_NAME}" ]; then
     err "Model file missing"

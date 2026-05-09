@@ -54,7 +54,7 @@ fi
 # 2. Check local Python backend
 if [ "$BACKEND" = "heuristic" ] && [ -f "$BACKEND_JSON" ] && [ -f "$MODEL_PATH" ]; then
   BACKEND=$(cat "$BACKEND_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin).get('backend','heuristic'))" 2>/dev/null || echo "heuristic")
-  if [ "$BACKEND" != "mlx" ] && [ "$BACKEND" != "llama-cpp" ]; then
+  if [ "$BACKEND" != "llama-cpp" ]; then
     BACKEND="heuristic"
   fi
 fi
@@ -253,17 +253,7 @@ Commit message:"
 
   local response=""
 
-  case "$BACKEND" in
-    mlx)
-      response=$("$python" -m mlx_lm.generate \
-        --model "${MODEL_PATH}" \
-        --prompt "$prompt" \
-        --max-tokens 50 \
-        --temp 0.2 \
-        --top-p 0.9 2>/dev/null || echo "")
-      ;;
-    llama-cpp)
-      response=$("$python" << PYEOF
+  response=$("$python" 2>/dev/null << PYEOF
 from llama_cpp import Llama
 import sys
 
@@ -279,11 +269,12 @@ output = llm(
     top_p=0.9,
     stop=["\n"]
 )
-print(output["choices"][0]["text"], end="")
+text = output["choices"][0]["text"]
+# Strip leading/trailing whitespace and quotes
+text = text.strip().strip('"').strip("'")
+print(text, end="")
 PYEOF
-      )
-      ;;
-  esac
+  )
 
   # Extract the first line matching conventional commit format
   local extracted
@@ -313,7 +304,7 @@ case "$BACKEND" in
   ollama)
     ollama_commit
     ;;
-  mlx|llama-cpp)
+  llama-cpp)
     python_backend_commit
     ;;
   heuristic)
