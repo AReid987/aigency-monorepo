@@ -24,8 +24,8 @@ describe("Config Integration", () => {
     // Reset config state
     resetConfig();
     // Clean up environment variables
-    process.env.PROVIDER_MISTRAL_API_KEY = undefined;
-    process.env.PROVIDER_GROQ_API_KEY = undefined;
+    delete process.env.PROVIDER_MISTRAL_API_KEY;
+    delete process.env.PROVIDER_GROQ_API_KEY;
   });
 
   it("should load config and apply env overrides", async () => {
@@ -201,14 +201,14 @@ providers:
 describe("Real Config File Loading", () => {
   afterEach(() => {
     resetConfig();
-    process.env.PROVIDER_MISTRAL_API_KEY = undefined;
-    process.env.PROVIDER_GROQ_API_KEY = undefined;
-    process.env.PROVIDER_GEMINI_API_KEY = undefined;
-    process.env.PROVIDER_CEREBRAS_API_KEY = undefined;
-    process.env.PROVIDER_OPENROUTER_API_KEY = undefined;
-    process.env.PROVIDER_VOIDAI_API_KEY = undefined;
-    process.env.PROVIDER_ZAI_API_KEY = undefined;
-    process.env.PROVIDER_KIMI_API_KEY = undefined;
+    delete process.env.PROVIDER_MISTRAL_API_KEY;
+    delete process.env.PROVIDER_GROQ_API_KEY;
+    delete process.env.PROVIDER_GEMINI_API_KEY;
+    delete process.env.PROVIDER_CEREBRAS_API_KEY;
+    delete process.env.PROVIDER_OPENROUTER_API_KEY;
+    delete process.env.PROVIDER_VOIDAI_API_KEY;
+    delete process.env.PROVIDER_ZAI_API_KEY;
+    delete process.env.PROVIDER_KIMI_API_KEY;
   });
 
   it("should load real config/providers.yaml and make providers available", async () => {
@@ -429,10 +429,10 @@ describe("Real Config File Loading", () => {
 describe("Environment Override Validation", () => {
   afterEach(() => {
     resetConfig();
-    process.env.PROVIDER_MISTRAL_API_KEY = undefined;
-    process.env.PROVIDER_GROQ_API_KEY = undefined;
-    process.env.PROVIDER_GEMINI_API_KEY = undefined;
-    process.env.PROVIDER_GROQ_ENABLED = undefined;
+    delete process.env.PROVIDER_MISTRAL_API_KEY;
+    delete process.env.PROVIDER_GROQ_API_KEY;
+    delete process.env.PROVIDER_GEMINI_API_KEY;
+    delete process.env.PROVIDER_GROQ_ENABLED;
   });
 
   it("should override provider enabled status via ENV", async () => {
@@ -625,7 +625,7 @@ providers:
 describe("Config Validation Error Handling", () => {
   afterEach(() => {
     resetConfig();
-    process.env.PROVIDER_MISTRAL_API_KEY = undefined;
+    delete process.env.PROVIDER_MISTRAL_API_KEY;
   });
 
   it("should reject invalid config with clear error", async () => {
