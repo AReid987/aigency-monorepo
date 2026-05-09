@@ -47,6 +47,18 @@ export interface CommitIntent {
   footer?: string;
 }
 
+export interface CommitOptions {
+  type?: string;
+  scope?: string;
+  subject?: string;
+  body?: string;
+  breaking?: boolean;
+  message?: string;
+  yes?: boolean;
+  json?: boolean;
+  nonInteractive?: boolean;
+}
+
 export interface ValidatedMessage {
   valid: boolean;
   message: string;
