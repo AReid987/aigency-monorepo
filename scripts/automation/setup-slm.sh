@@ -159,27 +159,14 @@ download_model() {
   info "Downloading ${MODEL_NAME} (~${MODEL_SIZE_MB}MB)..."
   info "Source: Hugging Face (Qwen2.5-0.5B-Instruct-GGUF)"
 
-  local hf_hub="${VENV_DIR}/bin/huggingface-cli"
-  if [ ! -f "$hf_hub" ]; then
-    hf_hub="${VENV_DIR}/Scripts/huggingface-cli.exe"
-  fi
-
-  if [ -f "$hf_hub" ]; then
-    # Use huggingface-cli for resume-capable download
-    "$hf_hub" download "Qwen/Qwen2.5-0.5B-Instruct-GGUF" \
-      "$MODEL_NAME" \
-      --local-dir "$MODEL_DIR" \
-      --local-dir-use-symlinks False
+  # huggingface-cli is deprecated; use curl/wget directly
+  if command -v curl &>/dev/null; then
+    curl -fsSL --progress-bar "$MODEL_URL" -o "$model_path"
+  elif command -v wget &>/dev/null; then
+    wget -q --show-progress "$MODEL_URL" -O "$model_path"
   else
-    # Fallback to curl/wget
-    if command -v curl &>/dev/null; then
-      curl -fsSL --progress-bar "$MODEL_URL" -o "$model_path"
-    elif command -v wget &>/dev/null; then
-      wget -q --show-progress "$MODEL_URL" -O "$model_path"
-    else
-      err "curl or wget required for download"
-      exit 1
-    fi
+    err "curl or wget required for download"
+    exit 1
   fi
 
   ok "Model downloaded to ${model_path}"
