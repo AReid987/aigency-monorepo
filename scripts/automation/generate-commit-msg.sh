@@ -1,7 +1,6 @@
 #!/bin/bash
 # Generate conventional commit message from staged diff using a local SLM
-# shellcheck disable=SC2059,SC2001
-# Supports: Ollama → Python backend (mlx-lm / llama-cpp) → heuristic fallback
+# Supports: Ollama → MLX (macOS) → llama-cpp-python → llamafile → heuristic fallback
 # Auto-installs Python backend on first run if Ollama is unavailable
 # Usage: ./scripts/automation/generate-commit-msg.sh [--model MODEL] [--dry-run]
 # Output: writes commit message to stdout (for use by git or cz-git)
@@ -13,14 +12,12 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 cd "$REPO_ROOT"
 
 SLM_DIR="${SCRIPT_DIR}/.slm"
-MODEL_PATH="${SLM_DIR}/models/qwen2.5-0.5b-instruct-q4_k_m.gguf"
+GGUF_MODEL="${SLM_DIR}/models/Qwen3.5-0.8B-Q4_K_M.gguf"
 BACKEND_JSON="${SLM_DIR}/backend.json"
 VENV_DIR="${SLM_DIR}/venv"
+LLAMAFILE_BIN="${SLM_DIR}/llamafile/llamafile"
 
 MODEL="${OLLAMA_MODEL:-qwen2.5:0.5b}"
-
-# Known scopes for this monorepo
-VALID_SCOPES="mem-brain router surreal honcho agent-core vault-tools oracle membrane librarian telos contracts ci docs test packages apps scripts automation design-tokens tsconfig monorepo"
 DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
@@ -40,6 +37,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Known scopes for this monorepo
+VALID_SCOPES="mem-brain router surreal honcho agent-core vault-tools oracle membrane librarian telos contracts ci docs test packages apps scripts automation design-tokens tsconfig monorepo"
+
 # ── Backend Detection ────────────────────────────────────────────────────────
 
 BACKEND="heuristic"
@@ -51,47 +51,38 @@ if command -v ollama &>/dev/null; then
   fi
 fi
 
-# 2. Check local Python backend
-if [ "$BACKEND" = "heuristic" ] && [ -f "$BACKEND_JSON" ] && [ -f "$MODEL_PATH" ]; then
-  BACKEND=$(cat "$BACKEND_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin).get('backend','heuristic'))" 2>/dev/null || echo "heuristic")
-  if [ "$BACKEND" != "llama-cpp" ]; then
-    BACKEND="heuristic"
-  fi
+# 2. Check local Python backend (mlx or llama-cpp-python)
+if [ "$BACKEND" = "heuristic" ] && [ -f "$BACKEND_JSON" ]; then
+  DETECTED=$(cat "$BACKEND_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin).get('backend','heuristic'))" 2>/dev/null || echo "heuristic")
+  case "$DETECTED" in
+    mlx|llamacpp)
+      BACKEND="$DETECTED"
+      ;;
+  esac
 fi
 
-# 3. Auto-install Python backend if neither Ollama nor local backend available
+# 3. Check llamafile
+if [ "$BACKEND" = "heuristic" ] && [ -f "$LLAMAFILE_BIN" ] && [ -f "$GGUF_MODEL" ]; then
+  BACKEND="llamafile"
+fi
+
+# 4. Auto-install Python backend if nothing available
 if [ "$BACKEND" = "heuristic" ]; then
-  echo "🔧 No SLM backend found. Auto-installing Python backend..." >&2
+  echo "🔧 No SLM backend found. Auto-installing..." >&2
   if "${SCRIPT_DIR}/setup-slm.sh" 2>/dev/null; then
     if [ -f "$BACKEND_JSON" ]; then
-      BACKEND=$(cat "$BACKEND_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin).get('backend','heuristic'))" 2>/dev/null || echo "heuristic")
+      DETECTED=$(cat "$BACKEND_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin).get('backend','heuristic'))" 2>/dev/null || echo "heuristic")
+      case "$DETECTED" in
+        mlx|llamacpp)
+          BACKEND="$DETECTED"
+          ;;
+      esac
     fi
   else
     echo "   Auto-install failed. Using heuristic fallback." >&2
     BACKEND="heuristic"
   fi
 fi
-
-# ── Scope Validation ─────────────────────────────────────────────────────────
-
-validate_scope() {
-  local msg="$1"
-  local scope
-  scope=$(printf '%s' "$msg" | sed -n 's/^[^(]*(\([a-z0-9_-]*\)): .*/\1/p')
-
-  if [ -z "$scope" ]; then
-    printf '%s\n' "$msg"
-    return
-  fi
-
-  if echo " $VALID_SCOPES " | grep -q " $scope "; then
-    printf '%s\n' "$msg"
-    return
-  fi
-
-  # Normalize unknown scope to empty (no scope)
-  printf '%s\n' "$msg" | sed "s/(\${scope}): /: /"
-}
 
 # ── Diff Extraction ──────────────────────────────────────────────────────────
 
@@ -104,19 +95,12 @@ if [ -z "$DIFF" ]; then
   exit 0
 fi
 
-DETAILED_DIFF=$(git diff --cached 2>/dev/null || git diff 2>/dev/null || true)
-MAX_DIFF_CHARS=6000
-if [ "${#DETAILED_DIFF}" -gt "$MAX_DIFF_CHARS" ]; then
-  DETAILED_DIFF="${DETAILED_DIFF:0:$MAX_DIFF_CHARS}"
-fi
-
 # ── Heuristic Fallback ───────────────────────────────────────────────────────
 
 heuristic_commit() {
   local files="$1"
   local type="chore"
   local scope=""
-  local subject=""
 
   if echo "$files" | grep -qE "test\.(ts|tsx|js|jsx)"; then
     type="test"
@@ -168,6 +152,7 @@ heuristic_commit() {
   local basename
   basename=$(basename "$first_file" 2>/dev/null || echo "files")
 
+  local subject
   if [ "$file_count" -eq 1 ]; then
     subject="update $basename"
   elif [ "$file_count" -le 3 ]; then
@@ -183,13 +168,35 @@ heuristic_commit() {
   fi
 }
 
-# ── Ollama Backend ───────────────────────────────────────────────────────────
+# ── Scope Validation ─────────────────────────────────────────────────────────
 
-ollama_commit() {
+validate_scope() {
+  local msg="$1"
+  local scope
+  scope=$(printf '%s' "$msg" | sed -n 's/^[^(]*(\([a-z0-9_-]*\)): .*/\1/p')
+
+  if [ -z "$scope" ]; then
+    printf '%s\n' "$msg"
+    return
+  fi
+
+  if echo " $VALID_SCOPES " | grep -q " $scope "; then
+    printf '%s\n' "$msg"
+    return
+  fi
+
+  # Normalize unknown scope to empty (no scope)
+  printf '%s\n' "$msg" | sed "s/(\${scope}): /: /"
+}
+
+# ── Prompt Builder ───────────────────────────────────────────────────────────
+
+build_prompt() {
   local file_list
-  file_list=$(echo "$DIFF" | head -30)
+  file_list=$(echo "$DIFF" | head -25)
 
-  local prompt="Generate a git commit message in this exact format:
+  cat << EOF
+Generate a git commit message in this exact format:
 type(scope): brief description
 
 Rules:
@@ -201,12 +208,15 @@ Rules:
 Changed files:
 ${file_list}
 
-Commit message:"
+Commit message:
+EOF
+}
 
-  local response
-  response=$(printf '%s' "$prompt" | ollama run "$MODEL" --nowordwrap 2>/dev/null || echo "")
+# ── Response Cleaning ────────────────────────────────────────────────────────
 
-  # Extract the first line matching conventional commit format
+clean_response() {
+  local response="$1"
+  # Extract first conventional commit line
   local extracted
   extracted=$(printf '%s' "$response" | grep -m1 -E "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|wiki|telos|agent)(\([a-z0-9_-]+\))?: .{3,100}$" 2>/dev/null || echo "")
 
@@ -214,78 +224,174 @@ Commit message:"
     # Strip trailing period if present
     extracted=$(printf '%s' "$extracted" | sed 's/\.$//')
     validate_scope "$extracted"
+  else
+    echo ""
+  fi
+}
+
+# ── Ollama Backend ───────────────────────────────────────────────────────────
+
+ollama_commit() {
+  local prompt
+  prompt=$(build_prompt)
+
+  local response
+  response=$(printf '%s' "$prompt" | ollama run "$MODEL" --nowordwrap 2>/dev/null || echo "")
+
+  local result
+  result=$(clean_response "$response")
+
+  if [ -n "$result" ]; then
+    printf '%s\n' "$result"
   else
     echo "⚠️  Ollama returned invalid format, using heuristic fallback" >&2
     heuristic_commit "$DIFF"
   fi
 }
 
-# ── Python Backend (mlx-lm / llama-cpp) ─────────────────────────────────────
+# ── MLX Backend (macOS arm64) ───────────────────────────────────────────────
 
-python_backend_commit() {
+mlx_commit() {
   local python="${VENV_DIR}/bin/python"
-  if [ ! -f "$python" ]; then
-    python="${VENV_DIR}/Scripts/python.exe"
-  fi
-
   if [ ! -f "$python" ]; then
     echo "⚠️  Python venv not found, using heuristic fallback" >&2
     heuristic_commit "$DIFF"
     return
   fi
 
-  local file_list
-  file_list=$(echo "$DIFF" | head -25)
+  local mlx_model
+  mlx_model=$(cat "$BACKEND_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin).get('model',''))" 2>/dev/null || echo "")
 
-  local prompt="Generate a git commit message in this exact format:
-type(scope): brief description
+  if [ -z "$mlx_model" ]; then
+    echo "⚠️  MLX model not configured, using heuristic fallback" >&2
+    heuristic_commit "$DIFF"
+    return
+  fi
 
-Rules:
-- type must be one of: feat, fix, docs, style, refactor, perf, test, build, ci, chore, wiki, agent
-- scope is the package name like: mem-brain, router, surreal, honcho, agent-core, vault-tools, ci
-- description is short, imperative, lowercase, no period
-- ONLY output the commit message, nothing else
+  local result
+  result=$("$python" 2>/dev/null << PYEOF
+from mlx_lm import load, generate
+from mlx_lm.sample_utils import make_sampler
+import re
 
-Changed files:
-${file_list}
+model, tokenizer = load("${mlx_model}")
 
-Commit message:"
+prompt = """You are a commit message generator.
 
-  local response=""
+Example 1:
+Files: src/router.ts, src/config.ts
+Message: feat(router): add config validation
 
-  response=$("$python" 2>/dev/null << PYEOF
-from llama_cpp import Llama
-import sys
+Example 2:
+Files: README.md
+Message: docs: update installation instructions
 
-llm = Llama(
-    model_path="${MODEL_PATH}",
-    n_ctx=2048,
-    verbose=False
-)
-output = llm(
-    """${prompt}""",
-    max_tokens=50,
-    temperature=0.2,
-    top_p=0.9,
-    stop=["\n"]
-)
-text = output["choices"][0]["text"]
-# Strip leading/trailing whitespace and quotes
-text = text.strip().strip('"').strip("'")
-print(text, end="")
+Now generate:
+$(build_prompt)
+Message:"""
+
+sampler = make_sampler(temp=0.1)
+response = generate(model, tokenizer, prompt=prompt, max_tokens=15, verbose=False, sampler=sampler)
+
+# Strip <think>...</think> tags (reasoning models)
+response = re.sub(r'<think>.*?</think>', '', response, flags=re.DOTALL)
+# Clean up
+response = response.strip().strip('"').strip("'")
+print(response)
 PYEOF
   )
 
-  # Extract the first line matching conventional commit format
-  local extracted
-  extracted=$(printf '%s' "$response" | grep -m1 -E "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|wiki|telos|agent)(\([a-z0-9_-]+\))?: .{3,100}$" 2>/dev/null || echo "")
+  local cleaned
+  cleaned=$(clean_response "$result")
 
-  if [ -n "$extracted" ]; then
-    # Strip trailing period if present
-    extracted=$(printf '%s' "$extracted" | sed 's/\.$//')
-    validate_scope "$extracted"
+  if [ -n "$cleaned" ]; then
+    printf '%s\n' "$cleaned"
   else
-    echo "⚠️  Python backend returned invalid format, using heuristic fallback" >&2
+    echo "⚠️  MLX returned invalid format, using heuristic fallback" >&2
+    heuristic_commit "$DIFF"
+  fi
+}
+
+# ── llama-cpp-python Backend ────────────────────────────────────────────────
+
+llamacpp_commit() {
+  local python="${VENV_DIR}/bin/python"
+  if [ ! -f "$python" ]; then
+    echo "⚠️  Python venv not found, using heuristic fallback" >&2
+    heuristic_commit "$DIFF"
+    return
+  fi
+
+  if [ ! -f "$GGUF_MODEL" ]; then
+    echo "⚠️  GGUF model not found, using heuristic fallback" >&2
+    heuristic_commit "$DIFF"
+    return
+  fi
+
+  local result
+  result=$("$python" 2>/dev/null << PYEOF
+from llama_cpp import Llama
+
+llm = Llama(
+    model_path="${GGUF_MODEL}",
+    n_ctx=2048,
+    verbose=False
+)
+
+output = llm.create_chat_completion(
+    messages=[
+        {"role": "system", "content": "You generate git commit messages. Only output the commit message in format: type(scope): description. No explanations."},
+        {"role": "user", "content": """$(build_prompt)"""}
+    ],
+    max_tokens=30,
+    temperature=0.2,
+    stop=["\n"]
+)
+text = output["choices"][0]["message"]["content"]
+text = text.strip().strip('"').strip("'")
+print(text)
+PYEOF
+  )
+
+  local cleaned
+  cleaned=$(clean_response "$result")
+
+  if [ -n "$cleaned" ]; then
+    printf '%s\n' "$cleaned"
+  else
+    echo "⚠️  llama-cpp returned invalid format, using heuristic fallback" >&2
+    heuristic_commit "$DIFF"
+  fi
+}
+
+# ── llamafile Backend ───────────────────────────────────────────────────────
+
+llamafile_commit() {
+  if [ ! -f "$LLAMAFILE_BIN" ] || [ ! -f "$GGUF_MODEL" ]; then
+    echo "⚠️  llamafile not configured, using heuristic fallback" >&2
+    heuristic_commit "$DIFF"
+    return
+  fi
+
+  local prompt
+  prompt=$(build_prompt)
+
+  # llamafile uses llama-cli syntax
+  local result
+  result=$("$LLAMAFILE_BIN" \
+    -m "$GGUF_MODEL" \
+    -p "$prompt" \
+    -n 30 \
+    --temp 0.2 \
+    --no-display-prompt 2>/dev/null || echo "")
+
+  local cleaned
+  cleaned=$(clean_response "$result")
+
+  if [ -n "$cleaned" ]; then
+    printf '%s\n' "$cleaned"
+  else
+    echo "⚠️  llamafile returned invalid format, using heuristic fallback" >&2
     heuristic_commit "$DIFF"
   fi
 }
@@ -304,8 +410,14 @@ case "$BACKEND" in
   ollama)
     ollama_commit
     ;;
-  llama-cpp)
-    python_backend_commit
+  mlx)
+    mlx_commit
+    ;;
+  llamacpp)
+    llamacpp_commit
+    ;;
+  llamafile)
+    llamafile_commit
     ;;
   heuristic)
     heuristic_commit "$DIFF"
