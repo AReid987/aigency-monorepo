@@ -81,8 +81,8 @@ pnpm commit                               # interactive commit with cz-git
 |----------|--------|-----|
 | DB | SurrealDB 3.0 | Multi-model: graph + vector + document + LIVE queries |
 | Peer identity | Honcho ^0.2.0 | Cross-session reasoning, "dreaming" inference |
-| LLM inference | MLX (M1 Pro) + Llama.cpp (Intel ×3 on Tailnet) | Local-first, no Ollama |
-| Commit message AI | Ollama (primary) → mlx-lm / llama-cpp (auto-install fallback) | Cross-platform, zero manual setup |
+| LLM inference | MLX (M1 Pro) + Llama.cpp (Intel ×3 on Tailnet) | Local-first, zero external deps |
+| Commit message AI | MLX (macOS arm64) → llama-cpp-python → llamafile → heuristic | Cross-platform, auto-install, zero manual setup |
 | LLM router | apps/router (aigency-router v1 migrated) | OpenAI-compat proxy, quota-aware |
 | Chain | Base L2 (chain ID 8453) | EVM, low gas, Coinbase alignment |
 | Contracts | Foundry | forge + cast + anvil; deploy target Base + Base Sepolia |
@@ -105,28 +105,32 @@ Persistent knowledge base at `packages/mem-brain/llm-wiki/`:
 
 ## Local SLM for Commit Messages
 
-The `prepare-commit-msg` hook auto-generates conventional commit messages using a local SLM with automatic backend selection:
+The `prepare-commit-msg` hook auto-generates conventional commit messages using a local SLM. No manual setup required — the first run auto-installs the best backend for your platform.
 
 ```bash
 # Priority order (auto-detected):
-# 1. Ollama — if installed and model available (qwen2.5:0.5b)
-# 2. Python backend — auto-installed on first run:
-#    - macOS arm64 (Apple Silicon) → mlx-lm (Metal GPU)
-#    - Intel Mac / Linux / Windows → llama-cpp-python (CPU)
-# 3. Heuristic fallback — pattern-based message from diff stats
+# 1. MLX          → macOS arm64 (native Metal, fastest)
+# 2. llama.cpp    → All platforms (pip wheel, auto-optimizes Metal/AVX2)
+# 3. llamafile    → Universal single-binary fallback (no Python)
+# 4. Heuristic    → Pattern-based message from diff stats (always works)
 ```
 
 **Manual setup** (if you want a specific backend):
 ```bash
-# Install Python backend explicitly (auto-detects platform)
+# Auto-detect and install best backend for your platform
 ./scripts/automation/setup-slm.sh
 
-# Or force reinstall
+# Force specific backend
+./scripts/automation/setup-slm.sh --backend mlx        # macOS arm64 only
+./scripts/automation/setup-slm.sh --backend llamacpp   # any platform
+./scripts/automation/setup-slm.sh --backend llamafile  # universal binary
+
+# Force reinstall
 ./scripts/automation/setup-slm.sh --force
 ```
 
 **Backend metadata:** `scripts/automation/.slm/backend.json`
-**Model:** Qwen2.5-0.5B-Instruct GGUF (~350MB)
+**Default model:** Qwen3.5-0.8B (~450MB)
 
 ---
 

@@ -66,3 +66,6 @@ coderabbit-report*.json
 
 # autofix backups
 *.autofix.bak
+
+# Local SLM models and venv
+scripts/automation/.slm/
