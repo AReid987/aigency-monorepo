@@ -1,0 +1,35 @@
+{
+  "name": "@aigency/nexus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GitNexus Dashboard — SynapTree-themed knowledge graph explorer and wiki viewer",
+  "type": "module",
+  "scripts": {
+    "build": "vite build && pnpm copy:wiki",
+    "clean": "rimraf dist",
+    "copy:wiki": "mkdir -p dist/.gitnexus/wiki && cp -r ../../.gitnexus/wiki/* dist/.gitnexus/wiki/",
+    "dev": "vite",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aigency/design-tokens": "workspace:*",
+    "framer-motion": "^11.14.1",
+    "fuse.js": "^7.0.0",
+    "marked": "^15.0.3",
+    "mermaid": "^11.4.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@aigency/tsconfig": "workspace:*",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.6"
+  }
+}
