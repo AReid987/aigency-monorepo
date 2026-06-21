@@ -1,6 +1,3 @@
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/router";
 import {
   Activity,
   BookOpen,
@@ -9,13 +6,16 @@ import {
   Hexagon,
   Layers,
   LayoutGrid,
+  type LucideIcon,
   MessageSquare,
   Radar,
   Search,
   Settings,
-  type LucideIcon,
 } from "lucide-react";
-import { getCategoryColor, getModuleCategory, type ModuleNode } from "../data/gitnexus";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { type ModuleNode, getCategoryColor, getModuleCategory } from "../data/gitnexus";
 import { useNexusStore } from "../store";
 
 function NavItem({
@@ -53,7 +53,9 @@ function TreeNode({ node, depth = 0 }: { node: ModuleNode; depth?: number }) {
         className="aig-tree-node"
         style={{ paddingLeft: `${depth * 12}px` }}
         onClick={() => {
-          if (hasChildren) setOpen((o) => !o);
+          if (hasChildren) {
+            setOpen((o) => !o);
+          }
         }}
         aria-expanded={open}
       >
@@ -69,7 +71,10 @@ function TreeNode({ node, depth = 0 }: { node: ModuleNode; depth?: number }) {
           className={`aig-tree-link ${isActive ? "aig-tree-link--active" : ""}`}
           style={{ color: "inherit" }}
         >
-          <span className="aig-tree-dot" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+          <span
+            className="aig-tree-dot"
+            style={{ background: color, boxShadow: `0 0 6px ${color}` }}
+          />
           <span className="aig-truncate">{node.name}</span>
         </Link>
       </button>
@@ -129,7 +134,11 @@ export function Sidebar() {
       </div>
 
       <div className="aig-sidebar__footer">
-        <button type="button" className="aig-button aig-button--ghost" onClick={() => setChatOpen(!chatOpen)}>
+        <button
+          type="button"
+          className="aig-button aig-button--ghost"
+          onClick={() => setChatOpen(!chatOpen)}
+        >
           <MessageSquare size={14} />
           <span>IRIS</span>
         </button>

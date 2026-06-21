@@ -1,17 +1,29 @@
 import Fuse from "fuse.js";
 import type { FuseResult, FuseResultMatch } from "fuse.js";
-import { useRef, useState } from "react";
 import { Send, X } from "lucide-react";
+import { useRef, useState } from "react";
 import type { WikiPage } from "../data/gitnexus";
 import { useNexusStore } from "../store";
 
 interface Message {
+  id: string;
   role: "user" | "agent";
   text: string;
   sources?: { slug: string; title: string }[];
 }
 
-function buildAnswer(question: string, pages: WikiPage[]): { text: string; sources: { slug: string; title: string }[] } {
+function createMessage(role: Message["role"], text: string, sources?: Message["sources"]): Message {
+  const id =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return { id, role, text, sources };
+}
+
+function buildAnswer(
+  question: string,
+  pages: WikiPage[]
+): { text: string; sources: { slug: string; title: string }[] } {
   if (pages.length === 0) {
     return {
       text: "No wiki pages are loaded for the active project. Switch to a project with indexed data and try again.",
@@ -62,32 +74,39 @@ export function ChatPanel() {
   const backend = useNexusStore((s) => s.backend);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "agent",
-      text: backend.online
+    createMessage(
+      "agent",
+      backend.online
         ? "IRIS online. Backend bridge connected. I can reason over live symbols, impact, and process data."
-        : "IRIS online. No backend bridge detected — answering from the bundled static wiki graph.",
-    },
+        : "IRIS online. No backend bridge detected — answering from the bundled static wiki graph."
+    ),
   ]);
   const [thinking, setThinking] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
   const send = () => {
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      return;
+    }
     const question = input.trim();
-    setMessages((m) => [...m, { role: "user", text: question }]);
+    setMessages((m) => [...m, createMessage("user", question)]);
     setInput("");
     setThinking(true);
 
-    setTimeout(() => {
-      const { text, sources } = buildAnswer(question, pages);
-      setMessages((m) => [...m, { role: "agent", text, sources }]);
-      setThinking(false);
-      endRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 400 + Math.random() * 300);
+    setTimeout(
+      () => {
+        const { text, sources } = buildAnswer(question, pages);
+        setMessages((m) => [...m, createMessage("agent", text, sources)]);
+        setThinking(false);
+        endRef.current?.scrollIntoView({ behavior: "smooth" });
+      },
+      400 + Math.random() * 300
+    );
   };
 
-  if (!chatOpen) return null;
+  if (!chatOpen) {
+    return null;
+  }
 
   return (
     <aside className="aig-chat">
@@ -97,19 +116,28 @@ export function ChatPanel() {
           <span className="aig-text-pixel">IRIS Agent</span>
           <span className="aig-chat__mode aig-text-mono">{backend.online ? "LIVE" : "STATIC"}</span>
         </div>
-        <button type="button" className="aig-button aig-button--ghost" onClick={() => setChatOpen(false)} aria-label="Close chat">
+        <button
+          type="button"
+          className="aig-button aig-button--ghost"
+          onClick={() => setChatOpen(false)}
+          aria-label="Close chat"
+        >
           <X size={14} />
         </button>
       </div>
 
       <div className="aig-chat__body">
-        {messages.map((m, i) => (
-          <div key={i} className={`aig-chat__bubble aig-chat__bubble--${m.role}`}>
+        {messages.map((m) => (
+          <div key={m.id} className={`aig-chat__bubble aig-chat__bubble--${m.role}`}>
             <div className="aig-chat__bubble-text">{m.text}</div>
             {m.sources && m.sources.length > 0 && (
               <div className="aig-chat__sources">
                 {m.sources.map((s) => (
-                  <a key={s.slug} href={`#/wiki/${s.slug}`} className="aig-chat__source aig-text-mono">
+                  <a
+                    key={s.slug}
+                    href={`#/wiki/${s.slug}`}
+                    className="aig-chat__source aig-text-mono"
+                  >
                     {s.title}
                   </a>
                 ))}
@@ -131,7 +159,13 @@ export function ChatPanel() {
           onKeyDown={(e) => e.key === "Enter" && send()}
           disabled={thinking}
         />
-        <button type="button" className="aig-button aig-button--primary" onClick={send} aria-label="Send" disabled={thinking}>
+        <button
+          type="button"
+          className="aig-button aig-button--primary"
+          onClick={send}
+          aria-label="Send"
+          disabled={thinking}
+        >
           <Send size={14} />
         </button>
       </div>

@@ -12,18 +12,25 @@ export function OnboardingView() {
             <Upload size={24} />
           </span>
           <div>
-            <h1 className="aig-view__title" style={{ margin: 0 }}>GitNexus</h1>
+            <h1 className="aig-view__title" style={{ margin: 0 }}>
+              GitNexus
+            </h1>
             <p className="aig-text-pixel">Aigency Knowledge Graph</p>
           </div>
         </div>
 
         <p className="aig-onboarding__body">
-          Drop a repository folder or connect to a running GitNexus backend to build a live knowledge graph.
-          For now, the dashboard has loaded the static wiki generated in <code>.gitnexus/wiki</code>.
+          Drop a repository folder or connect to a running GitNexus backend to build a live
+          knowledge graph. For now, the dashboard has loaded the static wiki generated in{" "}
+          <code>.gitnexus/wiki</code>.
         </p>
 
         <div className="aig-onboarding__actions">
-          <button type="button" className="aig-button aig-button--primary" onClick={() => router.push("/")}>
+          <button
+            type="button"
+            className="aig-button aig-button--primary"
+            onClick={() => router.push("/")}
+          >
             Open Mission Control
           </button>
           <button type="button" className="aig-button" onClick={() => router.push("/graph")}>

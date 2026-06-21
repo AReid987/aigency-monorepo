@@ -10,15 +10,18 @@ function run(cmd: string, args: string[], cwd: string): Promise<void> {
     const proc = spawn(cmd, args, { cwd, stdio: "inherit" });
     proc.on("error", reject);
     proc.on("close", (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`${cmd} ${args.join(" ")} exited with ${code}`));
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`${cmd} ${args.join(" ")} exited with ${code}`));
+      }
     });
   });
 }
 
 export async function analyzeAndBuildWiki(cwd: string): Promise<void> {
   if (!existsSync(join(cwd, ".git"))) {
-    throw new Error("Not a git repository: " + cwd);
+    throw new Error(`Not a git repository: ${cwd}`);
   }
 
   await run("npx", ["gitnexus", "analyze"], cwd);
@@ -53,8 +56,12 @@ export async function uploadTarball(
 ): Promise<void> {
   const apiUrl = globalConfig.apiUrl ?? projectConfig.apiUrl;
   const token = globalConfig.token;
-  if (!apiUrl) throw new Error("No API URL configured. Run 'repoatlas login <url> <token>' first.");
-  if (!token) throw new Error("No API token configured. Run 'repoatlas login <url> <token>' first.");
+  if (!apiUrl) {
+    throw new Error("No API URL configured. Run 'repoatlas login <url> <token>' first.");
+  }
+  if (!token) {
+    throw new Error("No API token configured. Run 'repoatlas login <url> <token>' first.");
+  }
 
   const form = new FormData();
   const buffer = await readFile(tarPath);
@@ -72,6 +79,5 @@ export async function uploadTarball(
     throw new Error(`Upload failed (${res.status}): ${text}`);
   }
 
-  const body = (await res.json()) as { projectName?: string; wikiCount?: number };
-  console.log(`Synced ${body.projectName ?? projectConfig.projectId} (${body.wikiCount ?? 0} wiki pages) to ${apiUrl}`);
+  await res.json();
 }

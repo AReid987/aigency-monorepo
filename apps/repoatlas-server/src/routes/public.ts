@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type postgres from "postgres";
-import { getProject, listProjects, getWikiPage, getWikiPages } from "../db/index.js";
+import { getProject, getWikiPage, getWikiPages, listProjects } from "../db/index.js";
 
 export function createPublicRoutes(sql: postgres.Sql) {
   const app = new Hono();
@@ -32,11 +32,14 @@ export function createPublicRoutes(sql: postgres.Sql) {
   app.get("/api/repo/:id/meta", async (c) => {
     const id = c.req.param("id");
     const project = await getProject(sql, id);
-    if (!project) return c.json({ error: "Not found" }, 404);
+    if (!project) {
+      return c.json({ error: "Not found" }, 404);
+    }
     const meta = (project.meta ?? {}) as Record<string, unknown>;
     return c.json({
       fromCommit: meta.fromCommit ?? project.last_commit ?? "unknown",
-      generatedAt: meta.generatedAt ?? project.indexed_at?.toISOString() ?? new Date().toISOString(),
+      generatedAt:
+        meta.generatedAt ?? project.indexed_at?.toISOString() ?? new Date().toISOString(),
       model: meta.model ?? "unknown",
       moduleFiles: meta.moduleFiles ?? {},
       ...meta,
@@ -46,7 +49,9 @@ export function createPublicRoutes(sql: postgres.Sql) {
   app.get("/api/repo/:id/tree", async (c) => {
     const id = c.req.param("id");
     const project = await getProject(sql, id);
-    if (!project) return c.json({ error: "Not found" }, 404);
+    if (!project) {
+      return c.json({ error: "Not found" }, 404);
+    }
     const meta = (project.meta ?? {}) as Record<string, unknown>;
     const tree = meta.moduleTree ?? [];
     return c.json(tree);
@@ -62,7 +67,9 @@ export function createPublicRoutes(sql: postgres.Sql) {
     const id = c.req.param("id");
     const slug = c.req.param("slug");
     const page = await getWikiPage(sql, id, slug);
-    if (!page) return c.json({ error: "Not found" }, 404);
+    if (!page) {
+      return c.json({ error: "Not found" }, 404);
+    }
     return c.json(page);
   });
 
@@ -90,7 +97,9 @@ export function createPublicRoutes(sql: postgres.Sql) {
   app.get("/api/repo/:id/graph", async (c) => {
     const id = c.req.param("id");
     const project = await getProject(sql, id);
-    if (!project) return c.json({ error: "Not found" }, 404);
+    if (!project) {
+      return c.json({ error: "Not found" }, 404);
+    }
     return c.json({ nodes: [], edges: [] });
   });
 

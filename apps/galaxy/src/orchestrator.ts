@@ -2,8 +2,8 @@ import { EventEmitter } from "node:events";
 import {
   type DelegateTaskOptions,
   type OmpRpcClient,
-  type TaskResult,
   TaskDelegator,
+  type TaskResult,
 } from "@aigency/galaxy-bridge";
 import type { HermesClient } from "@aigency/hermes-client";
 import type { GalaxyConfig } from "./config.js";
@@ -154,16 +154,12 @@ export class GalaxyOrchestrator extends EventEmitter {
 
   // ── Internal ───────────────────────────────────────────────────────────
 
-  private async reportToHermes(
-    ventureId: string,
-    task: string,
-    result: TaskResult,
-  ): Promise<void> {
+  private async reportToHermes(ventureId: string, task: string, result: TaskResult): Promise<void> {
     try {
       const costStr = result.cost ? `$${result.cost.toFixed(2)}` : "unknown cost";
       await this.hermes.storeMemory(
         `[Galaxy] Venture ${ventureId}: ${task} — ${result.success ? "DONE" : "FAILED"} (${result.durationMs}ms, ${costStr})`,
-        ["galaxy", "task-result", ventureId],
+        ["galaxy", "task-result", ventureId]
       );
     } catch {
       this.emit("status_update", {
@@ -187,9 +183,7 @@ export class GalaxyOrchestrator extends EventEmitter {
 
     if (result.output) {
       const truncated =
-        result.output.length > 500
-          ? `...${result.output.slice(-500)}`
-          : result.output;
+        result.output.length > 500 ? `...${result.output.slice(-500)}` : result.output;
       message += `\n\n${truncated}`;
     }
 

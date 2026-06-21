@@ -2,8 +2,8 @@
   "name": "@repoatlas/cli",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "description": "RepoAtlas CLI for initializing projects and syncing docs/graphs",
+  "type": "module",
   "bin": {
     "repoatlas": "./dist/index.js"
   },

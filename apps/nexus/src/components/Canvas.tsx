@@ -13,11 +13,21 @@ interface Particle {
 function hexToRgba(hex: string, alpha: number): string {
   // Accepts short OKLCH fallback: if not hex, return as-is with alpha
   if (!hex.startsWith("#")) {
-    if (hex.startsWith("oklch")) return hex;
+    if (hex.startsWith("oklch")) {
+      return hex;
+    }
     return `rgba(255,255,255,${alpha})`;
   }
   const clean = hex.replace("#", "");
-  const bigint = parseInt(clean.length === 3 ? clean.split("").map((c) => c + c).join("") : clean, 16);
+  const bigint = Number.parseInt(
+    clean.length === 3
+      ? clean
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : clean,
+    16
+  );
   const r = (bigint >> 16) & 255;
   const g = (bigint >> 8) & 255;
   const b = bigint & 255;
@@ -33,9 +43,13 @@ export function Canvas() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      return;
+    }
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
 
     let raf = 0;
     let particles: Particle[] = [];
@@ -89,20 +103,28 @@ export function Canvas() {
       const go = readCssVar("--aig-signal-go") || "oklch(0.72 0.170 160)";
 
       // Particles
-      particles.forEach((p) => {
+      for (const p of particles) {
         p.x += p.vx;
         p.y += p.vy;
-        if (p.x < 0) p.x = width;
-        if (p.x > width) p.x = 0;
-        if (p.y < 0) p.y = height;
-        if (p.y > height) p.y = 0;
+        if (p.x < 0) {
+          p.x = width;
+        }
+        if (p.x > width) {
+          p.x = 0;
+        }
+        if (p.y < 0) {
+          p.y = height;
+        }
+        if (p.y > height) {
+          p.y = 0;
+        }
 
         const pulse = 0.7 + 0.3 * Math.sin(time * 0.001 + p.pulseOffset);
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = hexToRgba(accent, p.alpha * pulse * 0.45);
         ctx.fill();
-      });
+      }
 
       // Shooting star
       if (performance.now() > nextShootingStar) {
@@ -148,7 +170,7 @@ export function Canvas() {
     <>
       <div className="aig-canvas" aria-hidden="true" />
       <div className="aig-grid-beam" aria-hidden="true" />
-      <canvas ref={canvasRef} className="aig-particles" aria-hidden="true" />
+      <canvas ref={canvasRef} className="aig-particles" />
       <div className="aig-dither" aria-hidden="true" />
     </>
   );

@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { useRouter } from "next/router";
 import { MessageSquare, Radio, Search } from "lucide-react";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { checkBackend } from "../services/backend-client";
 import { useNexusStore } from "../store";
 import { ProjectSwitcher } from "./ProjectSwitcher";
@@ -18,11 +18,15 @@ export function TopBar() {
   useEffect(() => {
     let mounted = true;
     checkBackend().then((status) => {
-      if (mounted) setBackend({ online: status.online, version: status.version, lastChecked: Date.now() });
+      if (mounted) {
+        setBackend({ online: status.online, version: status.version, lastChecked: Date.now() });
+      }
     });
     const id = setInterval(() => {
       checkBackend().then((status) => {
-        if (mounted) setBackend({ online: status.online, version: status.version, lastChecked: Date.now() });
+        if (mounted) {
+          setBackend({ online: status.online, version: status.version, lastChecked: Date.now() });
+        }
       });
     }, 30000);
     return () => {
@@ -61,7 +65,14 @@ export function TopBar() {
       </div>
 
       <div className="aig-topbar__right">
-        <div className="aig-topbar__status" title={backend.online ? `Backend online${backend.version ? ` v${backend.version}` : ""}` : "Backend offline — using static bundle"}>
+        <div
+          className="aig-topbar__status"
+          title={
+            backend.online
+              ? `Backend online${backend.version ? ` v${backend.version}` : ""}`
+              : "Backend offline — using static bundle"
+          }
+        >
           <Radio size={14} strokeWidth={1.5} />
           <span className="aig-text-pixel">{dataSource === "backend" ? "ONLINE" : "STATIC"}</span>
         </div>

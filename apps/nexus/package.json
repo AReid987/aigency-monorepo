@@ -5,8 +5,8 @@
   "description": "GitNexus Dashboard — Aigency-themed knowledge graph explorer and wiki viewer",
   "type": "module",
   "scripts": {
-    "bundle:registry": "tsx scripts/bundle-registry.ts",
     "build": "pnpm bundle:registry && next build",
+    "bundle:registry": "tsx scripts/bundle-registry.ts",
     "clean": "rimraf dist",
     "dev": "next dev -p 3000",
     "dev:full": "pnpm bundle:registry && next dev -p 3000",

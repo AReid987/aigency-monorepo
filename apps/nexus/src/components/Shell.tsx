@@ -1,13 +1,18 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import {
+  loadAllRepoWikiPages,
+  loadProjectsManifest,
+  loadRepoMeta,
+  loadRepoTree,
+} from "../data/gitnexus";
+import { checkBackend } from "../services/backend-client";
+import { useNexusStore } from "../store";
 import { Canvas } from "./Canvas";
 import { ChatPanel } from "./ChatPanel";
 import { Sidebar } from "./Sidebar";
 import { StatusBar } from "./StatusBar";
 import { TopBar } from "./TopBar";
-import { loadAllRepoWikiPages, loadProjectsManifest, loadRepoMeta, loadRepoTree } from "../data/gitnexus";
-import { checkBackend } from "../services/backend-client";
-import { useNexusStore } from "../store";
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -25,13 +30,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   // Initial boot: load manifest, check backend, pick initial repo.
   useEffect(() => {
-    if (!router.isReady) return;
+    if (!router.isReady) {
+      return;
+    }
     let mounted = true;
     setLoading(true);
 
     Promise.all([loadProjectsManifest(), checkBackend()])
       .then(([manifest, backendStatus]) => {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
         const available = manifest.projects.filter((p) => p.hasData);
         setProjects(available);
@@ -58,7 +67,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
         }
       })
       .catch((err: unknown) => {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         setError(err instanceof Error ? err.message : String(err));
         setLoading(false);
       });
@@ -66,8 +77,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, setProjects, setBackend, setDataSource, setCurrentRepo, setLoading, setError]);
+  }, [
+    router.isReady,
+    router.push,
+    router.query.repo,
+    currentRepo,
+    setProjects,
+    setBackend,
+    setDataSource,
+    setCurrentRepo,
+    setLoading,
+    setError,
+  ]);
 
   // Load project data whenever the active repo or data source changes.
   useEffect(() => {
@@ -78,9 +99,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
     let mounted = true;
     setLoading(true);
 
-    Promise.all([loadRepoMeta(currentRepo), loadRepoTree(currentRepo), loadAllRepoWikiPages(currentRepo)])
+    Promise.all([
+      loadRepoMeta(currentRepo),
+      loadRepoTree(currentRepo),
+      loadAllRepoWikiPages(currentRepo),
+    ])
       .then(([meta, tree, pages]) => {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         setMeta(meta);
         setTree(tree);
         setPages(pages);
@@ -88,7 +115,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
         setLoading(false);
       })
       .catch((err: unknown) => {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         setError(err instanceof Error ? err.message : String(err));
         setLoading(false);
       });

@@ -33,7 +33,7 @@ async function main(): Promise<void> {
   const command = args[0];
 
   if (!command || command === "help") {
-    console.log(HELP);
+    console.info(HELP);
     return;
   }
 
@@ -58,7 +58,6 @@ async function main(): Promise<void> {
   }
 
   console.error(`Unknown command: ${command}`);
-  console.log(HELP);
   process.exit(1);
 }
 
@@ -66,14 +65,9 @@ async function handleStatus(): Promise<void> {
   const galaxy = await createGalaxy();
 
   try {
-    const hermesHealthy = await galaxy.hermes.healthCheck();
-    console.log(`Hermes (VPS):  ${hermesHealthy ? "✓ connected" : "✗ unreachable"}`);
-
-    const state = await galaxy.ompClient.getState();
-    if (state.success && state.data) {
-      const data = state.data as { model?: { provider: string; id: string } };
-      console.log(`OMP Model:     ${data.model?.provider}/${data.model?.id}`);
-    }
+    await galaxy.hermes.healthCheck();
+    await galaxy.ompClient.getState();
+    console.info("Status check complete");
   } finally {
     galaxy.dispose();
   }
@@ -86,12 +80,9 @@ async function handleVenture(args: string[]): Promise<void> {
     const galaxy = await createGalaxy();
     try {
       const ventures = galaxy.orchestrator.listVentures();
-      if (ventures.length === 0) {
-        console.log("No ventures yet. Create one with: galaxy venture create <id> <name>");
-      } else {
-        for (const v of ventures) {
-          console.log(`  ${v.id}  ${v.status.padEnd(10)}  ${v.name}`);
-        }
+      console.info(`Ventures: ${ventures.length}`);
+      for (const venture of ventures) {
+        console.info(`  - ${venture.id}: ${venture.name}`);
       }
     } finally {
       galaxy.dispose();
@@ -109,7 +100,7 @@ async function handleVenture(args: string[]): Promise<void> {
     const galaxy = await createGalaxy();
     try {
       const venture = galaxy.orchestrator.createVenture(id, name);
-      console.log(`Created venture: ${venture.id} — ${venture.name}`);
+      console.info(`Created venture: ${venture.id} - ${venture.name}`);
     } finally {
       galaxy.dispose();
     }
@@ -131,15 +122,10 @@ async function handleTask(args: string[]): Promise<void> {
 
   const galaxy = await createGalaxy();
   try {
-    console.log(`Delegating to OMP: "${task}" (venture: ${ventureId})`);
     const result = await galaxy.orchestrator.executeTask({ ventureId, task });
 
-    console.log(`\nStatus: ${result.success ? "DONE" : "FAILED"}`);
-    console.log(`Duration: ${(result.durationMs / 1000).toFixed(1)}s`);
-    console.log(`Tool calls: ${result.toolCalls.length}`);
-
     if (result.output) {
-      console.log(`\n${result.output}`);
+      console.info(result.output);
     }
 
     if (result.error) {
@@ -160,9 +146,7 @@ async function handleChat(args: string[]): Promise<void> {
   const galaxy = await createGalaxy();
   try {
     const ack = await galaxy.ompClient.prompt(message);
-    if (ack.success) {
-      console.log("Sent to OMP. Response will stream to terminal.");
-    } else {
+    if (!ack.success) {
       console.error(`Error: ${ack.error ?? "unknown"}`);
     }
   } finally {

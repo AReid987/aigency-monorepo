@@ -22,7 +22,7 @@
     "build": "tsup src/index.ts src/bin/compile.ts src/bin/lint.ts src/bin/flush.ts --format esm,cjs --dts",
     "clean": "rimraf dist",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },

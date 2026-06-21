@@ -3,33 +3,33 @@
 
 :root {
   /* Void (background) */
-  --aig-void-deep: oklch(0.10 0.015 250);
+  --aig-void-deep: oklch(0.1 0.015 250);
   --aig-void-base: oklch(0.13 0.015 250);
   --aig-void-raised: oklch(0.17 0.015 250);
-  --aig-void-glass: oklch(0.20 0.020 250);
+  --aig-void-glass: oklch(0.2 0.02 250);
 
   /* Text */
-  --aig-text-primary: oklch(0.90 0.010 250);
-  --aig-text-body: oklch(0.78 0.010 250);
-  --aig-text-secondary: oklch(0.60 0.010 250);
-  --aig-text-tertiary: oklch(0.45 0.010 250);
+  --aig-text-primary: oklch(0.9 0.01 250);
+  --aig-text-body: oklch(0.78 0.01 250);
+  --aig-text-secondary: oklch(0.6 0.01 250);
+  --aig-text-tertiary: oklch(0.45 0.01 250);
 
   /* Accent (warm signal) */
-  --aig-accent-warm: oklch(0.75 0.150 65);
-  --aig-accent-warm-dim: oklch(0.55 0.100 65);
-  --aig-accent-warm-glow: oklch(0.75 0.150 65 / 0.3);
+  --aig-accent-warm: oklch(0.75 0.15 65);
+  --aig-accent-warm-dim: oklch(0.55 0.1 65);
+  --aig-accent-warm-glow: oklch(0.75 0.15 65 / 0.3);
 
   /* Signals */
-  --aig-signal-go: oklch(0.72 0.170 160);
-  --aig-signal-conditional: oklch(0.75 0.150 65);
-  --aig-signal-avoid: oklch(0.60 0.200 25);
-  --aig-signal-critical: oklch(0.55 0.220 25);
-  --aig-signal-highlight: oklch(0.65 0.170 300);
+  --aig-signal-go: oklch(0.72 0.17 160);
+  --aig-signal-conditional: oklch(0.75 0.15 65);
+  --aig-signal-avoid: oklch(0.6 0.2 25);
+  --aig-signal-critical: oklch(0.55 0.22 25);
+  --aig-signal-highlight: oklch(0.65 0.17 300);
 
   /* Fence (borders) */
-  --aig-fence-light: oklch(0.90 0.010 250 / 0.08);
-  --aig-fence-medium: oklch(0.90 0.010 250 / 0.12);
-  --aig-fence-strong: oklch(0.90 0.010 250 / 0.20);
+  --aig-fence-light: oklch(0.9 0.01 250 / 0.08);
+  --aig-fence-medium: oklch(0.9 0.01 250 / 0.12);
+  --aig-fence-strong: oklch(0.9 0.01 250 / 0.2);
 
   /* Fonts */
   --aig-font-pixel: "Geist Mono", "Space Mono", monospace;
@@ -62,9 +62,9 @@
 
   /* Border */
   --aig-border-radius: 0px;
-  --aig-border-subtle: 0 0 0 1px oklch(0.90 0.010 250 / 0.06);
-  --aig-border-medium: 0 0 0 1px oklch(0.90 0.010 250 / 0.12);
-  --aig-border-strong: 0 0 0 1px oklch(0.90 0.010 250 / 0.20);
+  --aig-border-subtle: 0 0 0 1px oklch(0.9 0.01 250 / 0.06);
+  --aig-border-medium: 0 0 0 1px oklch(0.9 0.01 250 / 0.12);
+  --aig-border-strong: 0 0 0 1px oklch(0.9 0.01 250 / 0.2);
 
   /* Perspective */
   --aig-perspective-value: 1200px;
@@ -107,5 +107,5 @@
   --aig-border: var(--aig-fence-medium);
   --aig-border-subtle: var(--aig-fence-light);
   --aig-border-strong: var(--aig-fence-strong);
-  --aig-focus-ring: 0 0 0 1px var(--aig-accent-warm), 0 0 0 3px oklch(0.75 0.150 65 / 0.15);
+  --aig-focus-ring: 0 0 0 1px var(--aig-accent-warm), 0 0 0 3px oklch(0.75 0.15 65 / 0.15);
 }

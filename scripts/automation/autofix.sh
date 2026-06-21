@@ -93,7 +93,7 @@ echo ""
 
 # ─── 5. Git Conflict Markers ─────────────────────────────────────────────────
 echo "⚔️  5/6 Git Conflict Markers"
-if grep -rn "<<<<<<< HEAD" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.json" --include="*.md" packages/ apps/ scripts/ 2>/dev/null; then
+if grep -rn "<<<<<<< HEAD" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.json" --include="*.md" --exclude-dir=.gitnexus --exclude-dir=dist --exclude-dir=.next --exclude-dir=out --exclude-dir=build --exclude-dir=node_modules packages/ apps/ scripts/ 2>/dev/null; then
   echo "   ❌ Git conflict markers found!"
   EXIT_CODE=1
 else

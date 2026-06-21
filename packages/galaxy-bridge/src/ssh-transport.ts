@@ -119,10 +119,7 @@ export class SshOmpTransport extends EventEmitter implements OmpRpcTransport {
   }
 
   private buildSshArgs(): string[] {
-    const args: string[] = [
-      "-o", "StrictHostKeyChecking=accept-new",
-      "-o", "BatchMode=yes",
-    ];
+    const args: string[] = ["-o", "StrictHostKeyChecking=accept-new", "-o", "BatchMode=yes"];
 
     if (this.options.port !== 22) {
       args.push("-p", String(this.options.port));

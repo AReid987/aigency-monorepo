@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { useState } from "react";
 import { backendBaseUrl } from "../services/backend-client";
 import { useNexusStore } from "../store";
 
@@ -20,7 +20,9 @@ export function SettingsView() {
       <div className="aig-view__header">
         <div>
           <h1 className="aig-view__title">Settings</h1>
-          <p className="aig-view__subtitle">Configure the GitNexus backend and display preferences.</p>
+          <p className="aig-view__subtitle">
+            Configure the GitNexus backend and display preferences.
+          </p>
         </div>
       </div>
 
@@ -40,7 +42,12 @@ export function SettingsView() {
               <span className="aig-settings-row__label">Endpoint</span>
               <div className="aig-settings-url">
                 <code className="aig-text-mono">{url}</code>
-                <button type="button" className="aig-button aig-button--ghost" onClick={copyUrl} aria-label="Copy URL">
+                <button
+                  type="button"
+                  className="aig-button aig-button--ghost"
+                  onClick={copyUrl}
+                  aria-label="Copy URL"
+                >
                   {copied ? <Check size={14} /> : <Copy size={14} />}
                 </button>
               </div>
@@ -50,7 +57,8 @@ export function SettingsView() {
               <span className="aig-text-mono">{backend.version ?? "—"}</span>
             </div>
             <p className="aig-settings-hint">
-              Set <code>VITE_GITNEXUS_BACKEND_URL</code> to point at a running GitNexus backend. Without a backend, the app falls back to static wiki data.
+              Set <code>VITE_GITNEXUS_BACKEND_URL</code> to point at a running GitNexus backend.
+              Without a backend, the app falls back to static wiki data.
             </p>
           </div>
         </section>

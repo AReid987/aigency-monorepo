@@ -37,7 +37,9 @@ export interface NexusState {
 }
 
 function initialRepo(): string | null {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
   try {
     return localStorage.getItem("aig-nexus:repo");
   } catch {

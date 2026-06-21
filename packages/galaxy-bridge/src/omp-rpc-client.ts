@@ -127,7 +127,7 @@ export class OmpRpcClient extends EventEmitter {
 
   async setSubagentSubscription(
     level: "off" | "progress" | "events",
-    id?: string,
+    id?: string
   ): Promise<OmpRpcResponse> {
     return this.sendCommand({ type: "set_subagent_subscription", level, id });
   }

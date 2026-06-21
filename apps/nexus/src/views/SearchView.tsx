@@ -1,17 +1,17 @@
 import Fuse from "fuse.js";
-import { useEffect, useMemo, useState } from "react";
+import { Globe, Search } from "lucide-react";
 import { useRouter } from "next/router";
-import { Search, Globe } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  getCategoryColor,
-  getCategoryLabel,
-  getModuleCategory,
-  loadProjectsManifest,
-  loadRepoTree,
-  loadAllRepoWikiPages,
   type ModuleNode,
   type ProjectInfo,
   type WikiPage,
+  getCategoryColor,
+  getCategoryLabel,
+  getModuleCategory,
+  loadAllRepoWikiPages,
+  loadProjectsManifest,
+  loadRepoTree,
 } from "../data/gitnexus";
 import { useNexusStore } from "../store";
 
@@ -33,7 +33,9 @@ export function SearchView() {
   const urlQuery = (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery) ?? query;
 
   const [scope, setScope] = useState<"current" | "all">("current");
-  const [allData, setAllData] = useState<{ project: ProjectInfo; pages: WikiPage[]; tree: ModuleNode[] }[] | null>(null);
+  const [allData, setAllData] = useState<
+    { project: ProjectInfo; pages: WikiPage[]; tree: ModuleNode[] }[] | null
+  >(null);
   const [loadingAll, setLoadingAll] = useState(false);
 
   useEffect(() => {
@@ -55,7 +57,9 @@ export function SearchView() {
             return { project, tree, pages };
           })
         );
-        if (!cancelled) setAllData(data);
+        if (!cancelled) {
+          setAllData(data);
+        }
       })
       .finally(() => setLoadingAll(false));
     return () => {
@@ -63,7 +67,10 @@ export function SearchView() {
     };
   }, [scope]);
 
-  const activePages = scope === "all" && allData ? allData.flatMap((d) => d.pages.map((p) => ({ projectId: d.project.id, page: p }))) : pages.map((p) => ({ projectId: currentRepo ?? "", page: p }));
+  const activePages =
+    scope === "all" && allData
+      ? allData.flatMap((d) => d.pages.map((p) => ({ projectId: d.project.id, page: p })))
+      : pages.map((p) => ({ projectId: currentRepo ?? "", page: p }));
 
   const activeModules: ModuleHit[] = useMemo(() => {
     if (scope === "all" && allData) {
@@ -71,20 +78,36 @@ export function SearchView() {
         const flat: ModuleHit[] = [];
         function walk(nodes: ModuleNode[]) {
           for (const n of nodes) {
-            flat.push({ projectId: d.project.id, name: n.name, slug: n.slug, cat: getModuleCategory(n.slug) });
-            if (n.children) walk(n.children);
+            flat.push({
+              projectId: d.project.id,
+              name: n.name,
+              slug: n.slug,
+              cat: getModuleCategory(n.slug),
+            });
+            if (n.children) {
+              walk(n.children);
+            }
           }
         }
         walk(d.tree);
         return flat;
       });
     }
-    if (!tree) return [];
+    if (!tree) {
+      return [];
+    }
     const flat: ModuleHit[] = [];
     function walk(nodes: ModuleNode[]) {
       for (const n of nodes) {
-        flat.push({ projectId: currentRepo ?? "", name: n.name, slug: n.slug, cat: getModuleCategory(n.slug) });
-        if (n.children) walk(n.children);
+        flat.push({
+          projectId: currentRepo ?? "",
+          name: n.name,
+          slug: n.slug,
+          cat: getModuleCategory(n.slug),
+        });
+        if (n.children) {
+          walk(n.children);
+        }
       }
     }
     walk(tree);
@@ -94,7 +117,9 @@ export function SearchView() {
   const projectNames = useMemo(() => {
     const map = new Map<string, string>();
     if (scope === "all" && allData) {
-      for (const d of allData) map.set(d.project.id, d.project.name);
+      for (const d of allData) {
+        map.set(d.project.id, d.project.name);
+      }
     } else if (currentRepo) {
       map.set(currentRepo, "");
     }
@@ -102,7 +127,9 @@ export function SearchView() {
   }, [scope, allData, currentRepo]);
 
   const pageResults = useMemo(() => {
-    if (!urlQuery.trim() || activePages.length === 0) return [];
+    if (!urlQuery.trim() || activePages.length === 0) {
+      return [];
+    }
     const fuse = new Fuse(activePages, {
       keys: [
         { name: "page.title", weight: 0.4 },
@@ -117,7 +144,9 @@ export function SearchView() {
   }, [urlQuery, activePages]);
 
   const moduleResults = useMemo(() => {
-    if (!urlQuery.trim() || activeModules.length === 0) return [];
+    if (!urlQuery.trim() || activeModules.length === 0) {
+      return [];
+    }
     const fuse = new Fuse(activeModules, { keys: ["name", "slug"], threshold: 0.3 });
     return fuse.search(urlQuery.trim()).slice(0, 20);
   }, [urlQuery, activeModules]);
@@ -158,11 +187,12 @@ export function SearchView() {
         <div>
           <h1 className="aig-view__title">Results for “{urlQuery}”</h1>
           <p className="aig-search__summary">
-            {pageResults.length} wiki hit{pageResults.length !== 1 ? "s" : ""} · {moduleResults.length} module hit
+            {pageResults.length} wiki hit{pageResults.length !== 1 ? "s" : ""} ·{" "}
+            {moduleResults.length} module hit
             {moduleResults.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <div className="aig-search__scope" role="group" aria-label="Search scope">
+        <fieldset className="aig-search__scope" aria-label="Search scope">
           <button
             type="button"
             className={`aig-search__scope-btn ${scope === "current" ? "aig-search__scope-btn--active" : ""}`}
@@ -178,10 +208,12 @@ export function SearchView() {
             <Globe size={12} strokeWidth={1.5} />
             All projects
           </button>
-        </div>
+        </fieldset>
       </div>
 
-      {loadingAll && <div className="aig-search__loading aig-text-pixel">Loading all project indexes…</div>}
+      {loadingAll && (
+        <div className="aig-search__loading aig-text-pixel">Loading all project indexes…</div>
+      )}
 
       {moduleResults.length > 0 && (
         <section className="aig-search__section">
@@ -191,7 +223,11 @@ export function SearchView() {
               <ResultRow
                 key={`${item.projectId}-${item.slug}`}
                 title={item.name}
-                meta={scope === "all" ? `${getCategoryLabel(item.cat)} · ${projectNames.get(item.projectId) ?? item.projectId}` : getCategoryLabel(item.cat)}
+                meta={
+                  scope === "all"
+                    ? `${getCategoryLabel(item.cat)} · ${projectNames.get(item.projectId) ?? item.projectId}`
+                    : getCategoryLabel(item.cat)
+                }
                 color={getCategoryColor(item.cat)}
                 onClick={() => handleSelect(item.projectId, item.slug)}
               />
@@ -214,7 +250,11 @@ export function SearchView() {
                 <ResultRow
                   key={`${item.projectId}-${page.slug}`}
                   title={page.title}
-                  meta={scope === "all" ? `${snippet} · ${projectNames.get(item.projectId) ?? item.projectId}` : snippet}
+                  meta={
+                    scope === "all"
+                      ? `${snippet} · ${projectNames.get(item.projectId) ?? item.projectId}`
+                      : snippet
+                  }
                   color="var(--aig-foreground-muted)"
                   onClick={() => handleSelect(item.projectId, page.slug)}
                 />
@@ -247,6 +287,9 @@ export function SearchView() {
           display: flex;
           background: var(--aig-surface);
           box-shadow: var(--aig-border-subtle);
+          border: none;
+          margin: 0;
+          padding: 0;
         }
         .aig-search__scope-btn {
           display: flex;
@@ -306,10 +349,15 @@ function ResultRow({
 }) {
   return (
     <button type="button" onClick={onClick} className="aig-result-row">
-      <span className="aig-result-row__dot" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+      <span
+        className="aig-result-row__dot"
+        style={{ background: color, boxShadow: `0 0 6px ${color}` }}
+      />
       <div className="aig-result-row__body">
         <div className="aig-result-row__title">{title}</div>
-        <div className="aig-result-row__meta aig-truncate" title={meta}>{meta}</div>
+        <div className="aig-result-row__meta aig-truncate" title={meta}>
+          {meta}
+        </div>
       </div>
       <style>{`
         .aig-result-row {

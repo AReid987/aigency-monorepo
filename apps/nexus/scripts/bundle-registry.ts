@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename, dirname, join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 interface RegistryEntry {
@@ -51,7 +51,9 @@ function copyRecursive(src: string, dest: string) {
     } else {
       // Skip macOS metadata files and the static single-file viewer's index.html
       // (we only need the data files, not the standalone viewer).
-      if (entry.name === ".DS_Store" || entry.name === "index.html") continue;
+      if (entry.name === ".DS_Store" || entry.name === "index.html") {
+        continue;
+      }
       writeFileSync(destPath, readFileSync(srcPath));
     }
   }
@@ -99,12 +101,10 @@ function main() {
     const wikiDir = join(picked.storagePath, "wiki");
 
     if (!existsSync(join(wikiDir, "module_tree.json"))) {
-      console.log(`[bundle-registry] skipping ${id}: no wiki/module_tree.json`);
       continue;
     }
 
     if ((picked.stats?.files ?? 0) < 5) {
-      console.log(`[bundle-registry] skipping ${id}: only ${picked.stats?.files ?? 0} files`);
       continue;
     }
 
@@ -120,8 +120,7 @@ function main() {
       writeFileSync(join(destDir, "repo-meta.json"), readFileSync(repoMeta));
     }
 
-    const wikiCount = readdirSync(join(destDir, "wiki"))
-      .filter((f) => f.endsWith(".md")).length;
+    const wikiCount = readdirSync(join(destDir, "wiki")).filter((f) => f.endsWith(".md")).length;
 
     projects.push({
       id,
@@ -137,22 +136,15 @@ function main() {
     });
 
     if (group.length > 1) {
-      const skipped = group
+      const _skipped = group
         .filter((e) => e.path !== picked.path)
         .map((e) => e.path)
         .join(", ");
-      console.log(`[bundle-registry] deduped ${id}: kept ${picked.path}, skipped ${skipped}`);
     } else {
-      console.log(`[bundle-registry] bundled ${id} (${wikiCount} wiki pages)`);
     }
   }
 
-  writeFileSync(
-    join(outDir, "projects.json"),
-    JSON.stringify({ projects }, null, 2)
-  );
-
-  console.log(`[bundle-registry] ${projects.length} project(s) bundled to ${outDir}`);
+  writeFileSync(join(outDir, "projects.json"), JSON.stringify({ projects }, null, 2));
 }
 
 main();

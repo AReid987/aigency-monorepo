@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { Shield } from "lucide-react";
-import { getImpact, type ImpactEntry } from "../services/backend-client";
+import { useEffect, useState } from "react";
+import { type ImpactEntry, getImpact } from "../services/backend-client";
 import { useNexusStore } from "../store";
 
 export function ImpactView() {
@@ -18,10 +18,14 @@ export function ImpactView() {
     setLoading(true);
     getImpact(repo, symbol ?? "")
       .then((data) => {
-        if (mounted) setImpact(data);
+        if (mounted) {
+          setImpact(data);
+        }
       })
       .finally(() => {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       });
     return () => {
       mounted = false;
@@ -45,12 +49,17 @@ export function ImpactView() {
         <div className="aig-empty">
           <Shield size={32} />
           <p>No impact data available.</p>
-          <span className="aig-text-pixel">Connect a GitNexus backend to enable real impact analysis.</span>
+          <span className="aig-text-pixel">
+            Connect a GitNexus backend to enable real impact analysis.
+          </span>
         </div>
       ) : (
         <div className="aig-impact-grid">
-          {impact.map((entry, i) => (
-            <div key={i} className={`aig-impact-card aig-impact-card--${entry.risk}`}>
+          {impact.map((entry) => (
+            <div
+              key={`${entry.file}:${entry.symbol}:${entry.risk}`}
+              className={`aig-impact-card aig-impact-card--${entry.risk}`}
+            >
               <div className="aig-impact-card__risk aig-text-pixel">{entry.risk}</div>
               <div className="aig-impact-card__file">{entry.file}</div>
               <div className="aig-impact-card__symbol">{entry.symbol}</div>

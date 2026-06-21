@@ -1,9 +1,9 @@
+import { ArrowLeft } from "lucide-react";
 import { marked } from "marked";
 import mermaid from "mermaid";
-import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
-import { ArrowLeft } from "lucide-react";
-import { loadRepoWikiPage, type WikiPage } from "../data/gitnexus";
+import { useEffect, useRef, useState } from "react";
+import { type WikiPage, loadRepoWikiPage } from "../data/gitnexus";
 import { useNexusStore } from "../store";
 
 export function WikiView({ slug: slugProp }: { slug?: string }) {
@@ -16,7 +16,9 @@ export function WikiView({ slug: slugProp }: { slug?: string }) {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
     mermaid.initialize({
       startOnLoad: false,
       theme: "base",
@@ -41,9 +43,14 @@ export function WikiView({ slug: slugProp }: { slug?: string }) {
     }
     let cancelled = false;
     async function load() {
+      if (!repoId || !slug) {
+        return;
+      }
       setLoading(true);
-      const p = await loadRepoWikiPage(repoId!, slug!);
-      if (cancelled) return;
+      const p = await loadRepoWikiPage(repoId, slug);
+      if (cancelled) {
+        return;
+      }
       if (!p) {
         setPage(null);
         setHtml("");
@@ -62,7 +69,9 @@ export function WikiView({ slug: slugProp }: { slug?: string }) {
   }, [slug, repo]);
 
   useEffect(() => {
-    if (!contentRef.current || !html) return;
+    if (!contentRef.current || !html) {
+      return;
+    }
     const els = contentRef.current.querySelectorAll(".language-mermaid, .mermaid");
     for (const el of Array.from(els)) {
       const code = el.textContent || "";
@@ -118,7 +127,9 @@ export function WikiView({ slug: slugProp }: { slug?: string }) {
         <div className="aig-wiki__meta">
           <span className="aig-tag">{page.slug}</span>
           {page.generatedAt && (
-            <span className="aig-text-pixel">Updated {new Date(page.generatedAt).toLocaleString()}</span>
+            <span className="aig-text-pixel">
+              Updated {new Date(page.generatedAt).toLocaleString()}
+            </span>
           )}
         </div>
       </div>

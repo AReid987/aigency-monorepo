@@ -47,11 +47,7 @@ function kebabCase(str: string): string {
   return str.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
 }
 
-function walkAigencyTokens(
-  prefix: string,
-  node: unknown,
-  out: Record<string, string>
-): void {
+function walkAigencyTokens(prefix: string, node: unknown, out: Record<string, string>): void {
   if (typeof node !== "object" || node === null) {
     return;
   }
@@ -60,7 +56,9 @@ function walkAigencyTokens(
     return;
   }
   for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
-    if (key.startsWith("$")) continue;
+    if (key.startsWith("$")) {
+      continue;
+    }
     const nextPrefix = prefix ? `${prefix}-${kebabCase(key)}` : `--aig-${kebabCase(key)}`;
     walkAigencyTokens(nextPrefix, value, out);
   }
@@ -77,7 +75,9 @@ export function aigencyValue(path: string): string | undefined {
   const parts = path.split(".");
   let node: unknown = aigencyTokens.atoms;
   for (const part of parts) {
-    if (typeof node !== "object" || node === null) return undefined;
+    if (typeof node !== "object" || node === null) {
+      return undefined;
+    }
     node = (node as Record<string, unknown>)[part];
   }
   if (typeof node === "object" && node !== null && "$value" in node) {

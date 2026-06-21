@@ -1,5 +1,5 @@
-import { useRouter } from "next/router";
 import { Box, ExternalLink, FileCode, GitGraph, Layers } from "lucide-react";
+import { useRouter } from "next/router";
 import type { ProjectInfo } from "../data/gitnexus";
 import { useNexusStore } from "../store";
 
@@ -42,7 +42,9 @@ function ProjectCard({ project }: { project: ProjectInfo }) {
       </div>
 
       <div className="aig-project-card__footer">
-        <span className="aig-text-pixel">Indexed {new Date(project.indexedAt).toLocaleDateString()}</span>
+        <span className="aig-text-pixel">
+          Indexed {new Date(project.indexedAt).toLocaleDateString()}
+        </span>
         <button type="button" className="aig-button aig-button--primary" onClick={open}>
           Open
         </button>
@@ -70,13 +72,16 @@ export function ProjectsView() {
         <div>
           <h1 className="aig-view__title">Indexed Projects</h1>
           <p className="aig-view__subtitle">
-            {projects.length} project{projects.length !== 1 ? "s" : ""} available in the static bundle.
+            {projects.length} project{projects.length !== 1 ? "s" : ""} available in the static
+            bundle.
           </p>
         </div>
       </div>
 
       {projects.length === 0 ? (
-        <div className="aig-empty">No projects bundled. Run `pnpm bundle:registry` to import your GitNexus registry.</div>
+        <div className="aig-empty">
+          No projects bundled. Run `pnpm bundle:registry` to import your GitNexus registry.
+        </div>
       ) : (
         <div className="aig-project-grid">
           {projects.map((p) => (

@@ -16,7 +16,9 @@ function collectSlugs(nodes: ModuleNode[]): string[] {
 
 export function getAllWikiSlugs(): string[] {
   const manifestPath = join(process.cwd(), "public", ".gitnexus", "projects.json");
-  if (!existsSync(manifestPath)) return [];
+  if (!existsSync(manifestPath)) {
+    return [];
+  }
 
   let manifest: ProjectManifest;
   try {
@@ -27,9 +29,21 @@ export function getAllWikiSlugs(): string[] {
 
   const slugs = new Set<string>();
   for (const project of manifest.projects) {
-    if (!project.hasData) continue;
-    const treePath = join(process.cwd(), "public", ".gitnexus", "repos", project.id, "wiki", "module_tree.json");
-    if (!existsSync(treePath)) continue;
+    if (!project.hasData) {
+      continue;
+    }
+    const treePath = join(
+      process.cwd(),
+      "public",
+      ".gitnexus",
+      "repos",
+      project.id,
+      "wiki",
+      "module_tree.json"
+    );
+    if (!existsSync(treePath)) {
+      continue;
+    }
     try {
       const tree = JSON.parse(readFileSync(treePath, "utf-8")) as ModuleNode[];
       for (const slug of collectSlugs(tree)) {

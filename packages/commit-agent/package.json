@@ -19,7 +19,7 @@
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "biome check src",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

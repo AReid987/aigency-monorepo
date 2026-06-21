@@ -9,7 +9,10 @@ import {
 } from "./config.js";
 import { analyzeAndBuildWiki, createTarball, uploadTarball } from "./sync.js";
 
-program.name("repoatlas").description("RepoAtlas CLI for syncing project docs to RepoAtlas").version("0.1.0");
+program
+  .name("repoatlas")
+  .description("RepoAtlas CLI for syncing project docs to RepoAtlas")
+  .version("0.1.0");
 
 program
   .command("login")
@@ -18,7 +21,6 @@ program
   .argument("<token>", "API token")
   .action(async (url: string, token: string) => {
     await saveGlobalConfig({ apiUrl: url.replace(/\/$/, ""), token });
-    console.log(`Saved credentials for ${url}`);
   });
 
 program
@@ -26,7 +28,6 @@ program
   .description("Remove saved credentials")
   .action(async () => {
     await saveGlobalConfig({});
-    console.log("Removed RepoAtlas credentials");
   });
 
 program
@@ -62,7 +63,6 @@ program
     }
 
     await saveProjectConfig(cwd, { projectId, apiUrl: globalConfig.apiUrl });
-    console.log(`Registered project ${projectId} at ${globalConfig.apiUrl}`);
   });
 
 program

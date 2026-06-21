@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { getSymbolContext, type SymbolContext } from "../services/backend-client";
+import { useEffect, useState } from "react";
+import { type SymbolContext, getSymbolContext } from "../services/backend-client";
 import { useNexusStore } from "../store";
 
 export function SymbolContextView({ symbol: symbolProp }: { symbol?: string }) {
   const router = useRouter();
-  const symbol = symbolProp ?? (typeof router.query.symbol === "string" ? router.query.symbol : undefined);
+  const symbol =
+    symbolProp ?? (typeof router.query.symbol === "string" ? router.query.symbol : undefined);
   const repo = useNexusStore((s) => s.currentRepo);
   const [context, setContext] = useState<SymbolContext | null>(null);
   const [loading, setLoading] = useState(true);
@@ -19,22 +20,30 @@ export function SymbolContextView({ symbol: symbolProp }: { symbol?: string }) {
     setLoading(true);
     getSymbolContext(repo, symbol ?? "")
       .then((data) => {
-        if (mounted) setContext(data);
+        if (mounted) {
+          setContext(data);
+        }
       })
       .finally(() => {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       });
     return () => {
       mounted = false;
     };
   }, [repo, symbol]);
 
-  if (loading) return <div className="aig-loading">Loading symbol context…</div>;
+  if (loading) {
+    return <div className="aig-loading">Loading symbol context…</div>;
+  }
   if (!context) {
     return (
       <div className="aig-view">
         <h1 className="aig-view__title">Symbol: {symbol}</h1>
-        <p className="aig-view__subtitle">No backend context available. Connect GitNexus backend for symbol details.</p>
+        <p className="aig-view__subtitle">
+          No backend context available. Connect GitNexus backend for symbol details.
+        </p>
       </div>
     );
   }
@@ -55,7 +64,9 @@ export function SymbolContextView({ symbol: symbolProp }: { symbol?: string }) {
           </div>
           <div className="aig-symbol-card__body">
             <p>{context.summary}</p>
-            <div className="aig-text-pixel">Lines {context.lines[0]}–{context.lines[1]}</div>
+            <div className="aig-text-pixel">
+              Lines {context.lines[0]}–{context.lines[1]}
+            </div>
           </div>
         </section>
 
@@ -68,8 +79,10 @@ export function SymbolContextView({ symbol: symbolProp }: { symbol?: string }) {
               <p className="aig-foreground-muted">No references found.</p>
             ) : (
               <ul className="aig-symbol-list">
-                {context.references.map((ref, i) => (
-                  <li key={i} className="aig-text-mono">{ref.file}:{ref.line}</li>
+                {context.references.map((ref) => (
+                  <li key={`${ref.file}:${ref.line}`} className="aig-text-mono">
+                    {ref.file}:{ref.line}
+                  </li>
                 ))}
               </ul>
             )}

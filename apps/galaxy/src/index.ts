@@ -24,7 +24,7 @@ export interface GalaxyInstance {
  *   galaxy.dispose();
  */
 export async function createGalaxy(
-  overrides?: Partial<ReturnType<typeof loadConfig>>,
+  overrides?: Partial<ReturnType<typeof loadConfig>>
 ): Promise<GalaxyInstance> {
   const config = { ...loadConfig(), ...overrides };
 

@@ -1,9 +1,9 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import postgres from "postgres";
-import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
+import postgres from "postgres";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -82,7 +82,11 @@ export async function getWikiPages(sql: postgres.Sql, projectId: string): Promis
   `;
 }
 
-export async function getWikiPage(sql: postgres.Sql, projectId: string, slug: string): Promise<DbWikiPage | null> {
+export async function getWikiPage(
+  sql: postgres.Sql,
+  projectId: string,
+  slug: string
+): Promise<DbWikiPage | null> {
   const rows = await sql<DbWikiPage[]>`
     select slug, title, markdown, generated_at
     from wiki_pages
@@ -106,7 +110,11 @@ export async function upsertWikiPage(
   `;
 }
 
-export async function deleteWikiPagesNotIn(sql: postgres.Sql, projectId: string, slugs: string[]): Promise<void> {
+export async function deleteWikiPagesNotIn(
+  sql: postgres.Sql,
+  projectId: string,
+  slugs: string[]
+): Promise<void> {
   if (slugs.length === 0) {
     await sql`delete from wiki_pages where project_id = ${projectId}`;
     return;

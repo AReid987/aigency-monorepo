@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { CheckCircle2, Circle, Loader2, XCircle } from "lucide-react";
-import { getProcess, type ProcessStep } from "../services/backend-client";
+import { useEffect, useState } from "react";
+import { type ProcessStep, getProcess } from "../services/backend-client";
 import { useNexusStore } from "../store";
 
 export function ProcessView() {
@@ -17,10 +17,14 @@ export function ProcessView() {
     setLoading(true);
     getProcess(repo)
       .then((data) => {
-        if (mounted) setSteps(data);
+        if (mounted) {
+          setSteps(data);
+        }
       })
       .finally(() => {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       });
     return () => {
       mounted = false;
@@ -29,10 +33,20 @@ export function ProcessView() {
 
   const fallbackSteps: ProcessStep[] = [
     { step: 1, title: "Repository Ingest", status: "done", detail: "Static wiki loaded" },
-    { step: 2, title: "Parse Modules", status: "done", detail: `${steps.length ? "" : "Tree parsed from module_tree.json"}` },
+    {
+      step: 2,
+      title: "Parse Modules",
+      status: "done",
+      detail: `${steps.length ? "" : "Tree parsed from module_tree.json"}`,
+    },
     { step: 3, title: "Build Graph", status: "done", detail: "Sigma graph ready" },
     { step: 4, title: "Generate Wiki", status: "done", detail: "Markdown pages loaded" },
-    { step: 5, title: "Agent Bridge", status: "pending", detail: "Awaiting localhost:4747 backend" },
+    {
+      step: 5,
+      title: "Agent Bridge",
+      status: "pending",
+      detail: "Awaiting localhost:4747 backend",
+    },
   ];
 
   const displaySteps = steps.length > 0 ? steps : fallbackSteps;
@@ -42,7 +56,9 @@ export function ProcessView() {
       <div className="aig-view__header">
         <div>
           <h1 className="aig-view__title">Process Pipeline</h1>
-          <p className="aig-view__subtitle">Indexing and enrichment stages for the loaded repository.</p>
+          <p className="aig-view__subtitle">
+            Indexing and enrichment stages for the loaded repository.
+          </p>
         </div>
       </div>
 
@@ -50,8 +66,8 @@ export function ProcessView() {
         <div className="aig-loading">Fetching process state…</div>
       ) : (
         <div className="aig-process">
-          {displaySteps.map((s, idx) => (
-            <div key={idx} className={`aig-process-step aig-process-step--${s.status}`}>
+          {displaySteps.map((s) => (
+            <div key={s.step} className={`aig-process-step aig-process-step--${s.status}`}>
               <div className="aig-process-step__icon">
                 {s.status === "done" && <CheckCircle2 size={18} />}
                 {s.status === "running" && <Loader2 size={18} className="aig-spin" />}

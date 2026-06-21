@@ -1,7 +1,16 @@
+import {
+  BookOpen,
+  Box,
+  Cpu,
+  GitBranch,
+  GitGraph,
+  Layers,
+  type LucideIcon,
+  Radio,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { BookOpen, Box, Cpu, GitBranch, GitGraph, Layers, Radio, type LucideIcon } from "lucide-react";
-import { getCategoryColor, getModuleCategory, type ModuleNode } from "../data/gitnexus";
+import { type ModuleNode, getCategoryColor, getModuleCategory } from "../data/gitnexus";
 import { useNexusStore } from "../store";
 
 function StatCard({
@@ -36,7 +45,10 @@ function ModuleRow({ node }: { node: ModuleNode }) {
   const color = getCategoryColor(cat);
   return (
     <Link href={`/wiki/${node.slug}`} className="aig-module-row">
-      <span className="aig-module-row__dot" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+      <span
+        className="aig-module-row__dot"
+        style={{ background: color, boxShadow: `0 0 6px ${color}` }}
+      />
       <span className="aig-truncate aig-module-row__name">{node.name}</span>
       <span className="aig-tag">{cat}</span>
     </Link>
@@ -90,7 +102,11 @@ export function OverviewView() {
               {new Date(activeProject.indexedAt).toLocaleString()}
             </div>
           </div>
-          <button type="button" className="aig-button aig-button--ghost" onClick={() => router.push("/projects")}>
+          <button
+            type="button"
+            className="aig-button aig-button--ghost"
+            onClick={() => router.push("/projects")}
+          >
             Switch Project
           </button>
         </div>
@@ -101,10 +117,34 @@ export function OverviewView() {
       ) : (
         <>
           <div className="aig-stat-grid">
-            <StatCard label="Modules" value={modules.length} sub={`${apps.length} apps · ${packages.length} packages`} icon={Box} href="/files" />
-            <StatCard label="Agents" value={agents.length} sub="Autonomous workers" icon={Cpu} href="/files" />
-            <StatCard label="Wiki Pages" value={pages.length} sub="Generated docs" icon={BookOpen} href="/wiki" />
-            <StatCard label="Relations" value="Graph" sub="Visual dependency map" icon={GitGraph} href="/graph" />
+            <StatCard
+              label="Modules"
+              value={modules.length}
+              sub={`${apps.length} apps · ${packages.length} packages`}
+              icon={Box}
+              href="/files"
+            />
+            <StatCard
+              label="Agents"
+              value={agents.length}
+              sub="Autonomous workers"
+              icon={Cpu}
+              href="/files"
+            />
+            <StatCard
+              label="Wiki Pages"
+              value={pages.length}
+              sub="Generated docs"
+              icon={BookOpen}
+              href="/wiki"
+            />
+            <StatCard
+              label="Relations"
+              value="Graph"
+              sub="Visual dependency map"
+              icon={GitGraph}
+              href="/graph"
+            />
           </div>
 
           <div className="aig-overview-grid">

@@ -1,9 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
 import type postgres from "postgres";
-import { randomUUID } from "node:crypto";
 import { createSyncJob, finishSyncJob, getProject, upsertProject } from "../db/index.js";
-import { ingestGitnexusTarball } from "../lib/extract.js";
 import { config } from "../lib/config.js";
+import { ingestGitnexusTarball } from "../lib/extract.js";
 
 function bearerToken(c: { req: { header(name: string): string | undefined } }): string | undefined {
   const auth = c.req.header("Authorization") ?? "";
@@ -53,7 +53,10 @@ export function createUploadRoutes(sql: postgres.Sql) {
       return c.json({ error: "Missing tarball field" }, 400);
     }
 
-    const jobId = await createSyncJob(sql, id, "running", { source: "upload", filename: file.name });
+    const jobId = await createSyncJob(sql, id, "running", {
+      source: "upload",
+      filename: file.name,
+    });
 
     try {
       const buffer = Buffer.from(await file.arrayBuffer());

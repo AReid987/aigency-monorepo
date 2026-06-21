@@ -2,8 +2,8 @@
   "name": "@repoatlas/server",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "description": "RepoAtlas sync hub and API for live project docs/graphs",
+  "type": "module",
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --out-dir dist",
     "clean": "rimraf dist",

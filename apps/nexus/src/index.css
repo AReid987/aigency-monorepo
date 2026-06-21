@@ -69,10 +69,22 @@ pre {
   font-weight: 600;
 }
 
-.markdown-body h1 { font-size: var(--aig-text-size-3xl); border-bottom: 1px solid var(--aig-fence-light); padding-bottom: 0.3em; }
-.markdown-body h2 { font-size: var(--aig-text-size-2xl); border-bottom: 1px solid var(--aig-fence-light); padding-bottom: 0.3em; }
-.markdown-body h3 { font-size: var(--aig-text-size-xl); }
-.markdown-body h4 { font-size: var(--aig-text-size-lg); }
+.markdown-body h1 {
+  font-size: var(--aig-text-size-3xl);
+  border-bottom: 1px solid var(--aig-fence-light);
+  padding-bottom: 0.3em;
+}
+.markdown-body h2 {
+  font-size: var(--aig-text-size-2xl);
+  border-bottom: 1px solid var(--aig-fence-light);
+  padding-bottom: 0.3em;
+}
+.markdown-body h3 {
+  font-size: var(--aig-text-size-xl);
+}
+.markdown-body h4 {
+  font-size: var(--aig-text-size-lg);
+}
 
 .markdown-body p {
   margin: 0.75em 0;
@@ -168,7 +180,7 @@ pre {
 
 .mermaid svg {
   max-width: 100%;
-  filter: drop-shadow(0 0 12px oklch(0.75 0.150 65 / 0.08));
+  filter: drop-shadow(0 0 12px oklch(0.75 0.15 65 / 0.08));
 }
 
 /* Utility helpers */

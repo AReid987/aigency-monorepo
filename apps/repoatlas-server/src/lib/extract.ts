@@ -9,9 +9,14 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, extname, join, relative } from "node:path";
-import { x } from "tar";
 import type postgres from "postgres";
-import { upsertProject, upsertWikiPage, deleteWikiPagesNotIn, type DbWikiPage } from "../db/index.js";
+import { x } from "tar";
+import {
+  type DbWikiPage,
+  deleteWikiPagesNotIn,
+  upsertProject,
+  upsertWikiPage,
+} from "../db/index.js";
 
 export interface GitnexusMeta {
   repoPath?: string;
@@ -65,7 +70,9 @@ export async function ingestGitnexusTarball(
       for (const file of walkMarkdown(wikiDir)) {
         const rel = relative(wikiDir, file);
         const slug = rel.replace(/\.md$/i, "");
-        if (slug === "index" || slug === "meta") continue;
+        if (slug === "index" || slug === "meta") {
+          continue;
+        }
         const markdown = readFileSync(file, "utf-8");
         pages.push({
           slug: slug.replace(/\\/g, "/"),
@@ -80,7 +87,11 @@ export async function ingestGitnexusTarball(
       await upsertWikiPage(sql, projectId, page);
     }
 
-    await deleteWikiPagesNotIn(sql, projectId, pages.map((p) => p.slug));
+    await deleteWikiPagesNotIn(
+      sql,
+      projectId,
+      pages.map((p) => p.slug)
+    );
 
     return { projectName, wikiCount: pages.length };
   } finally {

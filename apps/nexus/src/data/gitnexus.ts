@@ -45,7 +45,9 @@ interface ProjectManifest {
 
 const REPOATLAS_URL =
   typeof process !== "undefined"
-    ? (process.env.NEXT_PUBLIC_REPOATLAS_API_URL ?? process.env.NEXT_PUBLIC_GITNEXUS_BACKEND_URL ?? null)
+    ? (process.env.NEXT_PUBLIC_REPOATLAS_API_URL ??
+      process.env.NEXT_PUBLIC_GITNEXUS_BACKEND_URL ??
+      null)
     : null;
 
 const metaCache = new Map<string, MetaData>();
@@ -74,7 +76,9 @@ export async function loadProjectsManifest(): Promise<ProjectManifest> {
   if (REPOATLAS_URL) {
     try {
       const res = await fetch(`${REPOATLAS_URL}/api/repos`);
-      if (res.ok) return (await res.json()) as ProjectManifest;
+      if (res.ok) {
+        return (await res.json()) as ProjectManifest;
+      }
     } catch {
       // fall through to static manifest
     }
@@ -89,7 +93,9 @@ export async function loadProjectsManifest(): Promise<ProjectManifest> {
 
 export async function loadRepoMeta(repoId: string): Promise<MetaData> {
   const cached = metaCache.get(repoId);
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   if (REPOATLAS_URL) {
     const res = await fetch(`${REPOATLAS_URL}/api/repo/${encodeURIComponent(repoId)}/meta`);
@@ -111,7 +117,9 @@ export async function loadRepoMeta(repoId: string): Promise<MetaData> {
 
 export async function loadRepoTree(repoId: string): Promise<ModuleNode[]> {
   const cached = treeCache.get(repoId);
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   if (REPOATLAS_URL) {
     const res = await fetch(`${REPOATLAS_URL}/api/repo/${encodeURIComponent(repoId)}/tree`);
@@ -138,7 +146,9 @@ export async function loadRepoWikiPage(repoId: string, slug: string): Promise<Wi
     pagesCache.set(repoId, repoCache);
   }
   const cached = repoCache.get(slug);
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   if (REPOATLAS_URL) {
     const res = await fetch(
@@ -164,7 +174,9 @@ export async function loadRepoWikiPage(repoId: string, slug: string): Promise<Wi
 export async function loadAllRepoWikiPages(repoId: string): Promise<WikiPage[]> {
   if (REPOATLAS_URL) {
     const res = await fetch(`${REPOATLAS_URL}/api/repo/${encodeURIComponent(repoId)}/wiki`);
-    if (res.ok) return (await res.json()) as WikiPage[];
+    if (res.ok) {
+      return (await res.json()) as WikiPage[];
+    }
   }
 
   const tree = await loadRepoTree(repoId);
@@ -210,9 +222,12 @@ export function getAgentColor(name: string): string {
 }
 
 export function getCategoryColor(cat: ReturnType<typeof getModuleCategory>): string {
-  return { package: AIGENCY_HIGHLIGHT, app: AIGENCY_ACCENT, agent: AIGENCY_GO, other: AIGENCY_MUTED }[
-    cat
-  ];
+  return {
+    package: AIGENCY_HIGHLIGHT,
+    app: AIGENCY_ACCENT,
+    agent: AIGENCY_GO,
+    other: AIGENCY_MUTED,
+  }[cat];
 }
 
 export function getModuleCategory(slug: string): "package" | "app" | "agent" | "other" {

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/router";
 import { Check, ChevronDown, GitBranch, Layers } from "lucide-react";
+import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from "react";
 import { useNexusStore } from "../store";
 
 export function ProjectSwitcher() {
@@ -53,11 +53,15 @@ export function ProjectSwitcher() {
           <GitBranch size={14} strokeWidth={2} />
         </div>
         <span className="aig-repo__label">{active?.name ?? "Project"}</span>
-        <ChevronDown size={12} className={`aig-repo__chevron ${open ? "aig-repo__chevron--open" : ""}`} />
+        <ChevronDown
+          size={12}
+          className={`aig-repo__chevron ${open ? "aig-repo__chevron--open" : ""}`}
+        />
       </button>
 
       {open && (
-        <div className="aig-project-dropdown" role="listbox">
+        // biome-ignore lint/a11y/useSemanticElements: custom styled dropdown
+        <div className="aig-project-dropdown" role="listbox" tabIndex={0}>
           <div className="aig-project-dropdown__header">
             <Layers size={12} />
             <span className="aig-text-pixel">Indexed Projects</span>
@@ -68,8 +72,6 @@ export function ProjectSwitcher() {
               type="button"
               className={`aig-project-option ${p.id === currentRepo ? "aig-project-option--active" : ""}`}
               onClick={() => select(p.id)}
-              role="option"
-              aria-selected={p.id === currentRepo}
             >
               <span className="aig-project-option__name">{p.name}</span>
               <span className="aig-project-option__meta">

@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, FileCode, Folder } from "lucide-react";
-import { getCategoryColor, getModuleCategory, type ModuleNode } from "../data/gitnexus";
+import { useMemo, useState } from "react";
+import { type ModuleNode, getCategoryColor, getModuleCategory } from "../data/gitnexus";
 import { useNexusStore } from "../store";
 
 function TreeItem({ node, depth = 0 }: { node: ModuleNode; depth?: number }) {
@@ -20,7 +20,9 @@ function TreeItem({ node, depth = 0 }: { node: ModuleNode; depth?: number }) {
         aria-expanded={open}
       >
         {hasChildren || hasFiles ? (
-          <span className="aig-filetree-chevron">{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</span>
+          <span className="aig-filetree-chevron">
+            {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          </span>
         ) : (
           <span className="aig-filetree-chevron-placeholder" />
         )}
@@ -32,7 +34,11 @@ function TreeItem({ node, depth = 0 }: { node: ModuleNode; depth?: number }) {
       {open && (
         <div>
           {node.files?.map((file) => (
-            <div key={file} className="aig-filetree-file" style={{ paddingLeft: `${(depth + 1) * 18}px` }}>
+            <div
+              key={file}
+              className="aig-filetree-file"
+              style={{ paddingLeft: `${(depth + 1) * 18}px` }}
+            >
               <span className="aig-filetree-chevron-placeholder" />
               <FileCode size={14} />
               <span className="aig-truncate aig-text-mono">{file}</span>
@@ -54,10 +60,14 @@ export function FileTreeView() {
     function walk(nodes: ModuleNode[]) {
       for (const n of nodes) {
         count += n.files?.length ?? 0;
-        if (n.children) walk(n.children);
+        if (n.children) {
+          walk(n.children);
+        }
       }
     }
-    if (tree) walk(tree);
+    if (tree) {
+      walk(tree);
+    }
     return count;
   }, [tree]);
 
@@ -70,7 +80,9 @@ export function FileTreeView() {
       <div className="aig-view__header">
         <div>
           <h1 className="aig-view__title">File Tree</h1>
-          <p className="aig-view__subtitle">{tree.length} modules · {fileCount} tracked files</p>
+          <p className="aig-view__subtitle">
+            {tree.length} modules · {fileCount} tracked files
+          </p>
         </div>
       </div>
 

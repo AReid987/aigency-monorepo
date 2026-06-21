@@ -18,7 +18,9 @@ export interface GlobalConfig {
 }
 
 export async function loadGlobalConfig(): Promise<GlobalConfig> {
-  if (!existsSync(globalPath)) return {};
+  if (!existsSync(globalPath)) {
+    return {};
+  }
   const raw = await readFile(globalPath, "utf-8");
   return JSON.parse(raw) as GlobalConfig;
 }
@@ -30,7 +32,9 @@ export async function saveGlobalConfig(config: GlobalConfig): Promise<void> {
 
 export async function loadProjectConfig(cwd: string): Promise<ProjectConfig | null> {
   const path = join(cwd, localFilename);
-  if (!existsSync(path)) return null;
+  if (!existsSync(path)) {
+    return null;
+  }
   const raw = await readFile(path, "utf-8");
   return JSON.parse(raw) as ProjectConfig;
 }
@@ -39,13 +43,19 @@ export async function saveProjectConfig(cwd: string, config: ProjectConfig): Pro
   await writeFile(join(cwd, localFilename), JSON.stringify(config, null, 2));
 }
 
-export async function findProjectConfig(startDir: string): Promise<{ config: ProjectConfig; root: string } | null> {
+export async function findProjectConfig(
+  startDir: string
+): Promise<{ config: ProjectConfig; root: string } | null> {
   let dir = startDir;
   while (true) {
     const config = await loadProjectConfig(dir);
-    if (config) return { config, root: dir };
+    if (config) {
+      return { config, root: dir };
+    }
     const parent = join(dir, "..");
-    if (parent === dir) return null;
+    if (parent === dir) {
+      return null;
+    }
     dir = parent;
   }
 }

@@ -1,9 +1,14 @@
 import Graph from "graphology";
-import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import Sigma from "sigma";
 import { BookOpen, Filter, Maximize, Search, X } from "lucide-react";
-import { getCategoryColor, getCategoryLabel, getModuleCategory, type ModuleNode } from "../data/gitnexus";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Sigma from "sigma";
+import {
+  type ModuleNode,
+  getCategoryColor,
+  getCategoryLabel,
+  getModuleCategory,
+} from "../data/gitnexus";
 import { useNexusStore } from "../store";
 
 interface GraphNode {
@@ -41,7 +46,9 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
   const added = new Set<string>();
 
   function addNode(n: ModuleNode, parentId?: string) {
-    if (added.has(n.slug)) return;
+    if (added.has(n.slug)) {
+      return;
+    }
     added.add(n.slug);
     const cat = getModuleCategory(n.slug);
     nodes.push({
@@ -55,14 +62,22 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
       fileCount: countFiles(n),
       children: collectChildren(n),
     });
-    if (parentId) links.push({ source: parentId, target: n.slug });
-    for (const child of n.children ?? []) addNode(child, n.slug);
+    if (parentId) {
+      links.push({ source: parentId, target: n.slug });
+    }
+    for (const child of n.children ?? []) {
+      addNode(child, n.slug);
+    }
   }
-  for (const root of tree) addNode(root);
+  for (const root of tree) {
+    addNode(root);
+  }
 
   for (const a of nodes) {
     for (const b of nodes) {
-      if (a.id >= b.id) continue;
+      if (a.id >= b.id) {
+        continue;
+      }
       if (a.category === "package" && b.category === "app") {
         if (a.id.includes(b.id) || b.id.includes(a.id)) {
           links.push({ source: a.id, target: b.id });
@@ -94,7 +109,9 @@ function runForceLayout(nodes: GraphNode[], links: GraphLink[], iterations = 300
     for (const link of links) {
       const na = nodes.find((n) => n.id === link.source);
       const nb = nodes.find((n) => n.id === link.target);
-      if (!na || !nb) continue;
+      if (!na || !nb) {
+        continue;
+      }
       let dx = nb.x - na.x;
       let dy = nb.y - na.y;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -124,10 +141,14 @@ function resolveColor(value: string): string {
 
 function findNode(tree: ModuleNode[], slug: string): ModuleNode | null {
   for (const n of tree) {
-    if (n.slug === slug) return n;
+    if (n.slug === slug) {
+      return n;
+    }
     if (n.children) {
       const found = findNode(n.children, slug);
-      if (found) return found;
+      if (found) {
+        return found;
+      }
     }
   }
   return null;
@@ -143,7 +164,9 @@ export function GraphView() {
   const [query, setQuery] = useState("");
 
   const { nodes, links, nodeMap } = useMemo(() => {
-    if (!tree) return { nodes: [], links: [], nodeMap: new Map<string, GraphNode>() };
+    if (!tree) {
+      return { nodes: [], links: [], nodeMap: new Map<string, GraphNode>() };
+    }
     const g = buildGraph(tree);
     runForceLayout(g.nodes, g.links);
     const map = new Map(g.nodes.map((n) => [n.id, n]));
@@ -151,13 +174,19 @@ export function GraphView() {
   }, [tree]);
 
   const suggestions = useMemo(() => {
-    if (!query.trim()) return [];
+    if (!query.trim()) {
+      return [];
+    }
     const q = query.toLowerCase();
-    return nodes.filter((n) => n.label.toLowerCase().includes(q) || n.id.toLowerCase().includes(q)).slice(0, 8);
+    return nodes
+      .filter((n) => n.label.toLowerCase().includes(q) || n.id.toLowerCase().includes(q))
+      .slice(0, 8);
   }, [query, nodes]);
 
   useEffect(() => {
-    if (!containerRef.current || nodes.length === 0) return;
+    if (!containerRef.current || nodes.length === 0) {
+      return;
+    }
     const graph = new Graph();
     for (const n of nodes) {
       graph.addNode(n.id, {
@@ -199,7 +228,9 @@ export function GraphView() {
 
   useEffect(() => {
     const renderer = sigmaRef.current;
-    if (!renderer) return;
+    if (!renderer) {
+      return;
+    }
     const graph = renderer.getGraph();
     graph.forEachNode((node) => {
       const cat = nodeMap.get(node)?.category ?? "other";
@@ -208,7 +239,12 @@ export function GraphView() {
     graph.forEachEdge((edge) => {
       const src = graph.source(edge);
       const tgt = graph.target(edge);
-      graph.setEdgeAttribute(edge, "hidden", !visible.has(nodeMap.get(src)?.category ?? "other") || !visible.has(nodeMap.get(tgt)?.category ?? "other"));
+      graph.setEdgeAttribute(
+        edge,
+        "hidden",
+        !visible.has(nodeMap.get(src)?.category ?? "other") ||
+          !visible.has(nodeMap.get(tgt)?.category ?? "other")
+      );
     });
     renderer.refresh();
   }, [visible, nodeMap]);
@@ -216,7 +252,9 @@ export function GraphView() {
   const focusNode = (slug: string) => {
     const renderer = sigmaRef.current;
     const n = nodeMap.get(slug);
-    if (!renderer || !n) return;
+    if (!renderer || !n) {
+      return;
+    }
     renderer.getCamera().animate({ x: n.x, y: n.y, ratio: 0.5 }, { duration: 350 });
     setSelected(slug);
     setQuery("");
@@ -229,8 +267,11 @@ export function GraphView() {
   const toggleCategory = (cat: Category) => {
     setVisible((prev) => {
       const next = new Set(prev);
-      if (next.has(cat)) next.delete(cat);
-      else next.add(cat);
+      if (next.has(cat)) {
+        next.delete(cat);
+      } else {
+        next.add(cat);
+      }
       return next;
     });
   };
@@ -248,7 +289,8 @@ export function GraphView() {
         <div>
           <h1 className="aig-view__title">Relationship Graph</h1>
           <p className="aig-graph__subtitle">
-            {nodes.length} modules · {links.length} relationships · pan, zoom, and click nodes to inspect
+            {nodes.length} modules · {links.length} relationships · pan, zoom, and click nodes to
+            inspect
           </p>
         </div>
         <div className="aig-graph__controls">
@@ -264,7 +306,12 @@ export function GraphView() {
             {suggestions.length > 0 && (
               <div className="aig-graph__suggestions">
                 {suggestions.map((n) => (
-                  <button key={n.id} type="button" className="aig-graph__suggestion" onClick={() => focusNode(n.id)}>
+                  <button
+                    key={n.id}
+                    type="button"
+                    className="aig-graph__suggestion"
+                    onClick={() => focusNode(n.id)}
+                  >
                     <span className="aig-graph__suggestion-dot" style={{ background: n.color }} />
                     {n.label}
                   </button>
@@ -272,27 +319,44 @@ export function GraphView() {
               </div>
             )}
           </div>
-          <button type="button" className="aig-button aig-button--ghost" onClick={resetCamera} title="Reset view">
+          <button
+            type="button"
+            className="aig-button aig-button--ghost"
+            onClick={resetCamera}
+            title="Reset view"
+          >
             <Maximize size={14} strokeWidth={1.5} />
           </button>
         </div>
       </div>
 
       <div className="aig-graph__body">
-        <div ref={containerRef} className="aig-graph__stage" role="img" aria-label="Module relationship graph" />
+        <div
+          ref={containerRef}
+          className="aig-graph__stage"
+          role="img"
+          aria-label="Module relationship graph"
+        />
 
         {selectedNode && (
           <aside className="aig-graph__panel">
             <div className="aig-graph__panel-header">
               <h3 className="aig-graph__panel-title">{selectedNode.label}</h3>
-              <button type="button" className="aig-button aig-button--ghost" onClick={() => setSelected(null)} aria-label="Close">
+              <button
+                type="button"
+                className="aig-button aig-button--ghost"
+                onClick={() => setSelected(null)}
+                aria-label="Close"
+              >
                 <X size={14} strokeWidth={1.5} />
               </button>
             </div>
             <div className="aig-graph__panel-body">
               <div className="aig-graph__panel-row">
                 <span className="aig-text-pixel">Type</span>
-                <span className="aig-tag" style={{ color: selectedNode.color }}>{getCategoryLabel(selectedNode.category)}</span>
+                <span className="aig-tag" style={{ color: selectedNode.color }}>
+                  {getCategoryLabel(selectedNode.category)}
+                </span>
               </div>
               <div className="aig-graph__panel-row">
                 <span className="aig-text-pixel">Files</span>
@@ -307,7 +371,9 @@ export function GraphView() {
                   <span className="aig-text-pixel">Top files</span>
                   <ul className="aig-graph__file-list">
                     {selectedSource.files.slice(0, 6).map((f) => (
-                      <li key={f} className="aig-text-mono">{f.split("/").pop()}</li>
+                      <li key={f} className="aig-text-mono">
+                        {f.split("/").pop()}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -336,7 +402,12 @@ export function GraphView() {
                 onClick={() => toggleCategory(cat)}
                 title={active ? `Hide ${cat}` : `Show ${cat}`}
               >
-                <span className="aig-legend-item__dot" style={{ background: active ? getCategoryColor(cat) : "var(--aig-foreground-muted)" }} />
+                <span
+                  className="aig-legend-item__dot"
+                  style={{
+                    background: active ? getCategoryColor(cat) : "var(--aig-foreground-muted)",
+                  }}
+                />
                 <span>{getCategoryLabel(cat)}</span>
               </button>
             );

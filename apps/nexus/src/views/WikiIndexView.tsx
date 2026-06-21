@@ -1,8 +1,13 @@
-import Link from "next/link";
 import { BookOpen } from "lucide-react";
+import Link from "next/link";
 import { useMemo } from "react";
+import {
+  type ModuleNode,
+  getCategoryColor,
+  getCategoryLabel,
+  getModuleCategory,
+} from "../data/gitnexus";
 import { useNexusStore } from "../store";
-import { getCategoryColor, getCategoryLabel, getModuleCategory, type ModuleNode } from "../data/gitnexus";
 
 const CATEGORY_ORDER = ["app", "package", "agent", "other"];
 
@@ -15,10 +20,14 @@ export function WikiIndexView() {
     function walk(nodes: ModuleNode[]) {
       for (const node of nodes) {
         map.set(node.slug, node);
-        if (node.children) walk(node.children);
+        if (node.children) {
+          walk(node.children);
+        }
       }
     }
-    if (tree) walk(tree);
+    if (tree) {
+      walk(tree);
+    }
     return map;
   }, [tree]);
 
@@ -27,7 +36,10 @@ export function WikiIndexView() {
     for (const page of pages) {
       const node = slugToNode.get(page.slug);
       const cat = node ? getModuleCategory(node.slug) : "other";
-      (buckets[cat] ||= []).push(page);
+      if (!buckets[cat]) {
+        buckets[cat] = [];
+      }
+      buckets[cat].push(page);
     }
     return Object.entries(buckets)
       .sort(([a], [b]) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b))

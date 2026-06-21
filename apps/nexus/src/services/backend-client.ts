@@ -11,7 +11,9 @@ async function safeFetch<T>(url: string): Promise<T | null> {
     const timeout = setTimeout(() => controller.abort(), 2500);
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timeout);
-    if (!res.ok) return null;
+    if (!res.ok) {
+      return null;
+    }
     return (await res.json()) as T;
   } catch {
     return null;
@@ -111,7 +113,10 @@ export async function searchRepo(repo: string, query: string): Promise<SearchRes
   );
 }
 
-export async function getSymbolContext(repo: string, symbol: string): Promise<SymbolContext | null> {
+export async function getSymbolContext(
+  repo: string,
+  symbol: string
+): Promise<SymbolContext | null> {
   return safeFetch<SymbolContext>(
     `${BACKEND_URL}/api/repo/${encodeURIComponent(repo)}/symbol/${encodeURIComponent(symbol)}`
   );
@@ -127,8 +132,9 @@ export async function getImpact(repo: string, symbol: string): Promise<ImpactEnt
 
 export async function getProcess(repo: string): Promise<ProcessStep[]> {
   return (
-    (await safeFetch<ProcessStep[]>(`${BACKEND_URL}/api/repo/${encodeURIComponent(repo)}/process`)) ??
-    []
+    (await safeFetch<ProcessStep[]>(
+      `${BACKEND_URL}/api/repo/${encodeURIComponent(repo)}/process`
+    )) ?? []
   );
 }
 
