@@ -48,28 +48,26 @@ function TreeNode({ node, depth = 0 }: { node: ModuleNode; depth?: number }) {
 
   return (
     <div>
-      <button
-        type="button"
-        className="aig-tree-node"
-        style={{ paddingLeft: `${depth * 12}px` }}
-        onClick={() => {
-          if (hasChildren) {
-            setOpen((o) => !o);
-          }
-        }}
-        aria-expanded={open}
-      >
-        {hasChildren ? (
-          <span className="aig-tree-chevron" data-open={open}>
-            ▼
-          </span>
-        ) : (
-          <span className="aig-tree-chevron-placeholder" />
-        )}
+      <div className="aig-tree-node" style={{ paddingLeft: `${depth * 12}px` }}>
+        <button
+          type="button"
+          className="aig-tree-toggle"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          disabled={!hasChildren}
+          aria-label={open ? "Collapse module" : "Expand module"}
+        >
+          {hasChildren ? (
+            <span className="aig-tree-chevron" data-open={open}>
+              ▼
+            </span>
+          ) : (
+            <span className="aig-tree-chevron-placeholder" />
+          )}
+        </button>
         <Link
           href={`/wiki/${node.slug}`}
           className={`aig-tree-link ${isActive ? "aig-tree-link--active" : ""}`}
-          style={{ color: "inherit" }}
         >
           <span
             className="aig-tree-dot"
@@ -77,7 +75,7 @@ function TreeNode({ node, depth = 0 }: { node: ModuleNode; depth?: number }) {
           />
           <span className="aig-truncate">{node.name}</span>
         </Link>
-      </button>
+      </div>
       {open && hasChildren && (
         <div>
           {node.children?.map((c) => (
@@ -243,19 +241,28 @@ export function Sidebar() {
           align-items: center;
           gap: 6px;
           padding: 3px 0;
-          cursor: pointer;
           user-select: none;
-          background: transparent;
-          border: none;
           color: var(--aig-foreground-muted);
           font-family: inherit;
           font-size: var(--aig-text-size-sm);
-          width: 100%;
-          text-align: left;
           transition: color var(--aig-timing-signal-state) var(--aig-ease-out-expo);
         }
         .aig-tree-node:hover {
           color: var(--aig-foreground);
+        }
+        .aig-tree-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          background: transparent;
+          border: none;
+          color: inherit;
+          cursor: pointer;
+        }
+        .aig-tree-toggle:disabled {
+          cursor: default;
+          opacity: 0.3;
         }
         .aig-tree-chevron {
           width: 14px;

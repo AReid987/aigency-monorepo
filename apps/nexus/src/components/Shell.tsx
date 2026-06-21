@@ -93,11 +93,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
   // Load project data whenever the active repo or data source changes.
   useEffect(() => {
     if (!currentRepo) {
+      setMeta(null);
+      setTree(null);
+      setPages([]);
       setLoading(false);
       return;
     }
     let mounted = true;
     setLoading(true);
+    setMeta(null);
+    setTree(null);
+    setPages([]);
+    setError(null);
 
     Promise.all([
       loadRepoMeta(currentRepo),

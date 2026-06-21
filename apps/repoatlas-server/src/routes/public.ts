@@ -100,7 +100,68 @@ export function createPublicRoutes(sql: postgres.Sql) {
     if (!project) {
       return c.json({ error: "Not found" }, 404);
     }
-    return c.json({ nodes: [], edges: [] });
+    const meta = (project.meta ?? {}) as Record<string, unknown>;
+    const tree = (meta.moduleTree ?? []) as Array<{
+      name: string;
+      slug: string;
+      files?: string[];
+      children?: unknown[];
+    }>;
+
+    interface GraphNode {
+      id: string;
+      label: string;
+      type: "module";
+    }
+    interface GraphEdge {
+      id: string;
+      source: string;
+      target: string;
+      type: "parent" | "reference";
+    }
+
+    const nodes: GraphNode[] = [];
+    const edges: GraphEdge[] = [];
+    const seen = new Set<string>();
+
+    function walk(node: (typeof tree)[number], parentId?: string) {
+      if (seen.has(node.slug)) {
+        return;
+      }
+      seen.add(node.slug);
+      nodes.push({ id: node.slug, label: node.name, type: "module" });
+      if (parentId) {
+        edges.push({
+          id: `${parentId}->${node.slug}`,
+          source: parentId,
+          target: node.slug,
+          type: "parent",
+        });
+      }
+      for (const child of (node.children ?? []) as typeof tree) {
+        walk(child, node.slug);
+      }
+    }
+    for (const root of tree) {
+      walk(root);
+    }
+
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i];
+        const b = nodes[j];
+        if (a.id.includes(b.id) || b.id.includes(a.id)) {
+          edges.push({
+            id: `${a.id}<->${b.id}`,
+            source: a.id,
+            target: b.id,
+            type: "reference",
+          });
+        }
+      }
+    }
+
+    return c.json({ nodes, edges });
   });
 
   app.get("/api/repo/:id/process", async (c) => {

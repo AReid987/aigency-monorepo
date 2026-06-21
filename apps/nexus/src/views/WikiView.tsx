@@ -10,6 +10,7 @@ export function WikiView({ slug: slugProp }: { slug?: string }) {
   const router = useRouter();
   const slug = slugProp ?? (typeof router.query.slug === "string" ? router.query.slug : undefined);
   const repo = useNexusStore((s) => s.currentRepo);
+  const isReady = router.isReady;
   const [page, setPage] = useState<WikiPage | null>(null);
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(true);
@@ -90,7 +91,7 @@ export function WikiView({ slug: slugProp }: { slug?: string }) {
     }
   }, [html]);
 
-  if (loading) {
+  if (!isReady || loading) {
     return (
       <div className="aig-wiki">
         <div className="aig-loading">Loading wiki page…</div>

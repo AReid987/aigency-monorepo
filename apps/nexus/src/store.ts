@@ -23,8 +23,8 @@ export interface NexusState {
   selectedSymbol: string | null;
   setProjects: (p: ProjectInfo[]) => void;
   setCurrentRepo: (r: string | null) => void;
-  setMeta: (m: import("./data/gitnexus.js").MetaData) => void;
-  setTree: (t: import("./data/gitnexus.js").ModuleNode[]) => void;
+  setMeta: (m: import("./data/gitnexus.js").MetaData | null) => void;
+  setTree: (t: import("./data/gitnexus.js").ModuleNode[] | null) => void;
   setPages: (p: import("./data/gitnexus.js").WikiPage[]) => void;
   setCurrentSlug: (s: string | null) => void;
   setSearchQuery: (q: string) => void;

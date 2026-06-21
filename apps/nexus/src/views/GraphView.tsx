@@ -88,6 +88,16 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
   return { nodes, links };
 }
 
+function circularInitialLayout(nodes: GraphNode[]) {
+  const count = nodes.length;
+  const radius = Math.max(120, count * 18);
+  nodes.forEach((n, i) => {
+    const angle = (2 * Math.PI * i) / Math.max(1, count);
+    n.x = Math.cos(angle) * radius;
+    n.y = Math.sin(angle) * radius;
+  });
+}
+
 function runForceLayout(nodes: GraphNode[], links: GraphLink[], iterations = 300) {
   for (let i = 0; i < iterations; i++) {
     for (let a = 0; a < nodes.length; a++) {
@@ -168,6 +178,7 @@ export function GraphView() {
       return { nodes: [], links: [], nodeMap: new Map<string, GraphNode>() };
     }
     const g = buildGraph(tree);
+    circularInitialLayout(g.nodes);
     runForceLayout(g.nodes, g.links);
     const map = new Map(g.nodes.map((n) => [n.id, n]));
     return { nodes: g.nodes, links: g.links, nodeMap: map };
@@ -197,9 +208,10 @@ export function GraphView() {
         color: resolveColor(n.color),
       });
     }
+    const EDGE_COLOR = "oklch(0.65 0.02 250 / 0.45)";
     for (const l of links) {
       if (graph.hasNode(l.source) && graph.hasNode(l.target)) {
-        graph.addEdge(l.source, l.target, { size: 1, color: "oklch(0.90 0.010 250 / 0.15)" });
+        graph.addEdge(l.source, l.target, { size: 1.5, color: EDGE_COLOR });
       }
     }
 
@@ -209,7 +221,7 @@ export function GraphView() {
       labelWeight: "500",
       labelColor: { color: "oklch(0.78 0.010 250)" },
       defaultNodeColor: "oklch(0.75 0.150 65)",
-      defaultEdgeColor: "oklch(0.90 0.010 250 / 0.15)",
+      defaultEdgeColor: EDGE_COLOR,
       hideEdgesOnMove: false,
       hideLabelsOnMove: false,
       allowInvalidContainer: true,
