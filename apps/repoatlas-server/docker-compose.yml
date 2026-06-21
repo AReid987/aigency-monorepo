@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: repoatlas
+      POSTGRES_PASSWORD: repoatlas
+      POSTGRES_DB: repoatlas
+    ports:
+      - "5433:5432"
+    volumes:
+      - repoatlas_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U repoatlas -d repoatlas"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  repoatlas_pgdata:

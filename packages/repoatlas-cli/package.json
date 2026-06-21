@@ -1,0 +1,29 @@
+{
+  "name": "@repoatlas/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "RepoAtlas CLI for initializing projects and syncing docs/graphs",
+  "bin": {
+    "repoatlas": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --out-dir dist",
+    "clean": "rimraf dist",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "tar": "^7.4.3"
+  },
+  "devDependencies": {
+    "@aigency/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "@types/tar": "^6.1.13",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

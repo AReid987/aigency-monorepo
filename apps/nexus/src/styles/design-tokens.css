@@ -1,0 +1,111 @@
+/* Aigency design tokens — local CSS mirror of @aigency/design-tokens/aigency.json */
+/* OKLCH only. Zero border-radius. Sharp, spacecraft-instrument-panel aesthetic. */
+
+:root {
+  /* Void (background) */
+  --aig-void-deep: oklch(0.10 0.015 250);
+  --aig-void-base: oklch(0.13 0.015 250);
+  --aig-void-raised: oklch(0.17 0.015 250);
+  --aig-void-glass: oklch(0.20 0.020 250);
+
+  /* Text */
+  --aig-text-primary: oklch(0.90 0.010 250);
+  --aig-text-body: oklch(0.78 0.010 250);
+  --aig-text-secondary: oklch(0.60 0.010 250);
+  --aig-text-tertiary: oklch(0.45 0.010 250);
+
+  /* Accent (warm signal) */
+  --aig-accent-warm: oklch(0.75 0.150 65);
+  --aig-accent-warm-dim: oklch(0.55 0.100 65);
+  --aig-accent-warm-glow: oklch(0.75 0.150 65 / 0.3);
+
+  /* Signals */
+  --aig-signal-go: oklch(0.72 0.170 160);
+  --aig-signal-conditional: oklch(0.75 0.150 65);
+  --aig-signal-avoid: oklch(0.60 0.200 25);
+  --aig-signal-critical: oklch(0.55 0.220 25);
+  --aig-signal-highlight: oklch(0.65 0.170 300);
+
+  /* Fence (borders) */
+  --aig-fence-light: oklch(0.90 0.010 250 / 0.08);
+  --aig-fence-medium: oklch(0.90 0.010 250 / 0.12);
+  --aig-fence-strong: oklch(0.90 0.010 250 / 0.20);
+
+  /* Fonts */
+  --aig-font-pixel: "Geist Mono", "Space Mono", monospace;
+  --aig-font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --aig-font-display: "Space Grotesk", "Inter", sans-serif;
+
+  /* Text sizes */
+  --aig-text-size-xs: clamp(0.694rem, 0.65rem + 0.2vw, 0.75rem);
+  --aig-text-size-sm: clamp(0.833rem, 0.78rem + 0.25vw, 0.875rem);
+  --aig-text-size-base: clamp(1rem, 0.95rem + 0.25vw, 1rem);
+  --aig-text-size-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
+  --aig-text-size-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  --aig-text-size-2xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);
+  --aig-text-size-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem);
+  --aig-text-size-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3rem);
+  --aig-text-size-5xl: clamp(3rem, 2.25rem + 3.75vw, 4.5rem);
+
+  /* Timing */
+  --aig-timing-data-state: 2000ms;
+  --aig-timing-system-state: 600ms;
+  --aig-timing-signal-state: 200ms;
+  --aig-timing-reveal: 600ms;
+  --aig-timing-stagger: 80ms;
+
+  /* Easing */
+  --aig-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --aig-ease-in-expo: cubic-bezier(0.7, 0, 0.84, 0);
+  --aig-ease-in-out-expo: cubic-bezier(0.65, 0, 0.35, 1);
+  --aig-ease-sharp: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Border */
+  --aig-border-radius: 0px;
+  --aig-border-subtle: 0 0 0 1px oklch(0.90 0.010 250 / 0.06);
+  --aig-border-medium: 0 0 0 1px oklch(0.90 0.010 250 / 0.12);
+  --aig-border-strong: 0 0 0 1px oklch(0.90 0.010 250 / 0.20);
+
+  /* Perspective */
+  --aig-perspective-value: 1200px;
+  --aig-perspective-tilt-initial: rotateX(-19deg);
+  --aig-perspective-tilt-final: rotateX(0deg);
+
+  /* Particles */
+  --aig-particle-count: 120;
+  --aig-particle-size-min: 0.5px;
+  --aig-particle-size-max: 2px;
+  --aig-particle-opacity-min: 0.2;
+  --aig-particle-opacity-max: 0.7;
+  --aig-particle-pulse-period: 4000ms;
+  --aig-particle-shooting-star-interval: 45000ms;
+
+  /* Grid */
+  --aig-grid-spacing: 60px;
+  --aig-grid-dot-size: 1.5px;
+  --aig-grid-dot-opacity: 0.08;
+  --aig-grid-beam-speed: 8000ms;
+  --aig-grid-beam-length: 0.15;
+  --aig-grid-beam-opacity: 0.12;
+
+  /* Dither */
+  --aig-dither-cell-size: 16px;
+  --aig-dither-opacity: 0.04;
+
+  /* Semantic aliases (component-level) */
+  --aig-canvas: var(--aig-void-deep);
+  --aig-surface: var(--aig-void-base);
+  --aig-surface-raised: var(--aig-void-raised);
+  --aig-surface-glass: var(--aig-void-glass);
+  --aig-foreground: var(--aig-text-primary);
+  --aig-foreground-body: var(--aig-text-body);
+  --aig-foreground-muted: var(--aig-text-secondary);
+  --aig-foreground-ghost: var(--aig-text-tertiary);
+  --aig-accent: var(--aig-accent-warm);
+  --aig-accent-dim: var(--aig-accent-warm-dim);
+  --aig-accent-glow: var(--aig-accent-warm-glow);
+  --aig-border: var(--aig-fence-medium);
+  --aig-border-subtle: var(--aig-fence-light);
+  --aig-border-strong: var(--aig-fence-strong);
+  --aig-focus-ring: 0 0 0 1px var(--aig-accent-warm), 0 0 0 3px oklch(0.75 0.150 65 / 0.15);
+}

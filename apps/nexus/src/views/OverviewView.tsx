@@ -1,16 +1,45 @@
-import { useNavigate } from "react-router-dom";
-import { getAgentColor, getCategoryLabel, getModuleCategory } from "../data/gitnexus.js";
-import type { ModuleNode } from "../data/gitnexus.js";
-import { useNexusStore } from "../store.js";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { BookOpen, Box, Cpu, GitBranch, GitGraph, Layers, Radio, type LucideIcon } from "lucide-react";
+import { getCategoryColor, getModuleCategory, type ModuleNode } from "../data/gitnexus";
+import { useNexusStore } from "../store";
 
-function countModules(nodes: ModuleNode[]): number {
-  return nodes.reduce((acc, n) => acc + 1 + (n.children ? countModules(n.children) : 0), 0);
+function StatCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  href,
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+  icon: LucideIcon;
+  href: string;
+}) {
+  return (
+    <Link href={href} className="aig-stat-card">
+      <div className="aig-stat-card__icon">
+        <Icon size={20} strokeWidth={1.5} />
+      </div>
+      <div>
+        <div className="aig-text-pixel aig-stat-card__label">{label}</div>
+        <div className="aig-stat-card__value">{value}</div>
+        {sub && <div className="aig-stat-card__sub">{sub}</div>}
+      </div>
+    </Link>
+  );
 }
 
-function countFiles(nodes: ModuleNode[]): number {
-  return nodes.reduce(
-    (acc, n) => acc + n.files.length + (n.children ? countFiles(n.children) : 0),
-    0
+function ModuleRow({ node }: { node: ModuleNode }) {
+  const cat = getModuleCategory(node.slug);
+  const color = getCategoryColor(cat);
+  return (
+    <Link href={`/wiki/${node.slug}`} className="aig-module-row">
+      <span className="aig-module-row__dot" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+      <span className="aig-truncate aig-module-row__name">{node.name}</span>
+      <span className="aig-tag">{cat}</span>
+    </Link>
   );
 }
 
@@ -18,279 +47,300 @@ export function OverviewView() {
   const meta = useNexusStore((s) => s.meta);
   const tree = useNexusStore((s) => s.tree);
   const pages = useNexusStore((s) => s.pages);
+  const backend = useNexusStore((s) => s.backend);
   const isLoading = useNexusStore((s) => s.isLoading);
-  const navigate = useNavigate();
+  const projects = useNexusStore((s) => s.projects);
+  const currentRepo = useNexusStore((s) => s.currentRepo);
+  const activeProject = projects.find((p) => p.id === currentRepo);
+  const router = useRouter();
 
-  if (isLoading) {
-    return (
-      <div style={{ color: "var(--text-tertiary)", padding: 40 }}>
-        Initializing GitNexus knowledge graph…
-      </div>
-    );
-  }
-
-  const modules = tree ? countModules(tree) : 0;
-  const files = tree ? countFiles(tree) : 0;
-  const commit = meta?.fromCommit?.slice(0, 7) ?? "—";
-
-  const packages = tree?.filter((n) => getModuleCategory(n.slug) === "package") ?? [];
-  const apps = tree?.filter((n) => getModuleCategory(n.slug) === "app") ?? [];
-  const agents =
-    tree
-      ?.find((n) => n.slug === "other")
-      ?.children?.filter((n) => n.slug.startsWith("other-agents-")) ?? [];
+  const modules = tree ?? [];
+  const apps = modules.filter((n) => getModuleCategory(n.slug) === "app");
+  const agents = modules.filter((n) => getModuleCategory(n.slug) === "agent");
+  const packages = modules.filter((n) => getModuleCategory(n.slug) === "package");
 
   return (
-    <div style={{ maxWidth: 960 }}>
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 8 }}>
-          Knowledge Graph
-        </h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: 15 }}>
-          SynapTree-mapped view of the Aigency monorepo. Explore modules, agents, and their
-          relationships.
-        </p>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: 16,
-          marginBottom: 32,
-        }}
-      >
-        <StatCard label="Modules" value={modules} accent="var(--accent-zenith)" />
-        <StatCard label="Files Indexed" value={files} accent="var(--accent-vector)" />
-        <StatCard label="Wiki Pages" value={pages.length} accent="var(--accent-echo)" />
-        <StatCard label="Commit" value={commit} accent="var(--accent-cipher)" monospace />
-      </div>
-
-      <Section title="Packages" color="var(--accent-zenith)">
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: 12,
-          }}
-        >
-          {packages.map((pkg) => (
-            <ModuleCard key={pkg.slug} node={pkg} onClick={() => navigate(`/wiki/${pkg.slug}`)} />
-          ))}
+    <div className="aig-view aig-view--overview">
+      <div className="aig-view__header">
+        <div>
+          <h1 className="aig-view__title">Mission Control</h1>
+          <p className="aig-view__subtitle">
+            {meta?.fromCommit
+              ? `Indexed from ${meta.fromCommit.slice(0, 12)} via ${meta.model || "unknown model"}`
+              : "Static GitNexus knowledge graph"}
+          </p>
         </div>
-      </Section>
-
-      <Section title="Apps" color="var(--accent-atlas)">
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: 12,
-          }}
-        >
-          {apps.map((app) => (
-            <ModuleCard key={app.slug} node={app} onClick={() => navigate(`/wiki/${app.slug}`)} />
-          ))}
+        <div className="aig-view__status">
+          <Radio size={14} strokeWidth={1.5} />
+          <span className={`aig-text-pixel ${backend.online ? "aig-text-go" : "aig-text-muted"}`}>
+            {backend.online ? "LIVE LINK" : "LOCAL MODE"}
+          </span>
         </div>
-      </Section>
+      </div>
 
-      <Section title="Agents" color="var(--accent-cipher)">
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: 12,
-          }}
-        >
-          {agents.map((agent) => {
-            const name = agent.name.replace(/^Other — /, "").replace(/^agents-/, "");
-            return (
-              <AgentCard
-                key={agent.slug}
-                name={name}
-                color={getAgentColor(name)}
-                onClick={() => navigate(`/wiki/${agent.slug}`)}
-              />
-            );
-          })}
+      {activeProject && (
+        <div className="aig-project-banner">
+          <div className="aig-project-banner__icon">
+            <GitBranch size={18} strokeWidth={1.5} />
+          </div>
+          <div className="aig-project-banner__body">
+            <div className="aig-project-banner__name">{activeProject.name}</div>
+            <div className="aig-project-banner__meta aig-text-mono">
+              {activeProject.stats?.files ?? 0} files · {pages.length} wiki pages · indexed{" "}
+              {new Date(activeProject.indexedAt).toLocaleString()}
+            </div>
+          </div>
+          <button type="button" className="aig-button aig-button--ghost" onClick={() => router.push("/projects")}>
+            Switch Project
+          </button>
         </div>
-      </Section>
+      )}
+
+      {isLoading ? (
+        <div className="aig-loading">Initializing knowledge graph…</div>
+      ) : (
+        <>
+          <div className="aig-stat-grid">
+            <StatCard label="Modules" value={modules.length} sub={`${apps.length} apps · ${packages.length} packages`} icon={Box} href="/files" />
+            <StatCard label="Agents" value={agents.length} sub="Autonomous workers" icon={Cpu} href="/files" />
+            <StatCard label="Wiki Pages" value={pages.length} sub="Generated docs" icon={BookOpen} href="/wiki" />
+            <StatCard label="Relations" value="Graph" sub="Visual dependency map" icon={GitGraph} href="/graph" />
+          </div>
+
+          <div className="aig-overview-grid">
+            <section className="aig-pane aig-overview-panel">
+              <div className="aig-pane__header">
+                <Layers size={16} strokeWidth={1.5} />
+                <span className="aig-text-pixel">Modules</span>
+              </div>
+              <div className="aig-overview-panel__list">
+                {modules.map((node) => (
+                  <ModuleRow key={node.slug} node={node} />
+                ))}
+              </div>
+            </section>
+
+            <section className="aig-pane aig-overview-panel">
+              <div className="aig-pane__header">
+                <BookOpen size={16} strokeWidth={1.5} />
+                <span className="aig-text-pixel">Recent Wiki</span>
+              </div>
+              <div className="aig-overview-panel__list">
+                {pages.slice(0, 12).map((page) => (
+                  <Link key={page.slug} href={`/wiki/${page.slug}`} className="aig-wiki-row">
+                    <span className="aig-wiki-row__slug">{page.slug}</span>
+                    <span className="aig-truncate">{page.title}</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </div>
+        </>
+      )}
+
+      <style>{`
+        .aig-view--overview {
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+        .aig-view__header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 16px;
+        }
+        .aig-view__title {
+          font-family: var(--aig-font-display);
+          font-size: var(--aig-text-size-4xl);
+          font-weight: 600;
+          color: var(--aig-foreground);
+          margin: 0;
+          line-height: 1.1;
+        }
+        .aig-view__subtitle {
+          margin: 8px 0 0;
+          color: var(--aig-foreground-muted);
+          font-family: var(--aig-font-mono);
+          font-size: var(--aig-text-size-sm);
+        }
+        .aig-view__status {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: var(--aig-text-size-xs);
+          color: var(--aig-foreground-muted);
+        }
+        .aig-text-go { color: var(--aig-signal-go); }
+        .aig-text-muted { color: var(--aig-foreground-ghost); }
+        .aig-loading {
+          padding: 48px;
+          text-align: center;
+          color: var(--aig-foreground-muted);
+          font-family: var(--aig-font-pixel);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+        .aig-stat-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 16px;
+        }
+        .aig-stat-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 14px;
+          padding: 18px;
+          background: var(--aig-surface);
+          box-shadow: var(--aig-border-subtle);
+          color: inherit;
+          text-decoration: none;
+          transition: box-shadow var(--aig-timing-signal-state) var(--aig-ease-out-expo), transform var(--aig-timing-signal-state) var(--aig-ease-out-expo);
+        }
+        .aig-stat-card:hover {
+          box-shadow: var(--aig-border-medium);
+          transform: translateY(-2px);
+        }
+        .aig-stat-card__icon {
+          color: var(--aig-accent);
+        }
+        .aig-stat-card__label {
+          font-size: var(--aig-text-size-xs);
+          color: var(--aig-foreground-ghost);
+          margin-bottom: 4px;
+        }
+        .aig-stat-card__value {
+          font-family: var(--aig-font-display);
+          font-size: var(--aig-text-size-3xl);
+          font-weight: 600;
+          color: var(--aig-foreground);
+        }
+        .aig-stat-card__sub {
+          font-size: var(--aig-text-size-xs);
+          color: var(--aig-foreground-muted);
+          margin-top: 2px;
+        }
+        .aig-overview-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap: 16px;
+        }
+        .aig-overview-panel {
+          display: flex;
+          flex-direction: column;
+          min-height: 320px;
+        }
+        .aig-pane__header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 14px;
+          border-bottom: 1px solid var(--aig-fence-light);
+          color: var(--aig-foreground-muted);
+          font-size: var(--aig-text-size-xs);
+        }
+        .aig-project-banner {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 14px 16px;
+          margin-bottom: 16px;
+          background: var(--aig-surface);
+          box-shadow: var(--aig-border-subtle);
+        }
+        .aig-project-banner__icon {
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--aig-accent);
+          background: var(--aig-void-raised);
+          box-shadow: var(--aig-border-subtle);
+        }
+        .aig-project-banner__body {
+          flex: 1;
+          min-width: 0;
+        }
+        .aig-project-banner__name {
+          font-family: var(--aig-font-display);
+          font-size: var(--aig-text-size-lg);
+          font-weight: 600;
+          color: var(--aig-foreground);
+        }
+        .aig-project-banner__meta {
+          font-size: var(--aig-text-size-xs);
+          color: var(--aig-foreground-muted);
+          margin-top: 2px;
+        }
+        .aig-overview-panel__list {
+          flex: 1;
+          overflow: auto;
+          padding: 8px 0;
+        }
+        .aig-module-row,
+        .aig-wiki-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 14px;
+          color: var(--aig-foreground-body);
+          font-size: var(--aig-text-size-sm);
+          text-decoration: none;
+          transition: background var(--aig-timing-signal-state) var(--aig-ease-out-expo);
+        }
+        .aig-module-row:hover,
+        .aig-wiki-row:hover {
+          background: var(--aig-void-raised);
+        }
+        .aig-module-row__dot {
+          width: 6px;
+          height: 6px;
+          flex-shrink: 0;
+        }
+        .aig-module-row__name {
+          flex: 1;
+        }
+        .aig-wiki-row__slug {
+          font-family: var(--aig-font-mono);
+          font-size: var(--aig-text-size-xs);
+          color: var(--aig-accent-dim);
+          text-transform: uppercase;
+        }
+        .aig-project-banner {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 14px 16px;
+          background: var(--aig-surface);
+          box-shadow: var(--aig-border-subtle);
+        }
+        .aig-project-banner__icon {
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--aig-accent);
+          background: var(--aig-void-raised);
+          box-shadow: var(--aig-border-subtle);
+        }
+        .aig-project-banner__body {
+          flex: 1;
+          min-width: 0;
+        }
+        .aig-project-banner__name {
+          font-family: var(--aig-font-display);
+          font-size: var(--aig-text-size-lg);
+          font-weight: 600;
+          color: var(--aig-foreground);
+        }
+        .aig-project-banner__meta {
+          font-size: var(--aig-text-size-xs);
+          color: var(--aig-foreground-muted);
+          margin-top: 2px;
+        }
+      `}</style>
     </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  accent,
-  monospace,
-}: {
-  label: string;
-  value: string | number;
-  accent: string;
-  monospace?: boolean;
-}) {
-  return (
-    <div
-      style={{
-        background: "var(--surface-1)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius-md)",
-        padding: "20px",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 2,
-          background: accent,
-          boxShadow: `0 0 12px ${accent}`,
-        }}
-      />
-      <div
-        style={{
-          fontSize: 11,
-          color: "var(--text-tertiary)",
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
-          marginBottom: 8,
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          fontSize: 26,
-          fontWeight: 700,
-          color: "var(--text-primary)",
-          fontFamily: monospace ? "var(--font-mono)" : "inherit",
-        }}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  color,
-  children,
-}: { title: string; color: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 32 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          marginBottom: 16,
-        }}
-      >
-        <div
-          style={{
-            width: 4,
-            height: 20,
-            borderRadius: 2,
-            background: color,
-            boxShadow: `0 0 8px ${color}`,
-          }}
-        />
-        <h2 style={{ fontSize: 18, fontWeight: 600 }}>{title}</h2>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function ModuleCard({ node, onClick }: { node: ModuleNode; onClick: () => void }) {
-  const cat = getModuleCategory(node.slug);
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        background: "var(--surface-1)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius-md)",
-        padding: "16px",
-        cursor: "pointer",
-        textAlign: "left",
-        color: "inherit",
-        fontFamily: "inherit",
-        transition: "border-color 0.15s, transform 0.15s",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = "var(--border-hover)";
-        e.currentTarget.style.transform = "translateY(-1px)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = "var(--border)";
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
-    >
-      <div
-        style={{
-          fontSize: 11,
-          color: "var(--text-tertiary)",
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          marginBottom: 6,
-        }}
-      >
-        {getCategoryLabel(cat)}
-      </div>
-      <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{node.name}</div>
-      <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
-        {node.files.length} file{node.files.length !== 1 ? "s" : ""}
-      </div>
-    </button>
-  );
-}
-
-function AgentCard({ name, color, onClick }: { name: string; color: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        background: "var(--surface-1)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius-md)",
-        padding: "16px",
-        cursor: "pointer",
-        textAlign: "left",
-        color: "inherit",
-        fontFamily: "inherit",
-        transition: "border-color 0.15s, transform 0.15s",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = color;
-        e.currentTarget.style.transform = "translateY(-1px)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = "var(--border)";
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-        <div
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: "50%",
-            background: color,
-            boxShadow: `0 0 10px ${color}`,
-          }}
-        />
-        <div style={{ fontWeight: 600, fontSize: 15 }}>{name}</div>
-      </div>
-      <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>Agent</div>
-    </button>
   );
 }

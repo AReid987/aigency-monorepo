@@ -1,0 +1,119 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "$metadata": {
+    "system": "Aigency",
+    "owner": "IRIS",
+    "version": "2.0.0",
+    "created": "2026-05-09",
+    "standard": "W3C Design Token Community Group (DTCG)",
+    "paradigm": "Atomic Design System",
+    "layers": ["atoms"],
+    "notes": "OKLCH-only color values. No hex. No pure white. All durations in milliseconds. Sharp corners only."
+  },
+
+  "atoms": {
+    "$description": "Aigency primitive tokens — spacecraft instrument panel aesthetic.",
+
+    "color": {
+      "void": {
+        "deep": { "$value": "oklch(0.10 0.015 250)", "$type": "color" },
+        "base": { "$value": "oklch(0.13 0.015 250)", "$type": "color" },
+        "raised": { "$value": "oklch(0.17 0.015 250)", "$type": "color" },
+        "glass": { "$value": "oklch(0.20 0.020 250)", "$type": "color" }
+      },
+      "text": {
+        "primary": { "$value": "oklch(0.90 0.010 250)", "$type": "color" },
+        "body": { "$value": "oklch(0.78 0.010 250)", "$type": "color" },
+        "secondary": { "$value": "oklch(0.60 0.010 250)", "$type": "color" },
+        "tertiary": { "$value": "oklch(0.45 0.010 250)", "$type": "color" }
+      },
+      "accent": {
+        "warm": { "$value": "oklch(0.75 0.150 65)", "$type": "color" },
+        "warm-dim": { "$value": "oklch(0.55 0.100 65)", "$type": "color" },
+        "warm-glow": { "$value": "oklch(0.75 0.150 65 / 0.3)", "$type": "color" }
+      },
+      "signal": {
+        "go": { "$value": "oklch(0.72 0.170 160)", "$type": "color" },
+        "conditional": { "$value": "oklch(0.75 0.150 65)", "$type": "color" },
+        "avoid": { "$value": "oklch(0.60 0.200 25)", "$type": "color" },
+        "critical": { "$value": "oklch(0.55 0.220 25)", "$type": "color" },
+        "highlight": { "$value": "oklch(0.65 0.170 300)", "$type": "color" }
+      },
+      "fence": {
+        "light": { "$value": "oklch(0.90 0.010 250 / 0.08)", "$type": "color" },
+        "medium": { "$value": "oklch(0.90 0.010 250 / 0.12)", "$type": "color" },
+        "strong": { "$value": "oklch(0.90 0.010 250 / 0.20)", "$type": "color" }
+      }
+    },
+
+    "font": {
+      "pixel": { "$value": "'Geist Pixel', 'Space Mono', monospace", "$type": "fontFamily" },
+      "mono": { "$value": "'JetBrains Mono', 'Fira Code', monospace", "$type": "fontFamily" },
+      "display": { "$value": "'Space Grotesk', 'Inter', sans-serif", "$type": "fontFamily" }
+    },
+
+    "text-size": {
+      "xs": { "$value": "clamp(0.694rem, 0.65rem + 0.2vw, 0.75rem)", "$type": "dimension" },
+      "sm": { "$value": "clamp(0.833rem, 0.78rem + 0.25vw, 0.875rem)", "$type": "dimension" },
+      "base": { "$value": "clamp(1rem, 0.95rem + 0.25vw, 1rem)", "$type": "dimension" },
+      "lg": { "$value": "clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem)", "$type": "dimension" },
+      "xl": { "$value": "clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem)", "$type": "dimension" },
+      "2xl": { "$value": "clamp(1.5rem, 1.25rem + 1.25vw, 2rem)", "$type": "dimension" },
+      "3xl": { "$value": "clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem)", "$type": "dimension" },
+      "4xl": { "$value": "clamp(2.25rem, 1.75rem + 2.5vw, 3rem)", "$type": "dimension" },
+      "5xl": { "$value": "clamp(3rem, 2.25rem + 3.75vw, 4.5rem)", "$type": "dimension" }
+    },
+
+    "timing": {
+      "data-state": { "$value": 2000, "$type": "duration" },
+      "system-state": { "$value": 600, "$type": "duration" },
+      "signal-state": { "$value": 200, "$type": "duration" },
+      "reveal": { "$value": 600, "$type": "duration" },
+      "stagger": { "$value": 80, "$type": "duration" }
+    },
+
+    "ease": {
+      "out-expo": { "$value": "cubic-bezier(0.16, 1, 0.3, 1)", "$type": "string" },
+      "in-expo": { "$value": "cubic-bezier(0.7, 0, 0.84, 0)", "$type": "string" },
+      "in-out-expo": { "$value": "cubic-bezier(0.65, 0, 0.35, 1)", "$type": "string" },
+      "sharp": { "$value": "cubic-bezier(0.25, 0.46, 0.45, 0.94)", "$type": "string" }
+    },
+
+    "border": {
+      "radius": { "$value": "0px", "$type": "dimension" },
+      "subtle": { "$value": "0 0 0 1px oklch(0.90 0.010 250 / 0.06)", "$type": "string" },
+      "medium": { "$value": "0 0 0 1px oklch(0.90 0.010 250 / 0.12)", "$type": "string" },
+      "strong": { "$value": "0 0 0 1px oklch(0.90 0.010 250 / 0.20)", "$type": "string" }
+    },
+
+    "perspective": {
+      "value": { "$value": "1200px", "$type": "dimension" },
+      "tilt-initial": { "$value": "rotateX(-19deg)", "$type": "string" },
+      "tilt-final": { "$value": "rotateX(0deg)", "$type": "string" }
+    },
+
+    "particle": {
+      "count": { "$value": 120, "$type": "number" },
+      "size-min": { "$value": 0.5, "$type": "dimension" },
+      "size-max": { "$value": 2, "$type": "dimension" },
+      "opacity-min": { "$value": 0.2, "$type": "number" },
+      "opacity-max": { "$value": 0.7, "$type": "number" },
+      "pulse-period": { "$value": 4000, "$type": "duration" },
+      "shooting-star-interval": { "$value": 45000, "$type": "duration" }
+    },
+
+    "grid": {
+      "spacing": { "$value": 60, "$type": "dimension" },
+      "dot-size": { "$value": 1.5, "$type": "dimension" },
+      "dot-opacity": { "$value": 0.08, "$type": "number" },
+      "beam-speed": { "$value": 8000, "$type": "duration" },
+      "beam-length": { "$value": 0.15, "$type": "number" },
+      "beam-opacity": { "$value": 0.12, "$type": "number" }
+    },
+
+    "dither": {
+      "cell-size": { "$value": 16, "$type": "dimension" },
+      "opacity": { "$value": 0.04, "$type": "number" }
+    }
+  }
+}

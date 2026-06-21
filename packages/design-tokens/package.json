@@ -2,14 +2,15 @@
   "name": "@aigency/design-tokens",
   "version": "0.1.0",
   "private": true,
-  "description": "SynapTree W3C DTCG design tokens — atoms, molecules, organisms",
+  "description": "Aigency + SynapTree W3C DTCG design tokens — atoms, molecules, organisms",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./tokens.json": "./src/synapttree-design-tokens.json"
+    "./tokens.json": "./src/synapttree-design-tokens.json",
+    "./aigency.json": "./src/aigency-design-tokens.json"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

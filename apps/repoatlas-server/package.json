@@ -1,0 +1,30 @@
+{
+  "name": "@repoatlas/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "RepoAtlas sync hub and API for live project docs/graphs",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --out-dir dist",
+    "clean": "rimraf dist",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "hono": "^4.7.0",
+    "postgres": "^3.4.5",
+    "tar": "^7.4.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@aigency/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "@types/tar": "^6.1.13",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

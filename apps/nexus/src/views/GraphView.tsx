@@ -1,22 +1,38 @@
+import Graph from "graphology";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getAgentColor, getModuleCategory } from "../data/gitnexus.js";
-import type { ModuleNode } from "../data/gitnexus.js";
-import { useNexusStore } from "../store.js";
+import Link from "next/link";
+import Sigma from "sigma";
+import { BookOpen, Filter, Maximize, Search, X } from "lucide-react";
+import { getCategoryColor, getCategoryLabel, getModuleCategory, type ModuleNode } from "../data/gitnexus";
+import { useNexusStore } from "../store";
 
 interface GraphNode {
   id: string;
   label: string;
   x: number;
   y: number;
-  r: number;
+  size: number;
   color: string;
   category: ReturnType<typeof getModuleCategory>;
+  fileCount: number;
+  children: string[];
 }
 
 interface GraphLink {
   source: string;
   target: string;
+}
+
+type Category = ReturnType<typeof getModuleCategory>;
+
+const ALL_CATEGORIES: Category[] = ["app", "package", "agent", "other"];
+
+function countFiles(n: ModuleNode): number {
+  return (n.files?.length ?? 0) + (n.children ?? []).reduce((sum, c) => sum + countFiles(c), 0);
+}
+
+function collectChildren(n: ModuleNode): string[] {
+  return (n.children ?? []).flatMap((c) => [c.slug, ...collectChildren(c)]);
 }
 
 function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[] } {
@@ -25,50 +41,28 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
   const added = new Set<string>();
 
   function addNode(n: ModuleNode, parentId?: string) {
-    if (added.has(n.slug)) {
-      return;
-    }
+    if (added.has(n.slug)) return;
     added.add(n.slug);
-
     const cat = getModuleCategory(n.slug);
-    const color =
-      cat === "agent"
-        ? getAgentColor(n.name.replace(/^Other — /, "").replace(/^agents-/, ""))
-        : cat === "app"
-          ? "var(--accent-atlas)"
-          : cat === "package"
-            ? "var(--accent-zenith)"
-            : "var(--text-tertiary)";
-
     nodes.push({
       id: n.slug,
       label: n.name,
-      x: Math.random() * 800,
-      y: Math.random() * 600,
-      r: cat === "agent" ? 10 : cat === "app" ? 14 : 12,
-      color,
+      x: Math.random() * 800 - 400,
+      y: Math.random() * 600 - 300,
+      size: cat === "agent" ? 8 : cat === "app" ? 12 : 10,
+      color: getCategoryColor(cat),
       category: cat,
+      fileCount: countFiles(n),
+      children: collectChildren(n),
     });
-
-    if (parentId) {
-      links.push({ source: parentId, target: n.slug });
-    }
-
-    for (const child of n.children ?? []) {
-      addNode(child, n.slug);
-    }
+    if (parentId) links.push({ source: parentId, target: n.slug });
+    for (const child of n.children ?? []) addNode(child, n.slug);
   }
+  for (const root of tree) addNode(root);
 
-  for (const root of tree) {
-    addNode(root);
-  }
-
-  // Add cross-links between packages and apps based on slug similarity
   for (const a of nodes) {
     for (const b of nodes) {
-      if (a.id >= b.id) {
-        continue;
-      }
+      if (a.id >= b.id) continue;
       if (a.category === "package" && b.category === "app") {
         if (a.id.includes(b.id) || b.id.includes(a.id)) {
           links.push({ source: a.id, target: b.id });
@@ -76,18 +70,11 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
       }
     }
   }
-
   return { nodes, links };
 }
 
-function runForceLayout(nodes: GraphNode[], links: GraphLink[], iterations = 200) {
-  const width = 900;
-  const height = 600;
-  const centerX = width / 2;
-  const centerY = height / 2;
-
+function runForceLayout(nodes: GraphNode[], links: GraphLink[], iterations = 300) {
   for (let i = 0; i < iterations; i++) {
-    // Repulsion
     for (let a = 0; a < nodes.length; a++) {
       for (let b = a + 1; b < nodes.length; b++) {
         const na = nodes[a];
@@ -95,261 +82,453 @@ function runForceLayout(nodes: GraphNode[], links: GraphLink[], iterations = 200
         let dx = na.x - nb.x;
         let dy = na.y - nb.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const force = (150 * 150) / (dist * dist);
+        const force = (140 * 140) / (dist * dist);
         dx = (dx / dist) * force;
         dy = (dy / dist) * force;
-        na.x += dx * 0.05;
-        na.y += dy * 0.05;
-        nb.x -= dx * 0.05;
-        nb.y -= dy * 0.05;
+        na.x += dx * 0.04;
+        na.y += dy * 0.04;
+        nb.x -= dx * 0.04;
+        nb.y -= dy * 0.04;
       }
     }
-
-    // Attraction
     for (const link of links) {
       const na = nodes.find((n) => n.id === link.source);
       const nb = nodes.find((n) => n.id === link.target);
-      if (!na || !nb) {
-        continue;
-      }
+      if (!na || !nb) continue;
       let dx = nb.x - na.x;
       let dy = nb.y - na.y;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const force = (dist * dist) / 3000;
+      const force = (dist * dist) / 3200;
       dx = (dx / dist) * force;
       dy = (dy / dist) * force;
-      na.x += dx * 0.05;
-      na.y += dy * 0.05;
-      nb.x -= dx * 0.05;
-      nb.y -= dy * 0.05;
+      na.x += dx * 0.04;
+      na.y += dy * 0.04;
+      nb.x -= dx * 0.04;
+      nb.y -= dy * 0.04;
     }
-
-    // Center gravity
     for (const n of nodes) {
-      n.x += (centerX - n.x) * 0.005;
-      n.y += (centerY - n.y) * 0.005;
+      n.x += (0 - n.x) * 0.005;
+      n.y += (0 - n.y) * 0.005;
     }
   }
+}
 
-  // Clamp
-  for (const n of nodes) {
-    n.x = Math.max(40, Math.min(width - 40, n.x));
-    n.y = Math.max(40, Math.min(height - 40, n.y));
+function resolveColor(value: string): string {
+  if (value.startsWith("var(")) {
+    const name = value.slice(4, -1).trim();
+    const resolved = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return resolved || value;
   }
+  return value;
+}
+
+function findNode(tree: ModuleNode[], slug: string): ModuleNode | null {
+  for (const n of tree) {
+    if (n.slug === slug) return n;
+    if (n.children) {
+      const found = findNode(n.children, slug);
+      if (found) return found;
+    }
+  }
+  return null;
 }
 
 export function GraphView() {
   const tree = useNexusStore((s) => s.tree);
-  const navigate = useNavigate();
-  const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sigmaRef = useRef<Sigma | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
-  const [dragging, setDragging] = useState<string | null>(null);
-  const dragOffset = useRef({ x: 0, y: 0 });
+  const [selected, setSelected] = useState<string | null>(null);
+  const [visible, setVisible] = useState<Set<Category>>(new Set(ALL_CATEGORIES));
+  const [query, setQuery] = useState("");
 
-  const { nodes, links } = useMemo(() => {
-    if (!tree) {
-      return { nodes: [], links: [] };
-    }
+  const { nodes, links, nodeMap } = useMemo(() => {
+    if (!tree) return { nodes: [], links: [], nodeMap: new Map<string, GraphNode>() };
     const g = buildGraph(tree);
     runForceLayout(g.nodes, g.links);
-    return g;
+    const map = new Map(g.nodes.map((n) => [n.id, n]));
+    return { nodes: g.nodes, links: g.links, nodeMap: map };
   }, [tree]);
 
-  const [nodePositions, setNodePositions] = useState<Map<string, { x: number; y: number }>>(
-    new Map()
-  );
+  const suggestions = useMemo(() => {
+    if (!query.trim()) return [];
+    const q = query.toLowerCase();
+    return nodes.filter((n) => n.label.toLowerCase().includes(q) || n.id.toLowerCase().includes(q)).slice(0, 8);
+  }, [query, nodes]);
 
   useEffect(() => {
-    const map = new Map<string, { x: number; y: number }>();
+    if (!containerRef.current || nodes.length === 0) return;
+    const graph = new Graph();
     for (const n of nodes) {
-      map.set(n.id, { x: n.x, y: n.y });
+      graph.addNode(n.id, {
+        label: n.label,
+        x: n.x,
+        y: n.y,
+        size: n.size,
+        color: resolveColor(n.color),
+      });
     }
-    setNodePositions(map);
-  }, [nodes]);
+    for (const l of links) {
+      if (graph.hasNode(l.source) && graph.hasNode(l.target)) {
+        graph.addEdge(l.source, l.target, { size: 1, color: "oklch(0.90 0.010 250 / 0.15)" });
+      }
+    }
 
-  const handleMouseDown = (e: React.MouseEvent, id: string) => {
-    const pos = nodePositions.get(id);
-    if (!pos) {
-      return;
-    }
-    const rect = svgRef.current?.getBoundingClientRect();
-    if (!rect) {
-      return;
-    }
-    dragOffset.current = {
-      x: e.clientX - rect.left - pos.x,
-      y: e.clientY - rect.top - pos.y,
+    const renderer = new Sigma(graph, containerRef.current, {
+      renderLabels: true,
+      labelSize: 12,
+      labelWeight: "500",
+      labelColor: { color: "oklch(0.78 0.010 250)" },
+      defaultNodeColor: "oklch(0.75 0.150 65)",
+      defaultEdgeColor: "oklch(0.90 0.010 250 / 0.15)",
+      hideEdgesOnMove: false,
+      hideLabelsOnMove: false,
+      allowInvalidContainer: true,
+    });
+
+    renderer.on("enterNode", ({ node }) => setHovered(node));
+    renderer.on("leaveNode", () => setHovered(null));
+    renderer.on("clickNode", ({ node }) => setSelected(node));
+
+    sigmaRef.current = renderer;
+    return () => {
+      renderer.kill();
+      sigmaRef.current = null;
     };
-    setDragging(id);
+  }, [nodes, links]);
+
+  useEffect(() => {
+    const renderer = sigmaRef.current;
+    if (!renderer) return;
+    const graph = renderer.getGraph();
+    graph.forEachNode((node) => {
+      const cat = nodeMap.get(node)?.category ?? "other";
+      graph.setNodeAttribute(node, "hidden", !visible.has(cat));
+    });
+    graph.forEachEdge((edge) => {
+      const src = graph.source(edge);
+      const tgt = graph.target(edge);
+      graph.setEdgeAttribute(edge, "hidden", !visible.has(nodeMap.get(src)?.category ?? "other") || !visible.has(nodeMap.get(tgt)?.category ?? "other"));
+    });
+    renderer.refresh();
+  }, [visible, nodeMap]);
+
+  const focusNode = (slug: string) => {
+    const renderer = sigmaRef.current;
+    const n = nodeMap.get(slug);
+    if (!renderer || !n) return;
+    renderer.getCamera().animate({ x: n.x, y: n.y, ratio: 0.5 }, { duration: 350 });
+    setSelected(slug);
+    setQuery("");
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragging) {
-      return;
-    }
-    const rect = svgRef.current?.getBoundingClientRect();
-    if (!rect) {
-      return;
-    }
-    const x = e.clientX - rect.left - dragOffset.current.x;
-    const y = e.clientY - rect.top - dragOffset.current.y;
-    setNodePositions((prev) => {
-      const next = new Map(prev);
-      next.set(dragging, { x, y });
+  const resetCamera = () => {
+    sigmaRef.current?.getCamera().animate({ x: 0, y: 0, ratio: 1 }, { duration: 350 });
+  };
+
+  const toggleCategory = (cat: Category) => {
+    setVisible((prev) => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
       return next;
     });
   };
 
-  const handleMouseUp = () => setDragging(null);
+  const selectedNode = selected ? nodeMap.get(selected) : null;
+  const selectedSource = selected && tree ? findNode(tree, selected) : null;
 
   if (!tree) {
-    return <div style={{ color: "var(--text-tertiary)", padding: 40 }}>Loading graph…</div>;
+    return <div className="aig-loading">Loading graph…</div>;
   }
 
   return (
-    <div style={{ maxWidth: 960 }}>
-      <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>Relationship Graph</h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>
-          Interactive force-directed layout. Drag nodes to rearrange. Click to open wiki.
-        </p>
+    <div className="aig-graph">
+      <div className="aig-graph__header">
+        <div>
+          <h1 className="aig-view__title">Relationship Graph</h1>
+          <p className="aig-graph__subtitle">
+            {nodes.length} modules · {links.length} relationships · pan, zoom, and click nodes to inspect
+          </p>
+        </div>
+        <div className="aig-graph__controls">
+          <div className="aig-graph__search">
+            <Search size={14} strokeWidth={1.5} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Find module…"
+              className="aig-graph__search-input"
+            />
+            {suggestions.length > 0 && (
+              <div className="aig-graph__suggestions">
+                {suggestions.map((n) => (
+                  <button key={n.id} type="button" className="aig-graph__suggestion" onClick={() => focusNode(n.id)}>
+                    <span className="aig-graph__suggestion-dot" style={{ background: n.color }} />
+                    {n.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button type="button" className="aig-button aig-button--ghost" onClick={resetCamera} title="Reset view">
+            <Maximize size={14} strokeWidth={1.5} />
+          </button>
+        </div>
       </div>
 
-      <div
-        style={{
-          background: "var(--surface-1)",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--radius-lg)",
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
-        <svg
-          ref={svgRef}
-          viewBox="0 0 900 600"
-          style={{
-            width: "100%",
-            height: "auto",
-            display: "block",
-            cursor: dragging ? "grabbing" : "default",
-          }}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          role="img"
-          aria-label="Module relationship graph"
-        >
-          <title>Module Relationship Graph</title>
-          <defs>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-              <feMerge>
-                <feMergeNode in="coloredBlur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          <rect width="900" height="600" fill="var(--canvas)" />
+      <div className="aig-graph__body">
+        <div ref={containerRef} className="aig-graph__stage" role="img" aria-label="Module relationship graph" />
 
-          {links.map((link) => {
-            const sa = nodePositions.get(link.source) ?? { x: 0, y: 0 };
-            const ta = nodePositions.get(link.target) ?? { x: 0, y: 0 };
-            return (
-              <line
-                key={`${link.source}-${link.target}`}
-                x1={sa.x}
-                y1={sa.y}
-                x2={ta.x}
-                y2={ta.y}
-                stroke="var(--border-hover)"
-                strokeWidth={1}
-                opacity={0.5}
-              />
-            );
-          })}
+        {selectedNode && (
+          <aside className="aig-graph__panel">
+            <div className="aig-graph__panel-header">
+              <h3 className="aig-graph__panel-title">{selectedNode.label}</h3>
+              <button type="button" className="aig-button aig-button--ghost" onClick={() => setSelected(null)} aria-label="Close">
+                <X size={14} strokeWidth={1.5} />
+              </button>
+            </div>
+            <div className="aig-graph__panel-body">
+              <div className="aig-graph__panel-row">
+                <span className="aig-text-pixel">Type</span>
+                <span className="aig-tag" style={{ color: selectedNode.color }}>{getCategoryLabel(selectedNode.category)}</span>
+              </div>
+              <div className="aig-graph__panel-row">
+                <span className="aig-text-pixel">Files</span>
+                <span className="aig-text-mono">{selectedNode.fileCount}</span>
+              </div>
+              <div className="aig-graph__panel-row">
+                <span className="aig-text-pixel">Children</span>
+                <span className="aig-text-mono">{selectedNode.children.length}</span>
+              </div>
+              {selectedSource && selectedSource.files.length > 0 && (
+                <div className="aig-graph__panel-section">
+                  <span className="aig-text-pixel">Top files</span>
+                  <ul className="aig-graph__file-list">
+                    {selectedSource.files.slice(0, 6).map((f) => (
+                      <li key={f} className="aig-text-mono">{f.split("/").pop()}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="aig-graph__panel-actions">
+                <Link href={`/wiki/${selectedNode.id}`} className="aig-button">
+                  <BookOpen size={14} strokeWidth={1.5} />
+                  Open Wiki
+                </Link>
+              </div>
+            </div>
+          </aside>
+        )}
+      </div>
 
-          {nodes.map((n) => {
-            const pos = nodePositions.get(n.id) ?? { x: n.x, y: n.y };
-            const isHovered = hovered === n.id;
+      <div className="aig-graph__footer">
+        <div className="aig-graph__legend">
+          <Filter size={12} strokeWidth={1.5} />
+          {ALL_CATEGORIES.map((cat) => {
+            const active = visible.has(cat);
             return (
-              <g
-                key={n.id}
-                transform={`translate(${pos.x}, ${pos.y})`}
-                style={{ cursor: "pointer" }}
-                onMouseEnter={() => setHovered(n.id)}
-                onMouseLeave={() => setHovered(null)}
-                onMouseDown={(e) => handleMouseDown(e, n.id)}
-                onClick={() => navigate(`/wiki/${n.id}`)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    navigate(`/wiki/${n.id}`);
-                  }
-                }}
-                tabIndex={0}
-                aria-label={n.label}
+              <button
+                key={cat}
+                type="button"
+                className={`aig-legend-item ${active ? "" : "aig-legend-item--dim"}`}
+                onClick={() => toggleCategory(cat)}
+                title={active ? `Hide ${cat}` : `Show ${cat}`}
               >
-                <circle
-                  r={n.r + (isHovered ? 4 : 0)}
-                  fill={n.color}
-                  opacity={0.15}
-                  filter="url(#glow)"
-                />
-                <circle
-                  r={n.r}
-                  fill={n.color}
-                  stroke={isHovered ? "#fff" : "none"}
-                  strokeWidth={1.5}
-                  filter={isHovered ? "url(#glow)" : undefined}
-                />
-                <text
-                  y={n.r + 14}
-                  textAnchor="middle"
-                  fill={isHovered ? "var(--text-primary)" : "var(--text-secondary)"}
-                  fontSize={11}
-                  fontFamily="var(--font-sans)"
-                  fontWeight={isHovered ? 500 : 400}
-                  style={{ pointerEvents: "none", userSelect: "none" }}
-                >
-                  {n.label}
-                </text>
-              </g>
+                <span className="aig-legend-item__dot" style={{ background: active ? getCategoryColor(cat) : "var(--aig-foreground-muted)" }} />
+                <span>{getCategoryLabel(cat)}</span>
+              </button>
             );
           })}
-        </svg>
+        </div>
+        {hovered && <div className="aig-graph__hover aig-text-pixel">{hovered}</div>}
       </div>
 
-      <div style={{ marginTop: 16, display: "flex", gap: 20, flexWrap: "wrap" }}>
-        <LegendItem color="var(--accent-zenith)" label="Package" />
-        <LegendItem color="var(--accent-atlas)" label="App" />
-        <LegendItem color="var(--accent-cipher)" label="Agent" />
-        <LegendItem color="var(--text-tertiary)" label="Other" />
-      </div>
-    </div>
-  );
-}
-
-function LegendItem({ color, label }: { color: string; label: string }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        fontSize: 12,
-        color: "var(--text-secondary)",
-      }}
-    >
-      <div
-        style={{
-          width: 10,
-          height: 10,
-          borderRadius: "50%",
-          background: color,
-          boxShadow: `0 0 6px ${color}`,
-        }}
-      />
-      {label}
+      <style>{`
+        .aig-graph { height: 100%; display: flex; flex-direction: column; }
+        .aig-graph__header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 16px;
+          flex-wrap: wrap;
+        }
+        .aig-graph__subtitle {
+          color: var(--aig-foreground-muted);
+          font-size: var(--aig-text-size-sm);
+          margin: 6px 0 0;
+        }
+        .aig-graph__controls {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .aig-graph__search {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 10px;
+          background: var(--aig-surface);
+          box-shadow: var(--aig-border-subtle);
+        }
+        .aig-graph__search svg { color: var(--aig-foreground-muted); }
+        .aig-graph__search-input {
+          background: transparent;
+          border: none;
+          outline: none;
+          color: var(--aig-foreground);
+          font-family: var(--aig-font-mono);
+          font-size: var(--aig-text-size-sm);
+          width: 180px;
+        }
+        .aig-graph__search-input::placeholder { color: var(--aig-foreground-muted); }
+        .aig-graph__suggestions {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          z-index: 10;
+          background: var(--aig-void-raised);
+          box-shadow: var(--aig-border-medium);
+          margin-top: 4px;
+          max-height: 220px;
+          overflow: auto;
+        }
+        .aig-graph__suggestion {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+          padding: 8px 10px;
+          background: transparent;
+          border: none;
+          color: var(--aig-foreground);
+          font-size: var(--aig-text-size-sm);
+          text-align: left;
+          cursor: pointer;
+        }
+        .aig-graph__suggestion:hover { background: var(--aig-surface); }
+        .aig-graph__suggestion-dot { width: 8px; height: 8px; flex-shrink: 0; }
+        .aig-graph__body {
+          flex: 1;
+          display: flex;
+          gap: 16px;
+          min-height: 0;
+        }
+        .aig-graph__stage {
+          flex: 1;
+          min-height: 420px;
+          background: var(--aig-surface);
+          box-shadow: var(--aig-border-subtle);
+          position: relative;
+          overflow: hidden;
+        }
+        .aig-graph__stage canvas { outline: none; }
+        .aig-graph__panel {
+          width: 280px;
+          flex-shrink: 0;
+          background: var(--aig-surface);
+          box-shadow: var(--aig-border-subtle);
+          display: flex;
+          flex-direction: column;
+        }
+        .aig-graph__panel-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 14px 16px;
+          box-shadow: var(--aig-border-subtle);
+        }
+        .aig-graph__panel-title {
+          font-family: var(--aig-font-display);
+          font-size: var(--aig-text-size-md);
+          font-weight: 600;
+          color: var(--aig-foreground);
+          margin: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .aig-graph__panel-body {
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          overflow: auto;
+        }
+        .aig-graph__panel-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: var(--aig-text-size-sm);
+        }
+        .aig-graph__panel-section {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .aig-graph__file-list {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .aig-graph__file-list li {
+          font-size: var(--aig-text-size-xs);
+          color: var(--aig-foreground-muted);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .aig-graph__panel-actions {
+          margin-top: auto;
+          padding-top: 8px;
+        }
+        .aig-graph__footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          margin-top: 16px;
+          flex-wrap: wrap;
+        }
+        .aig-graph__legend {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex-wrap: wrap;
+          color: var(--aig-foreground-muted);
+        }
+        .aig-legend-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: var(--aig-text-size-xs);
+          color: var(--aig-foreground-muted);
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+        }
+        .aig-legend-item--dim { opacity: 0.5; }
+        .aig-legend-item__dot {
+          width: 10px;
+          height: 10px;
+        }
+        .aig-graph__hover {
+          padding: 6px 10px;
+          background: var(--aig-void-raised);
+          box-shadow: var(--aig-border-subtle);
+          font-size: var(--aig-text-size-xs);
+          color: var(--aig-accent);
+        }
+      `}</style>
     </div>
   );
 }

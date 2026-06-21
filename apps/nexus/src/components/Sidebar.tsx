@@ -1,43 +1,39 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { getAgentColor, getModuleCategory } from "../data/gitnexus.js";
-import type { ModuleNode } from "../data/gitnexus.js";
-import { useNexusStore } from "../store.js";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import {
+  Activity,
+  BookOpen,
+  FolderTree,
+  GitGraph,
+  Hexagon,
+  Layers,
+  LayoutGrid,
+  MessageSquare,
+  Radar,
+  Search,
+  Settings,
+  type LucideIcon,
+} from "lucide-react";
+import { getCategoryColor, getModuleCategory, type ModuleNode } from "../data/gitnexus";
+import { useNexusStore } from "../store";
 
 function NavItem({
   to,
-  icon,
+  icon: Icon,
   label,
-  color,
 }: {
   to: string;
-  icon: string;
+  icon: LucideIcon;
   label: string;
-  color?: string;
 }) {
+  const router = useRouter();
+  const isActive = router.pathname === to;
   return (
-    <NavLink
-      to={to}
-      style={({ isActive }) => ({
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: "8px 12px",
-        borderRadius: 8,
-        color: isActive ? "#fff" : "var(--text-secondary)",
-        background: isActive ? "var(--surface-2)" : "transparent",
-        borderLeft: isActive
-          ? `3px solid ${color || "var(--accent-zenith)"}`
-          : "3px solid transparent",
-        textDecoration: "none",
-        fontSize: 13,
-        fontWeight: isActive ? 500 : 400,
-        transition: "all 0.15s ease",
-      })}
-    >
-      <span style={{ fontSize: 16, opacity: 0.9 }}>{icon}</span>
+    <Link href={to} className={`aig-nav-item ${isActive ? "aig-nav-item--active" : ""}`}>
+      <Icon size={16} strokeWidth={1.5} />
       <span>{label}</span>
-    </NavLink>
+    </Link>
   );
 }
 
@@ -45,61 +41,37 @@ function TreeNode({ node, depth = 0 }: { node: ModuleNode; depth?: number }) {
   const [open, setOpen] = useState(depth < 1);
   const hasChildren = (node.children?.length ?? 0) > 0;
   const cat = getModuleCategory(node.slug);
-  const color =
-    cat === "agent"
-      ? getAgentColor(node.name)
-      : cat === "app"
-        ? "var(--accent-atlas)"
-        : "var(--accent-zenith)";
+  const color = getCategoryColor(cat);
+  const router = useRouter();
+  const activeSlug = typeof router.query.slug === "string" ? router.query.slug : null;
+  const isActive = router.pathname === "/wiki/[slug]" && activeSlug === node.slug;
 
   return (
     <div>
       <button
         type="button"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "4px 0",
-          paddingLeft: depth * 12,
-          cursor: hasChildren ? "pointer" : "default",
-          userSelect: "none",
-          background: "none",
-          border: "none",
-          color: "inherit",
-          fontFamily: "inherit",
-          fontSize: "inherit",
-          width: "100%",
-          textAlign: "left",
-        }}
+        className="aig-tree-node"
+        style={{ paddingLeft: `${depth * 12}px` }}
         onClick={() => {
-          if (hasChildren) {
-            setOpen((o) => !o);
-          }
+          if (hasChildren) setOpen((o) => !o);
         }}
         aria-expanded={open}
       >
-        {hasChildren && (
-          <span style={{ fontSize: 10, color: "var(--text-tertiary)", width: 14 }}>
-            {open ? "▼" : "▶"}
+        {hasChildren ? (
+          <span className="aig-tree-chevron" data-open={open}>
+            ▼
           </span>
+        ) : (
+          <span className="aig-tree-chevron-placeholder" />
         )}
-        {!hasChildren && <span style={{ width: 14 }} />}
-        <NavLink
-          to={`/wiki/${node.slug}`}
-          style={({ isActive }) => ({
-            flex: 1,
-            color: isActive ? color : "var(--text-secondary)",
-            textDecoration: "none",
-            fontSize: 12.5,
-            fontWeight: isActive ? 500 : 400,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          })}
+        <Link
+          href={`/wiki/${node.slug}`}
+          className={`aig-tree-link ${isActive ? "aig-tree-link--active" : ""}`}
+          style={{ color: "inherit" }}
         >
-          {node.name}
-        </NavLink>
+          <span className="aig-tree-dot" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+          <span className="aig-truncate">{node.name}</span>
+        </Link>
       </button>
       {open && hasChildren && (
         <div>
@@ -115,92 +87,215 @@ function TreeNode({ node, depth = 0 }: { node: ModuleNode; depth?: number }) {
 export function Sidebar() {
   const tree = useNexusStore((s) => s.tree);
   const isLoading = useNexusStore((s) => s.isLoading);
+  const chatOpen = useNexusStore((s) => s.chatOpen);
+  const setChatOpen = useNexusStore((s) => s.setChatOpen);
+  const projects = useNexusStore((s) => s.projects);
+  const currentRepo = useNexusStore((s) => s.currentRepo);
+  const activeProject = projects.find((p) => p.id === currentRepo);
 
   return (
-    <aside
-      style={{
-        width: 260,
-        minWidth: 260,
-        background: "var(--surface-1)",
-        borderRight: "1px solid var(--border)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
-    >
-      <div style={{ padding: "20px 16px 12px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: "linear-gradient(135deg, var(--accent-zenith), var(--accent-vector))",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 18,
-            }}
-          >
-            🜁
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: "-0.01em" }}>GitNexus</div>
-            <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: -2 }}>
-              Aigency Knowledge Graph
-            </div>
+    <aside className="aig-sidebar">
+      <div className="aig-sidebar__brand">
+        <div className="aig-logo">
+          <Hexagon size={24} strokeWidth={1.5} />
+        </div>
+        <div>
+          <div className="aig-sidebar__title">GitNexus</div>
+          <div className="aig-sidebar__subtitle">
+            {activeProject ? activeProject.name : "Aigency Knowledge Graph"}
           </div>
         </div>
       </div>
 
-      <div style={{ padding: "0 12px 8px", display: "flex", flexDirection: "column", gap: 2 }}>
-        <NavItem to="/" icon="◈" label="Overview" color="var(--accent-zenith)" />
-        <NavItem to="/search" icon="⚲" label="Search" color="var(--accent-echo)" />
-        <NavItem to="/graph" icon="✦" label="Relations" color="var(--accent-vector)" />
-      </div>
+      <nav className="aig-sidebar__nav">
+        <NavItem to="/" icon={Radar} label="Overview" />
+        <NavItem to="/projects" icon={LayoutGrid} label="Projects" />
+        <NavItem to="/search" icon={Search} label="Search" />
+        <NavItem to="/graph" icon={GitGraph} label="Relations" />
+        <NavItem to="/impact" icon={Activity} label="Impact" />
+        <NavItem to="/process" icon={Layers} label="Process" />
+        <NavItem to="/files" icon={FolderTree} label="Files" />
+        <NavItem to="/wiki" icon={BookOpen} label="Wiki" />
+      </nav>
 
-      <div style={{ borderTop: "1px solid var(--border)", margin: "8px 12px" }} />
+      <div className="aig-sidebar__divider" />
 
-      <div
-        style={{
-          flex: 1,
-          overflow: "auto",
-          padding: "0 12px 16px",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 600,
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            color: "var(--text-tertiary)",
-            marginBottom: 6,
-            marginTop: 4,
-          }}
-        >
-          Modules
-        </div>
-        {isLoading && (
-          <div style={{ color: "var(--text-tertiary)", fontSize: 12, padding: "8px 0" }}>
-            Loading…
-          </div>
-        )}
+      <div className="aig-sidebar__section">
+        <div className="aig-sidebar__section-title">Modules</div>
+        {isLoading && <div className="aig-sidebar__loading">Loading modules…</div>}
         {tree?.map((node) => (
           <TreeNode key={node.slug} node={node} />
         ))}
       </div>
 
-      <div
-        style={{
-          borderTop: "1px solid var(--border)",
-          padding: "10px 16px",
-          fontSize: 11,
-          color: "var(--text-tertiary)",
-        }}
-      >
-        SynapTree Design System
+      <div className="aig-sidebar__footer">
+        <button type="button" className="aig-button aig-button--ghost" onClick={() => setChatOpen(!chatOpen)}>
+          <MessageSquare size={14} />
+          <span>IRIS</span>
+        </button>
+        <Link href="/settings" className="aig-sidebar__settings">
+          <Settings size={16} strokeWidth={1.5} />
+        </Link>
       </div>
+
+      <style>{`
+        .aig-sidebar {
+          width: 260px;
+          min-width: 260px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          background: var(--aig-surface);
+          box-shadow: var(--aig-border-subtle);
+          z-index: 10;
+        }
+        .aig-sidebar__brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 20px 16px 16px;
+        }
+        .aig-logo {
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--aig-void-base);
+          background: var(--aig-accent);
+          box-shadow: 0 0 16px var(--aig-accent-glow);
+        }
+        .aig-sidebar__title {
+          font-family: var(--aig-font-display);
+          font-size: var(--aig-text-size-lg);
+          font-weight: 600;
+          color: var(--aig-foreground);
+          line-height: 1.2;
+        }
+        .aig-sidebar__subtitle {
+          font-family: var(--aig-font-pixel);
+          font-size: var(--aig-text-size-xs);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--aig-foreground-muted);
+        }
+        .aig-sidebar__nav {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          padding: 0 12px 8px;
+        }
+        .aig-nav-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 12px;
+          color: var(--aig-foreground-muted);
+          font-family: var(--aig-font-pixel);
+          font-size: var(--aig-text-size-xs);
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          text-decoration: none;
+          transition: color var(--aig-timing-signal-state) var(--aig-ease-out-expo), box-shadow var(--aig-timing-signal-state) var(--aig-ease-out-expo);
+        }
+        .aig-nav-item:hover {
+          color: var(--aig-foreground);
+          box-shadow: var(--aig-border-subtle);
+        }
+        .aig-nav-item--active {
+          color: var(--aig-accent);
+          box-shadow: inset 3px 0 0 0 var(--aig-accent), var(--aig-border-subtle);
+        }
+        .aig-sidebar__divider {
+          height: 1px;
+          background: var(--aig-fence-light);
+          margin: 8px 12px;
+        }
+        .aig-sidebar__section {
+          flex: 1;
+          overflow: auto;
+          padding: 0 12px 16px;
+        }
+        .aig-sidebar__section-title {
+          font-family: var(--aig-font-pixel);
+          font-size: var(--aig-text-size-xs);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--aig-foreground-ghost);
+          margin: 8px 0 6px;
+        }
+        .aig-sidebar__loading {
+          color: var(--aig-foreground-ghost);
+          font-size: var(--aig-text-size-sm);
+          padding: 8px 0;
+        }
+        .aig-tree-node {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 3px 0;
+          cursor: pointer;
+          user-select: none;
+          background: transparent;
+          border: none;
+          color: var(--aig-foreground-muted);
+          font-family: inherit;
+          font-size: var(--aig-text-size-sm);
+          width: 100%;
+          text-align: left;
+          transition: color var(--aig-timing-signal-state) var(--aig-ease-out-expo);
+        }
+        .aig-tree-node:hover {
+          color: var(--aig-foreground);
+        }
+        .aig-tree-chevron {
+          width: 14px;
+          font-size: 9px;
+          color: var(--aig-foreground-ghost);
+          transition: transform var(--aig-timing-signal-state) var(--aig-ease-out-expo);
+        }
+        .aig-tree-chevron[data-open="false"] {
+          transform: rotate(-90deg);
+        }
+        .aig-tree-chevron-placeholder {
+          width: 14px;
+        }
+        .aig-tree-link {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: inherit;
+          text-decoration: none;
+        }
+        .aig-tree-link--active {
+          color: var(--aig-accent);
+        }
+        .aig-tree-dot {
+          width: 6px;
+          height: 6px;
+          flex-shrink: 0;
+        }
+        .aig-sidebar__footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 12px;
+          border-top: 1px solid var(--aig-fence-light);
+        }
+        .aig-sidebar__settings {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          color: var(--aig-foreground-muted);
+          transition: color var(--aig-timing-signal-state) var(--aig-ease-out-expo);
+        }
+        .aig-sidebar__settings:hover {
+          color: var(--aig-accent);
+        }
+      `}</style>
     </aside>
   );
 }

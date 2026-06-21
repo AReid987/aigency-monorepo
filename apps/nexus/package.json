@@ -2,34 +2,38 @@
   "name": "@aigency/nexus",
   "version": "0.1.0",
   "private": true,
-  "description": "GitNexus Dashboard — SynapTree-themed knowledge graph explorer and wiki viewer",
+  "description": "GitNexus Dashboard — Aigency-themed knowledge graph explorer and wiki viewer",
   "type": "module",
   "scripts": {
-    "build": "vite build && pnpm copy:wiki",
+    "bundle:registry": "tsx scripts/bundle-registry.ts",
+    "build": "pnpm bundle:registry && next build",
     "clean": "rimraf dist",
-    "copy:wiki": "mkdir -p dist/.gitnexus/wiki && cp -r ../../.gitnexus/wiki/* dist/.gitnexus/wiki/",
-    "dev": "vite",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "dev": "next dev -p 3000",
+    "dev:full": "pnpm bundle:registry && next dev -p 3000",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "vercel-build": "pnpm build"
   },
   "dependencies": {
     "@aigency/design-tokens": "workspace:*",
-    "framer-motion": "^11.14.1",
     "fuse.js": "^7.0.0",
+    "graphology": "^0.26.0",
+    "lucide-react": "^0.473.0",
     "marked": "^15.0.3",
     "mermaid": "^11.4.1",
+    "next": "^14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0",
+    "sigma": "^3.0.0",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@aigency/tsconfig": "workspace:*",
+    "@types/node": "^26.0.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "@vitejs/plugin-react": "^4.3.4",
     "rimraf": "^6.0.1",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.6"
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   }
 }
