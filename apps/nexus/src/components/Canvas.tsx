@@ -170,7 +170,8 @@ export function Canvas() {
     <>
       <div className="aig-canvas" aria-hidden="true" />
       <div className="aig-grid-beam" aria-hidden="true" />
-      <canvas ref={canvasRef} className="aig-particles" />
+      {/* biome-ignore lint/a11y/noAriaHiddenOnFocusable: decorative background canvas */}
+      <canvas ref={canvasRef} className="aig-particles" aria-hidden="true" />
       <div className="aig-dither" aria-hidden="true" />
     </>
   );

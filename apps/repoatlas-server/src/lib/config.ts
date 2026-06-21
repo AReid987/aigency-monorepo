@@ -13,5 +13,5 @@ export const config = {
   databaseUrl: requireEnv("DATABASE_URL"),
   apiToken: requireEnv("API_TOKEN"),
   corsOrigin: process.env.CORS_ORIGIN ?? "*",
-  applyMigrations: process.env.APPLY_MIGRATIONS === "true",
+  applyMigrations: process.env.APPLY_MIGRATIONS !== "false",
 };

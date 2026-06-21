@@ -19,6 +19,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const setMeta = useNexusStore((s) => s.setMeta);
   const setTree = useNexusStore((s) => s.setTree);
   const setPages = useNexusStore((s) => s.setPages);
+  const setCurrentSlug = useNexusStore((s) => s.setCurrentSlug);
   const setLoading = useNexusStore((s) => s.setLoading);
   const setError = useNexusStore((s) => s.setError);
   const setBackend = useNexusStore((s) => s.setBackend);
@@ -92,6 +93,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   // Load project data whenever the active repo or data source changes.
   useEffect(() => {
+    setCurrentSlug(null);
     if (!currentRepo) {
       setMeta(null);
       setTree(null);
@@ -132,7 +134,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
     };
-  }, [currentRepo, setMeta, setTree, setPages, setLoading, setError]);
+  }, [currentRepo, setMeta, setTree, setPages, setCurrentSlug, setLoading, setError]);
 
   return (
     <div className="aig-app">

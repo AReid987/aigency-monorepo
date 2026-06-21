@@ -12,12 +12,15 @@ export function createPublicRoutes(sql: postgres.Sql) {
     const pagesPerProject = await Promise.all(
       projects.map(async (p) => {
         const pages = await getWikiPages(sql, p.id);
+        const meta = (p.meta ?? {}) as Record<string, unknown>;
+        const remoteUrl =
+          p.remote_url ?? (typeof meta.remoteUrl === "string" ? meta.remoteUrl : undefined);
         return {
           id: p.id,
           name: p.name,
-          path: p.remote_url ?? p.id,
+          path: remoteUrl ?? p.id,
           storagePath: p.id,
-          remoteUrl: p.remote_url,
+          remoteUrl,
           indexedAt: p.indexed_at?.toISOString() ?? new Date().toISOString(),
           lastCommit: p.last_commit ?? "unknown",
           stats: p.stats,

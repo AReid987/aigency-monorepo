@@ -201,7 +201,7 @@ const AIGENCY_GO = "oklch(0.72 0.17 160)";
 const AIGENCY_CONDITIONAL = "oklch(0.75 0.15 65)";
 const AIGENCY_AVOID = "oklch(0.6 0.2 25)";
 const AIGENCY_HIGHLIGHT = "oklch(0.65 0.17 300)";
-const AIGENCY_MUTED = "oklch(0.6 0.01 250)";
+const AIGENCY_MUTED = "oklch(0.72 0.02 250)";
 
 export function getAgentColor(name: string): string {
   const map: Record<string, string> = {
@@ -237,6 +237,9 @@ export function getModuleCategory(slug: string): "package" | "app" | "agent" | "
   if (slug.startsWith("other-agents-")) {
     return "agent";
   }
+  if (slug.endsWith("-worker")) {
+    return "agent";
+  }
   if (
     ["agent-core", "design-tokens", "honcho", "membrain", "surreal", "vault-tools"].includes(slug)
   ) {
@@ -244,6 +247,12 @@ export function getModuleCategory(slug: string): "package" | "app" | "agent" | "
   }
   if (["membrane", "router", "telos", "contracts", "librarian", "oracle"].includes(slug)) {
     return "app";
+  }
+  if (["dashboard-ui", "terminal-ui-tui"].includes(slug)) {
+    return "app";
+  }
+  if (slug === "shared-utilities") {
+    return "package";
   }
   return "other";
 }

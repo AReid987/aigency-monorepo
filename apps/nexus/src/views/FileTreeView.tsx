@@ -80,7 +80,7 @@ function buildFileUrl(remoteUrl: string | undefined, filePath: string): string |
     return null;
   }
   const base = remoteUrl.replace(/\.git$/, "");
-  return `${base}/blob/main/${encodeURIComponent(filePath)}`;
+  return `${base}/blob/main/${filePath.split("/").map(encodeURIComponent).join("/")}`;
 }
 
 export function FileTreeView() {

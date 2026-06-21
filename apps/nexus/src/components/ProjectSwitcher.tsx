@@ -7,6 +7,7 @@ export function ProjectSwitcher() {
   const projects = useNexusStore((s) => s.projects);
   const currentRepo = useNexusStore((s) => s.currentRepo);
   const setCurrentRepo = useNexusStore((s) => s.setCurrentRepo);
+  const setCurrentSlug = useNexusStore((s) => s.setCurrentSlug);
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -28,6 +29,7 @@ export function ProjectSwitcher() {
 
   const select = (id: string) => {
     setCurrentRepo(id);
+    setCurrentSlug(null);
     setOpen(false);
     router.push("/");
   };

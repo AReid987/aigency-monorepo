@@ -54,8 +54,8 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
     nodes.push({
       id: n.slug,
       label: n.name,
-      x: Math.random() * 800 - 400,
-      y: Math.random() * 600 - 300,
+      x: 0,
+      y: 0,
       size: cat === "agent" ? 8 : cat === "app" ? 12 : 10,
       color: getCategoryColor(cat),
       category: cat,
@@ -98,7 +98,7 @@ function circularInitialLayout(nodes: GraphNode[]) {
   });
 }
 
-function runForceLayout(nodes: GraphNode[], links: GraphLink[], iterations = 300) {
+function runForceLayout(nodes: GraphNode[], links: GraphLink[], iterations = 400) {
   for (let i = 0; i < iterations; i++) {
     for (let a = 0; a < nodes.length; a++) {
       for (let b = a + 1; b < nodes.length; b++) {
@@ -107,13 +107,25 @@ function runForceLayout(nodes: GraphNode[], links: GraphLink[], iterations = 300
         let dx = na.x - nb.x;
         let dy = na.y - nb.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const force = (140 * 140) / (dist * dist);
-        dx = (dx / dist) * force;
-        dy = (dy / dist) * force;
-        na.x += dx * 0.04;
-        na.y += dy * 0.04;
-        nb.x -= dx * 0.04;
-        nb.y -= dy * 0.04;
+        const repulsion = (220 * 220) / (dist * dist);
+        dx = (dx / dist) * repulsion;
+        dy = (dy / dist) * repulsion;
+        na.x += dx * 0.05;
+        na.y += dy * 0.05;
+        nb.x -= dx * 0.05;
+        nb.y -= dy * 0.05;
+
+        // collision/overlap correction
+        const minDist = 28;
+        if (dist < minDist) {
+          const overlap = ((minDist - dist) / dist) * 0.5;
+          const ox = (na.x - nb.x) * overlap;
+          const oy = (na.y - nb.y) * overlap;
+          na.x += ox;
+          na.y += oy;
+          nb.x -= ox;
+          nb.y -= oy;
+        }
       }
     }
     for (const link of links) {
@@ -125,17 +137,17 @@ function runForceLayout(nodes: GraphNode[], links: GraphLink[], iterations = 300
       let dx = nb.x - na.x;
       let dy = nb.y - na.y;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const force = (dist * dist) / 3200;
+      const force = (dist * dist) / 2000;
       dx = (dx / dist) * force;
       dy = (dy / dist) * force;
-      na.x += dx * 0.04;
-      na.y += dy * 0.04;
-      nb.x -= dx * 0.04;
-      nb.y -= dy * 0.04;
+      na.x += dx * 0.05;
+      na.y += dy * 0.05;
+      nb.x -= dx * 0.05;
+      nb.y -= dy * 0.05;
     }
     for (const n of nodes) {
-      n.x += (0 - n.x) * 0.005;
-      n.y += (0 - n.y) * 0.005;
+      n.x += (0 - n.x) * 0.008;
+      n.y += (0 - n.y) * 0.008;
     }
   }
 }
@@ -169,6 +181,7 @@ export function GraphView() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sigmaRef = useRef<Sigma | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [visible, setVisible] = useState<Set<Category>>(new Set(ALL_CATEGORIES));
   const [query, setQuery] = useState("");
@@ -208,10 +221,10 @@ export function GraphView() {
         color: resolveColor(n.color),
       });
     }
-    const EDGE_COLOR = "oklch(0.65 0.02 250 / 0.45)";
+    const EDGE_COLOR = "oklch(0.78 0.04 250 / 0.7)";
     for (const l of links) {
       if (graph.hasNode(l.source) && graph.hasNode(l.target)) {
-        graph.addEdge(l.source, l.target, { size: 1.5, color: EDGE_COLOR });
+        graph.addEdge(l.source, l.target, { size: 2, color: EDGE_COLOR, type: "arrow" });
       }
     }
 
@@ -219,17 +232,21 @@ export function GraphView() {
       renderLabels: true,
       labelSize: 12,
       labelWeight: "500",
-      labelColor: { color: "oklch(0.78 0.010 250)" },
+      labelColor: { color: "oklch(0.84 0.012 250)" },
       defaultNodeColor: "oklch(0.75 0.150 65)",
       defaultEdgeColor: EDGE_COLOR,
+      defaultEdgeType: "arrow",
       hideEdgesOnMove: false,
       hideLabelsOnMove: false,
       allowInvalidContainer: true,
+      enableEdgeEvents: true,
     });
 
     renderer.on("enterNode", ({ node }) => setHovered(node));
     renderer.on("leaveNode", () => setHovered(null));
     renderer.on("clickNode", ({ node }) => setSelected(node));
+    renderer.on("enterEdge", ({ edge }) => setHoveredEdge(edge));
+    renderer.on("leaveEdge", () => setHoveredEdge(null));
 
     sigmaRef.current = renderer;
     return () => {
@@ -426,6 +443,7 @@ export function GraphView() {
           })}
         </div>
         {hovered && <div className="aig-graph__hover aig-text-pixel">{hovered}</div>}
+        {hoveredEdge && <div className="aig-graph__hover aig-text-pixel">{hoveredEdge}</div>}
       </div>
 
       <style>{`

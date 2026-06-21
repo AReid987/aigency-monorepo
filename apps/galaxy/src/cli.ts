@@ -81,8 +81,12 @@ async function handleVenture(args: string[]): Promise<void> {
     try {
       const ventures = galaxy.orchestrator.listVentures();
       console.info(`Ventures: ${ventures.length}`);
-      for (const venture of ventures) {
-        console.info(`  - ${venture.id}: ${venture.name}`);
+      if (ventures.length === 0) {
+        console.info("No ventures found. Run `galaxy venture create <id> <name>` to add one.");
+      } else {
+        for (const venture of ventures) {
+          console.info(`  - ${venture.id}: ${venture.name}`);
+        }
       }
     } finally {
       galaxy.dispose();
@@ -146,7 +150,9 @@ async function handleChat(args: string[]): Promise<void> {
   const galaxy = await createGalaxy();
   try {
     const ack = await galaxy.ompClient.prompt(message);
-    if (!ack.success) {
+    if (ack.success) {
+      console.info("Message delivered to OMP.");
+    } else {
       console.error(`Error: ${ack.error ?? "unknown"}`);
     }
   } finally {

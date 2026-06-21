@@ -6,10 +6,12 @@ import { useNexusStore } from "../store";
 function ProjectCard({ project }: { project: ProjectInfo }) {
   const router = useRouter();
   const setCurrentRepo = useNexusStore((s) => s.setCurrentRepo);
+  const setCurrentSlug = useNexusStore((s) => s.setCurrentSlug);
   const stats = project.stats ?? {};
 
   const open = () => {
     setCurrentRepo(project.id);
+    setCurrentSlug(null);
     router.push("/");
   };
 
