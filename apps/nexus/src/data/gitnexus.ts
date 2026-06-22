@@ -196,11 +196,12 @@ function collectSlugs(nodes: ModuleNode[]): string[] {
   return out;
 }
 
-const AIGENCY_ACCENT = "#fb923c";
+const AIGENCY_ACCENT = "#fbbf24";
 const AIGENCY_GO = "#4ade80";
 const AIGENCY_CONDITIONAL = "#fb923c";
 const AIGENCY_AVOID = "#f87171";
-const AIGENCY_HIGHLIGHT = "#c084fc";
+const AIGENCY_HIGHLIGHT = "#e879f9";
+const AIGENCY_OTHER = "#f472b6";
 const AIGENCY_MUTED = "#94a3b8";
 
 export function getAgentColor(name: string): string {
@@ -226,7 +227,7 @@ export function getCategoryColor(cat: ReturnType<typeof getModuleCategory>): str
     package: AIGENCY_HIGHLIGHT,
     app: AIGENCY_ACCENT,
     agent: AIGENCY_GO,
-    other: AIGENCY_MUTED,
+    other: AIGENCY_OTHER,
   }[cat];
 }
 
