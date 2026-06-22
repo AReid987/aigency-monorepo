@@ -36,7 +36,8 @@ program
   .argument("[path]", "Repository path", ".")
   .option("-i, --id <id>", "Project ID")
   .option("-n, --name <name>", "Project name")
-  .action(async (repoPath: string, options: { id?: string; name?: string }) => {
+  .option("-r, --remote-url <url>", "Repository remote URL")
+  .action(async (repoPath: string, options: { id?: string; name?: string; remoteUrl?: string }) => {
     const cwd = resolve(repoPath);
     const globalConfig = await loadGlobalConfig();
     if (!globalConfig.apiUrl || !globalConfig.token) {
@@ -53,7 +54,7 @@ program
         "Content-Type": "application/json",
         Authorization: `Bearer ${globalConfig.token}`,
       },
-      body: JSON.stringify({ id: projectId, name: projectName }),
+      body: JSON.stringify({ id: projectId, name: projectName, remoteUrl: options.remoteUrl }),
     });
 
     if (!res.ok) {
