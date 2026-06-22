@@ -196,12 +196,12 @@ function collectSlugs(nodes: ModuleNode[]): string[] {
   return out;
 }
 
-const AIGENCY_ACCENT = "oklch(0.76 0.22 55)";
-const AIGENCY_GO = "oklch(0.74 0.24 145)";
-const AIGENCY_CONDITIONAL = "oklch(0.76 0.22 55)";
-const AIGENCY_AVOID = "oklch(0.62 0.22 25)";
-const AIGENCY_HIGHLIGHT = "oklch(0.72 0.24 280)";
-const AIGENCY_MUTED = "oklch(0.78 0.10 250)";
+const AIGENCY_ACCENT = "#fb923c";
+const AIGENCY_GO = "#4ade80";
+const AIGENCY_CONDITIONAL = "#fb923c";
+const AIGENCY_AVOID = "#f87171";
+const AIGENCY_HIGHLIGHT = "#c084fc";
+const AIGENCY_MUTED = "#94a3b8";
 
 export function getAgentColor(name: string): string {
   const map: Record<string, string> = {

@@ -33,10 +33,10 @@ type Category = ReturnType<typeof getModuleCategory>;
 
 const ALL_CATEGORIES: Category[] = ["app", "package", "agent", "other"];
 
-const EDGE_PARENT_COLOR = "oklch(0.78 0.06 250 / 0.8)";
-const EDGE_REFERENCE_COLOR = "oklch(0.78 0.16 220 / 0.9)";
-const EDGE_HOVER_COLOR = "oklch(0.92 0.05 250)";
-const EDGE_DEFAULT_SIZE = 2.5;
+const EDGE_PARENT_COLOR = "rgba(96, 165, 250, 0.85)";
+const EDGE_REFERENCE_COLOR = "rgba(34, 211, 238, 0.95)";
+const EDGE_HOVER_COLOR = "#ffffff";
+const EDGE_DEFAULT_SIZE = 3.5;
 
 function countFiles(n: ModuleNode): number {
   return (n.files?.length ?? 0) + (n.children ?? []).reduce((sum, c) => sum + countFiles(c), 0);
@@ -243,8 +243,8 @@ export function GraphView() {
       renderLabels: true,
       labelSize: 12,
       labelWeight: "500",
-      labelColor: { color: "oklch(0.84 0.012 250)" },
-      defaultNodeColor: "oklch(0.75 0.150 65)",
+      labelColor: { color: "#e2e8f0" },
+      defaultNodeColor: "#94a3b8",
       defaultEdgeColor: EDGE_PARENT_COLOR,
       defaultEdgeType: "arrow",
       hideEdgesOnMove: false,
