@@ -33,10 +33,10 @@ type Category = ReturnType<typeof getModuleCategory>;
 
 const ALL_CATEGORIES: Category[] = ["app", "package", "agent", "other"];
 
-const EDGE_PARENT_COLOR = "rgba(96, 165, 250, 0.85)";
-const EDGE_REFERENCE_COLOR = "rgba(34, 211, 238, 0.95)";
+const EDGE_PARENT_COLOR = "#60a5fa";
+const EDGE_REFERENCE_COLOR = "#22d3ee";
 const EDGE_HOVER_COLOR = "#ffffff";
-const EDGE_DEFAULT_SIZE = 3.5;
+const EDGE_DEFAULT_SIZE = 4;
 
 function countFiles(n: ModuleNode): number {
   return (n.files?.length ?? 0) + (n.children ?? []).reduce((sum, c) => sum + countFiles(c), 0);
@@ -62,7 +62,7 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
       label: n.name,
       x: 0,
       y: 0,
-      size: cat === "agent" ? 8 : cat === "app" ? 12 : 10,
+      size: cat === "agent" ? 10 : cat === "app" ? 14 : cat === "package" ? 12 : 9,
       color: getCategoryColor(cat),
       category: cat,
       fileCount: countFiles(n),
@@ -251,6 +251,8 @@ export function GraphView() {
       hideLabelsOnMove: false,
       allowInvalidContainer: true,
       enableEdgeEvents: true,
+      itemSizesReference: "screen",
+      minEdgeThickness: 2,
     });
 
     renderer.on("enterNode", ({ node }) => setHovered(node));
