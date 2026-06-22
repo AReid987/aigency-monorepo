@@ -34,6 +34,19 @@ interface ProjectInfo {
   wikiCount: number;
 }
 
+interface BackendProject {
+  id: string;
+  name: string;
+  path?: string;
+  storagePath?: string;
+  remoteUrl?: string;
+  indexedAt?: string;
+  lastCommit?: string;
+  stats?: RegistryEntry["stats"];
+  hasData?: boolean;
+  wikiCount?: number;
+}
+
 function slugify(name: string): string {
   return name
     .toLowerCase()
@@ -59,7 +72,43 @@ function copyRecursive(src: string, dest: string) {
   }
 }
 
-function main() {
+async function fetchBackendProjects(): Promise<ProjectInfo[]> {
+  const apiUrl =
+    process.env.NEXT_PUBLIC_REPOATLAS_API_URL ??
+    process.env.NEXT_PUBLIC_GITNEXUS_BACKEND_URL ??
+    null;
+  if (!apiUrl) {
+    return [];
+  }
+
+  try {
+    const res = await fetch(`${apiUrl.replace(/\/$/, "")}/api/repos`);
+    if (!res.ok) {
+      console.warn(`[bundle-registry] Backend returned ${res.status}; skipping backend merge`);
+      return [];
+    }
+    const json = (await res.json()) as { projects?: BackendProject[] };
+    return (json.projects ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      path: p.path ?? p.id,
+      storagePath: p.storagePath ?? p.id,
+      remoteUrl: p.remoteUrl,
+      indexedAt: p.indexedAt ?? new Date().toISOString(),
+      lastCommit: p.lastCommit ?? "unknown",
+      stats: p.stats ?? {},
+      hasData: p.hasData ?? true,
+      wikiCount: p.wikiCount ?? 0,
+    }));
+  } catch (err) {
+    console.warn(
+      `[bundle-registry] Failed to fetch backend projects: ${err instanceof Error ? err.message : String(err)}`
+    );
+    return [];
+  }
+}
+
+async function main() {
   const registryPath = process.env.GITNEXUS_REGISTRY_PATH
     ? resolve(process.env.GITNEXUS_REGISTRY_PATH)
     : join(homedir(), ".gitnexus", "registry.json");
@@ -70,19 +119,18 @@ function main() {
   mkdirSync(outDir, { recursive: true });
   mkdirSync(reposDir, { recursive: true });
 
+  let entries: RegistryEntry[] = [];
+
   if (!existsSync(registryPath)) {
     console.warn(`[bundle-registry] Registry not found at ${registryPath}`);
-    writeFileSync(join(outDir, "projects.json"), JSON.stringify({ projects: [] }, null, 2));
-    return;
-  }
-
-  const raw = readFileSync(registryPath, "utf-8");
-  let entries: RegistryEntry[];
-  try {
-    entries = JSON.parse(raw);
-  } catch {
-    console.error("[bundle-registry] Failed to parse registry.json");
-    process.exit(1);
+  } else {
+    const raw = readFileSync(registryPath, "utf-8");
+    try {
+      entries = JSON.parse(raw);
+    } catch {
+      console.error("[bundle-registry] Failed to parse registry.json");
+      process.exit(1);
+    }
   }
 
   // Deduplicate by slugified id, preferring the richer index.
@@ -140,11 +188,33 @@ function main() {
         .filter((e) => e.path !== picked.path)
         .map((e) => e.path)
         .join(", ");
+    }
+  }
+
+  // Merge in backend metadata (especially remoteUrl) when the local registry
+  // is missing or stale. This keeps the static fallback correct on hosts like
+  // Vercel where ~/.gitnexus/registry.json is not available during build.
+  const backendProjects = await fetchBackendProjects();
+  const projectMap = new Map(projects.map((p) => [p.id, p]));
+  for (const backend of backendProjects) {
+    const existing = projectMap.get(backend.id);
+    if (existing) {
+      if (!existing.remoteUrl && backend.remoteUrl) {
+        existing.remoteUrl = backend.remoteUrl;
+      }
+      if (!existing.hasData && backend.hasData) {
+        existing.hasData = backend.hasData;
+      }
     } else {
+      projectMap.set(backend.id, backend);
+      projects.push(backend);
     }
   }
 
   writeFileSync(join(outDir, "projects.json"), JSON.stringify({ projects }, null, 2));
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
