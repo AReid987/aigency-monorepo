@@ -26,11 +26,17 @@ interface GraphNode {
 interface GraphLink {
   source: string;
   target: string;
+  type: "parent" | "reference";
 }
 
 type Category = ReturnType<typeof getModuleCategory>;
 
 const ALL_CATEGORIES: Category[] = ["app", "package", "agent", "other"];
+
+const EDGE_PARENT_COLOR = "oklch(0.78 0.06 250 / 0.8)";
+const EDGE_REFERENCE_COLOR = "oklch(0.78 0.16 220 / 0.9)";
+const EDGE_HOVER_COLOR = "oklch(0.92 0.05 250)";
+const EDGE_DEFAULT_SIZE = 2.5;
 
 function countFiles(n: ModuleNode): number {
   return (n.files?.length ?? 0) + (n.children ?? []).reduce((sum, c) => sum + countFiles(c), 0);
@@ -63,7 +69,7 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
       children: collectChildren(n),
     });
     if (parentId) {
-      links.push({ source: parentId, target: n.slug });
+      links.push({ source: parentId, target: n.slug, type: "parent" });
     }
     for (const child of n.children ?? []) {
       addNode(child, n.slug);
@@ -80,7 +86,7 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
       }
       if (a.category === "package" && b.category === "app") {
         if (a.id.includes(b.id) || b.id.includes(a.id)) {
-          links.push({ source: a.id, target: b.id });
+          links.push({ source: a.id, target: b.id, type: "reference" });
         }
       }
     }
@@ -221,10 +227,15 @@ export function GraphView() {
         color: resolveColor(n.color),
       });
     }
-    const EDGE_COLOR = "oklch(0.78 0.04 250 / 0.7)";
     for (const l of links) {
       if (graph.hasNode(l.source) && graph.hasNode(l.target)) {
-        graph.addEdge(l.source, l.target, { size: 2, color: EDGE_COLOR, type: "arrow" });
+        const color = l.type === "reference" ? EDGE_REFERENCE_COLOR : EDGE_PARENT_COLOR;
+        graph.addEdge(l.source, l.target, {
+          size: EDGE_DEFAULT_SIZE,
+          color,
+          type: "arrow",
+          kind: l.type,
+        });
       }
     }
 
@@ -234,7 +245,7 @@ export function GraphView() {
       labelWeight: "500",
       labelColor: { color: "oklch(0.84 0.012 250)" },
       defaultNodeColor: "oklch(0.75 0.150 65)",
-      defaultEdgeColor: EDGE_COLOR,
+      defaultEdgeColor: EDGE_PARENT_COLOR,
       defaultEdgeType: "arrow",
       hideEdgesOnMove: false,
       hideLabelsOnMove: false,
@@ -254,6 +265,29 @@ export function GraphView() {
       sigmaRef.current = null;
     };
   }, [nodes, links]);
+
+  useEffect(() => {
+    const renderer = sigmaRef.current;
+    if (!renderer) {
+      return;
+    }
+    const graph = renderer.getGraph();
+    graph.forEachEdge((edge) => {
+      const kind = graph.getEdgeAttribute(edge, "kind") as "parent" | "reference" | undefined;
+      const isHovered = edge === hoveredEdge;
+      graph.setEdgeAttribute(
+        edge,
+        "color",
+        isHovered
+          ? EDGE_HOVER_COLOR
+          : kind === "reference"
+            ? EDGE_REFERENCE_COLOR
+            : EDGE_PARENT_COLOR
+      );
+      graph.setEdgeAttribute(edge, "size", isHovered ? 4 : EDGE_DEFAULT_SIZE);
+    });
+    renderer.refresh();
+  }, [hoveredEdge]);
 
   useEffect(() => {
     const renderer = sigmaRef.current;
