@@ -43,15 +43,16 @@ interface ProjectManifest {
   projects: ProjectInfo[];
 }
 
-// Backend URL: NEXT_PUBLIC_REPOATLAS_API_URL must be set at build time
-// to https://repoatlas-server.onrender.com for live mode.
-// Default fallback keeps STATIC mode working when env var is unset.
-const REPOATLAS_URL =
-  typeof process !== "undefined"
-    ? (process.env.NEXT_PUBLIC_REPOATLAS_API_URL ??
-      process.env.NEXT_PUBLIC_GITNEXUS_BACKEND_URL ??
-      null)
-    : null;
+// Backend URL — uses env var at build time; hardcoded fallback
+// for deployments where NEXT_PUBLIC_* is not injected.
+const BACKEND_URL = process.env.NEXT_PUBLIC_REPOATLAS_API_URL
+  ?? process.env.NEXT_PUBLIC_GITNEXUS_BACKEND_URL
+  ?? 'https://repoatlas-server.onrender.com';
+const REPOATLAS_URL = typeof process !== "undefined"
+  ? (process.env.NEXT_PUBLIC_REPOATLAS_API_URL ??
+     process.env.NEXT_PUBLIC_GITNEXUS_BACKEND_URL ??
+     "https://repoatlas-server.onrender.com")
+  : "https://repoatlas-server.onrender.com"
 
 const metaCache = new Map<string, MetaData>();
 const treeCache = new Map<string, ModuleNode[]>();
