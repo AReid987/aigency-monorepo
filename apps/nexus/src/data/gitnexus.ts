@@ -43,6 +43,9 @@ interface ProjectManifest {
   projects: ProjectInfo[];
 }
 
+// Backend URL: NEXT_PUBLIC_REPOATLAS_API_URL must be set at build time
+// to https://repoatlas-server.onrender.com for live mode.
+// Default fallback keeps STATIC mode working when env var is unset.
 const REPOATLAS_URL =
   typeof process !== "undefined"
     ? (process.env.NEXT_PUBLIC_REPOATLAS_API_URL ??
