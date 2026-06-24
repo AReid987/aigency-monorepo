@@ -45,8 +45,6 @@ interface ProjectManifest {
 
 // Backend URL — uses env var at build time; hardcoded fallback
 // for deployments where NEXT_PUBLIC_* is not injected.
-const BACKEND_URL = process.env.NEXT_PUBLIC_REPOATLAS_API_URL
-  ?? process.env.NEXT_PUBLIC_GITNEXUS_BACKEND_URL
   ?? 'https://repoatlas-server.onrender.com';
 const REPOATLAS_URL = typeof process !== "undefined"
   ? (process.env.NEXT_PUBLIC_REPOATLAS_API_URL ??
