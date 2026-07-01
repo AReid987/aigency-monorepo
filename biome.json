@@ -17,7 +17,9 @@
       "**/coverage/**",
       "**/*.gen.ts",
       "**/*.d.ts",
-      "pnpm-lock.yaml"
+      "pnpm-lock.yaml",
+      "apps/nexus/public/.gitnexus/**",
+      "apps/nexus/scripts/data/**"
     ]
   },
   "formatter": {

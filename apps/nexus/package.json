@@ -5,6 +5,7 @@
   "description": "GitNexus Dashboard — Aigency-themed knowledge graph explorer and wiki viewer",
   "type": "module",
   "scripts": {
+    "analyze": "tsx scripts/analyze-local.ts",
     "build": "pnpm bundle:registry && next build",
     "bundle:registry": "GITNEXUS_REGISTRY_PATH=scripts/registry.local.json tsx scripts/bundle-registry.ts",
     "clean": "rimraf dist",

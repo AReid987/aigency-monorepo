@@ -82,6 +82,13 @@ async function loadStaticManifest(): Promise<ProjectManifest> {
 export async function loadProjectsManifest(): Promise<
   ProjectManifest & { source: "backend" | "static" }
 > {
+  // The static bundle is authoritative for deployments: it is rebuilt on every
+  // push and avoids stale projects from an older backend ingest.
+  const fromStatic = await loadStaticManifest();
+  if (fromStatic.projects.length > 0) {
+    return { ...fromStatic, source: "static" };
+  }
+
   if (REPOATLAS_URL) {
     try {
       const res = await fetch(`${REPOATLAS_URL}/api/repos`);
@@ -90,22 +97,26 @@ export async function loadProjectsManifest(): Promise<
         if (fromBackend.projects.some((p) => p.hasData)) {
           return { ...fromBackend, source: "backend" };
         }
-        // Backend is alive but empty — fall through to static bundle so the
-        // deployed UI is never stuck on "No projects".
       }
     } catch {
-      // fall through to static manifest
+      // fall through to empty manifest
     }
   }
 
-  const fromStatic = await loadStaticManifest();
-  return { ...fromStatic, source: "static" };
+  return { projects: [], source: "static" };
 }
 
 export async function loadRepoMeta(repoId: string): Promise<MetaData> {
   const cached = metaCache.get(repoId);
   if (cached) {
     return cached;
+  }
+
+  const staticRes = await fetch(`${wikiBase(repoId)}/meta.json`);
+  if (staticRes.ok) {
+    const meta = (await staticRes.json()) as MetaData;
+    metaCache.set(repoId, meta);
+    return meta;
   }
 
   if (REPOATLAS_URL) {
@@ -117,19 +128,20 @@ export async function loadRepoMeta(repoId: string): Promise<MetaData> {
     }
   }
 
-  const res = await fetch(`${wikiBase(repoId)}/meta.json`);
-  if (!res.ok) {
-    throw new Error(`Failed to load meta.json for ${repoId}`);
-  }
-  const meta = (await res.json()) as MetaData;
-  metaCache.set(repoId, meta);
-  return meta;
+  throw new Error(`Failed to load meta.json for ${repoId}`);
 }
 
 export async function loadRepoTree(repoId: string): Promise<ModuleNode[]> {
   const cached = treeCache.get(repoId);
   if (cached) {
     return cached;
+  }
+
+  const staticRes = await fetch(`${wikiBase(repoId)}/module_tree.json`);
+  if (staticRes.ok) {
+    const tree = (await staticRes.json()) as ModuleNode[];
+    treeCache.set(repoId, tree);
+    return tree;
   }
 
   if (REPOATLAS_URL) {
@@ -141,13 +153,7 @@ export async function loadRepoTree(repoId: string): Promise<ModuleNode[]> {
     }
   }
 
-  const res = await fetch(`${wikiBase(repoId)}/module_tree.json`);
-  if (!res.ok) {
-    throw new Error(`Failed to load module_tree.json for ${repoId}`);
-  }
-  const tree = (await res.json()) as ModuleNode[];
-  treeCache.set(repoId, tree);
-  return tree;
+  throw new Error(`Failed to load module_tree.json for ${repoId}`);
 }
 
 export async function loadRepoWikiPage(repoId: string, slug: string): Promise<WikiPage | null> {
@@ -161,6 +167,14 @@ export async function loadRepoWikiPage(repoId: string, slug: string): Promise<Wi
     return cached;
   }
 
+  const staticRes = await fetch(`${wikiBase(repoId)}/${encodeURIComponent(slug)}.md`);
+  if (staticRes.ok) {
+    const markdown = await staticRes.text();
+    const page: WikiPage = { slug, title: titleFromSlug(slug), markdown };
+    repoCache.set(slug, page);
+    return page;
+  }
+
   if (REPOATLAS_URL) {
     const res = await fetch(
       `${REPOATLAS_URL}/api/repo/${encodeURIComponent(repoId)}/wiki/${encodeURIComponent(slug)}`
@@ -172,17 +186,18 @@ export async function loadRepoWikiPage(repoId: string, slug: string): Promise<Wi
     }
   }
 
-  const res = await fetch(`${wikiBase(repoId)}/${encodeURIComponent(slug)}.md`);
-  if (!res.ok) {
-    return null;
-  }
-  const markdown = await res.text();
-  const page: WikiPage = { slug, title: titleFromSlug(slug), markdown };
-  repoCache.set(slug, page);
-  return page;
+  return null;
 }
 
 export async function loadAllRepoWikiPages(repoId: string): Promise<WikiPage[]> {
+  const tree = await loadRepoTree(repoId);
+  const slugs = collectSlugs(tree);
+  const pages = await Promise.all(slugs.map((s) => loadRepoWikiPage(repoId, s)));
+  const found = pages.filter(Boolean) as WikiPage[];
+  if (found.length > 0) {
+    return found;
+  }
+
   if (REPOATLAS_URL) {
     const res = await fetch(`${REPOATLAS_URL}/api/repo/${encodeURIComponent(repoId)}/wiki`);
     if (res.ok) {
@@ -190,10 +205,7 @@ export async function loadAllRepoWikiPages(repoId: string): Promise<WikiPage[]> 
     }
   }
 
-  const tree = await loadRepoTree(repoId);
-  const slugs = collectSlugs(tree);
-  const pages = await Promise.all(slugs.map((s) => loadRepoWikiPage(repoId, s)));
-  return pages.filter(Boolean) as WikiPage[];
+  return [];
 }
 
 function collectSlugs(nodes: ModuleNode[]): string[] {

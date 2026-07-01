@@ -1,0 +1,1065 @@
+{
+  "fromCommit": "81ae308ff17a0b027bbd8d016215d080c7471897",
+  "generatedAt": "2026-07-01T12:16:27.896Z",
+  "model": "repoatlas-local",
+  "moduleFiles": {
+    "claude": [
+      ".claude/settings.local.json"
+    ],
+    "claude-skills": [
+      ".claude/skills/gitnexus/gitnexus-cli/SKILL.md",
+      ".claude/skills/gitnexus/gitnexus-debugging/SKILL.md",
+      ".claude/skills/gitnexus/gitnexus-exploring/SKILL.md",
+      ".claude/skills/gitnexus/gitnexus-guide/SKILL.md",
+      ".claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md",
+      ".claude/skills/gitnexus/gitnexus-refactoring/SKILL.md"
+    ],
+    "github": [],
+    "github-workflows": [
+      ".github/workflows/automation.yml",
+      ".github/workflows/coderabbit.yml",
+      ".github/workflows/coverage.yml",
+      ".github/workflows/megalinter.yml",
+      ".github/workflows/repoatlas-sync.yml"
+    ],
+    "vercel": [
+      ".vercel/project.json"
+    ],
+    "agents": [],
+    "agents-atlas": [
+      "agents/atlas/agent.yaml",
+      "agents/atlas/package.json"
+    ],
+    "agents-cipher": [
+      "agents/cipher/agent.yaml",
+      "agents/cipher/package.json"
+    ],
+    "agents-compass": [
+      "agents/compass/agent.yaml",
+      "agents/compass/package.json"
+    ],
+    "agents-echo": [
+      "agents/echo/agent.yaml",
+      "agents/echo/package.json"
+    ],
+    "agents-herald": [
+      "agents/herald/agent.yaml",
+      "agents/herald/package.json"
+    ],
+    "agents-iris": [
+      "agents/iris/agent.yaml",
+      "agents/iris/package.json"
+    ],
+    "agents-librarian": [
+      "agents/librarian/agent.yaml",
+      "agents/librarian/package.json"
+    ],
+    "agents-oracle": [
+      "agents/oracle/agent.yaml",
+      "agents/oracle/package.json"
+    ],
+    "agents-vector": [
+      "agents/vector/agent.yaml",
+      "agents/vector/package.json"
+    ],
+    "agents-zenith": [
+      "agents/zenith/agent.yaml",
+      "agents/zenith/package.json"
+    ],
+    "apps": [],
+    "apps-contracts": [
+      "apps/contracts/foundry.toml",
+      "apps/contracts/package.json",
+      "apps/contracts/src/HarvestMoon.sol"
+    ],
+    "apps-docs": [
+      "apps/docs/01-getting-started/overview.md",
+      "apps/docs/01-getting-started/quick-reference.md",
+      "apps/docs/01-getting-started/setup.md",
+      "apps/docs/02-deep-dive/agent-system.md",
+      "apps/docs/02-deep-dive/apps/contracts.md",
+      "apps/docs/02-deep-dive/apps/librarian.md",
+      "apps/docs/02-deep-dive/apps/membrane.md",
+      "apps/docs/02-deep-dive/apps/oracle.md",
+      "apps/docs/02-deep-dive/apps/router.md",
+      "apps/docs/02-deep-dive/apps/telos.md",
+      "apps/docs/02-deep-dive/architecture.md",
+      "apps/docs/02-deep-dive/data-layer.md",
+      "apps/docs/02-deep-dive/frontend.md",
+      "apps/docs/02-deep-dive/packages/agent-core.md",
+      "apps/docs/02-deep-dive/packages/design-tokens.md",
+      "apps/docs/02-deep-dive/packages/honcho.md",
+      "apps/docs/02-deep-dive/packages/mem-brain.md",
+      "apps/docs/02-deep-dive/packages/surreal.md",
+      "apps/docs/02-deep-dive/packages/vault-tools.md",
+      "apps/docs/03-agents/atlas.md",
+      "apps/docs/03-agents/cipher.md",
+      "apps/docs/03-agents/compass.md",
+      "apps/docs/03-agents/echo.md",
+      "apps/docs/03-agents/herald.md",
+      "apps/docs/03-agents/index.md",
+      "apps/docs/03-agents/iris.md",
+      "apps/docs/03-agents/vector.md",
+      "apps/docs/03-agents/zenith.md",
+      "apps/docs/AGENTS.md",
+      "apps/docs/AUTOMATION.md",
+      "apps/docs/README.md",
+      "apps/docs/llms-full.txt",
+      "apps/docs/llms.txt",
+      "apps/docs/onboarding/contributor.md",
+      "apps/docs/onboarding/executive.md",
+      "apps/docs/onboarding/product-manager.md",
+      "apps/docs/onboarding/staff-engineer.md",
+      "apps/docs/package.json"
+    ],
+    "apps-galaxy": [
+      "apps/galaxy/.env.example",
+      "apps/galaxy/AGENTS.md",
+      "apps/galaxy/Dockerfile.daytona",
+      "apps/galaxy/package.json",
+      "apps/galaxy/setup-daytona.sh",
+      "apps/galaxy/src/cli.ts",
+      "apps/galaxy/src/config.ts",
+      "apps/galaxy/src/index.ts",
+      "apps/galaxy/src/orchestrator.ts",
+      "apps/galaxy/tsconfig.json"
+    ],
+    "apps-librarian": [
+      "apps/librarian/package.json",
+      "apps/librarian/src/index.ts",
+      "apps/librarian/tsconfig.json"
+    ],
+    "apps-membrane": [
+      "apps/membrane/package.json",
+      "apps/membrane/src/App.tsx",
+      "apps/membrane/src/main.tsx",
+      "apps/membrane/tsconfig.json"
+    ],
+    "apps-nexus": [
+      "apps/nexus/.gitignore",
+      "apps/nexus/next-env.d.ts",
+      "apps/nexus/next.config.mjs",
+      "apps/nexus/package.json",
+      "apps/nexus/scripts/bundle-registry.ts",
+      "apps/nexus/src/components/Canvas.tsx",
+      "apps/nexus/src/components/ChatPanel.tsx",
+      "apps/nexus/src/components/ProjectSwitcher.tsx",
+      "apps/nexus/src/components/Shell.tsx",
+      "apps/nexus/src/components/Sidebar.tsx",
+      "apps/nexus/src/components/StatusBar.tsx",
+      "apps/nexus/src/components/TopBar.tsx",
+      "apps/nexus/src/data/gitnexus.ts",
+      "apps/nexus/src/index.css",
+      "apps/nexus/src/lib/staticPaths.ts",
+      "apps/nexus/src/pages/_app.tsx",
+      "apps/nexus/src/pages/_document.tsx",
+      "apps/nexus/src/pages/files.tsx",
+      "apps/nexus/src/pages/graph.tsx",
+      "apps/nexus/src/pages/impact.tsx",
+      "apps/nexus/src/pages/index.tsx",
+      "apps/nexus/src/pages/onboarding.tsx",
+      "apps/nexus/src/pages/process.tsx",
+      "apps/nexus/src/pages/projects.tsx",
+      "apps/nexus/src/pages/search.tsx",
+      "apps/nexus/src/pages/settings.tsx",
+      "apps/nexus/src/pages/symbol/[symbol].tsx",
+      "apps/nexus/src/pages/wiki/[slug].tsx",
+      "apps/nexus/src/pages/wiki/index.tsx",
+      "apps/nexus/src/services/backend-client.ts",
+      "apps/nexus/src/store.ts",
+      "apps/nexus/src/styles/canvas.css",
+      "apps/nexus/src/styles/design-tokens.css",
+      "apps/nexus/src/views/FileTreeView.tsx",
+      "apps/nexus/src/views/GraphView.tsx",
+      "apps/nexus/src/views/ImpactView.tsx",
+      "apps/nexus/src/views/OnboardingView.tsx",
+      "apps/nexus/src/views/OverviewView.tsx",
+      "apps/nexus/src/views/ProcessView.tsx",
+      "apps/nexus/src/views/ProjectsView.tsx",
+      "apps/nexus/src/views/SearchView.tsx",
+      "apps/nexus/src/views/SettingsView.tsx",
+      "apps/nexus/src/views/SymbolContextView.tsx",
+      "apps/nexus/src/views/WikiIndexView.tsx",
+      "apps/nexus/src/views/WikiView.tsx",
+      "apps/nexus/src/vite-env.d.ts",
+      "apps/nexus/tsconfig.json",
+      "apps/nexus/tsconfig.tsbuildinfo",
+      "apps/nexus/vercel.json"
+    ],
+    "apps-oracle": [
+      "apps/oracle/package.json",
+      "apps/oracle/src/index.ts",
+      "apps/oracle/tsconfig.json"
+    ],
+    "apps-repoatlas-server": [
+      "apps/repoatlas-server/.env.example",
+      "apps/repoatlas-server/README.md",
+      "apps/repoatlas-server/docker-compose.yml",
+      "apps/repoatlas-server/migrations/001_init.sql",
+      "apps/repoatlas-server/migrations/002_populate_remote_urls.sql",
+      "apps/repoatlas-server/package.json",
+      "apps/repoatlas-server/scripts/test-ingest.ts",
+      "apps/repoatlas-server/src/db/index.ts",
+      "apps/repoatlas-server/src/index.ts",
+      "apps/repoatlas-server/src/lib/config.ts",
+      "apps/repoatlas-server/src/lib/extract.ts",
+      "apps/repoatlas-server/src/routes/public.ts",
+      "apps/repoatlas-server/src/routes/upload.ts",
+      "apps/repoatlas-server/tsconfig.json"
+    ],
+    "apps-router": [
+      "apps/router/README.md",
+      "apps/router/config/production.example.yaml",
+      "apps/router/config/providers.development.yaml",
+      "apps/router/config/providers.yaml",
+      "apps/router/jest.config.js",
+      "apps/router/package.json",
+      "apps/router/package.json.orig",
+      "apps/router/src/cli.ts",
+      "apps/router/src/config/env-override.ts",
+      "apps/router/src/config/index.test.ts",
+      "apps/router/src/config/index.ts",
+      "apps/router/src/config/integration.test.ts",
+      "apps/router/src/config/loader.ts",
+      "apps/router/src/config/schema.ts",
+      "apps/router/src/config/validator.ts",
+      "apps/router/src/lib/logging/logger.test.ts",
+      "apps/router/src/lib/logging/logger.ts",
+      "apps/router/src/quota-tracker.test.ts",
+      "apps/router/src/quota-tracker.ts",
+      "apps/router/src/router.ts",
+      "apps/router/src/server.test.ts",
+      "apps/router/src/server.ts",
+      "apps/router/tsconfig.json"
+    ],
+    "apps-telos": [
+      "apps/telos/INTERVIEW.md",
+      "apps/telos/README.md",
+      "apps/telos/TELOS.md",
+      "apps/telos/agents/atlas.md",
+      "apps/telos/agents/cipher.md",
+      "apps/telos/agents/compass.md",
+      "apps/telos/agents/echo.md",
+      "apps/telos/agents/herald.md",
+      "apps/telos/agents/iris.md",
+      "apps/telos/agents/vector.md",
+      "apps/telos/agents/zenith.md",
+      "apps/telos/drafts/aigency-corporate.DRAFT.md",
+      "apps/telos/drafts/architect-personal.DRAFT.md",
+      "apps/telos/package.json",
+      "apps/telos/src/cli.ts",
+      "apps/telos/src/dev-server.ts",
+      "apps/telos/src/index.ts",
+      "apps/telos/templates/TELOS-v1-blank.md",
+      "apps/telos/templates/agent-persona.md",
+      "apps/telos/tsconfig.json"
+    ],
+    "packages": [],
+    "packages-agent-core": [
+      "packages/agent-core/README.md",
+      "packages/agent-core/package.json",
+      "packages/agent-core/src/index.test.ts",
+      "packages/agent-core/src/index.ts",
+      "packages/agent-core/tsconfig.json",
+      "packages/agent-core/vitest.config.ts"
+    ],
+    "packages-commit-agent": [
+      "packages/commit-agent/biome.json",
+      "packages/commit-agent/package.json",
+      "packages/commit-agent/src/cli.ts",
+      "packages/commit-agent/src/index.ts",
+      "packages/commit-agent/src/modes/auto.ts",
+      "packages/commit-agent/src/modes/free.ts",
+      "packages/commit-agent/src/modes/guided.ts",
+      "packages/commit-agent/src/modes/suggested.ts",
+      "packages/commit-agent/src/services/git.ts",
+      "packages/commit-agent/src/services/slm.ts",
+      "packages/commit-agent/src/services/validator.test.ts",
+      "packages/commit-agent/src/services/validator.ts",
+      "packages/commit-agent/src/types.ts",
+      "packages/commit-agent/src/utils/tty.ts",
+      "packages/commit-agent/tsconfig.json",
+      "packages/commit-agent/tsup.config.ts",
+      "packages/commit-agent/vitest.config.ts"
+    ],
+    "packages-design-tokens": [
+      "packages/design-tokens/package.json",
+      "packages/design-tokens/src/aigency-design-tokens.json",
+      "packages/design-tokens/src/index.ts",
+      "packages/design-tokens/src/synapttree-design-tokens.json",
+      "packages/design-tokens/tsconfig.json"
+    ],
+    "packages-galaxy-bridge": [
+      "packages/galaxy-bridge/AGENTS.md",
+      "packages/galaxy-bridge/package.json",
+      "packages/galaxy-bridge/src/index.ts",
+      "packages/galaxy-bridge/src/omp-rpc-client.ts",
+      "packages/galaxy-bridge/src/omp-rpc-types.ts",
+      "packages/galaxy-bridge/src/ssh-transport.ts",
+      "packages/galaxy-bridge/src/task-delegator.ts",
+      "packages/galaxy-bridge/tsconfig.json"
+    ],
+    "packages-hermes-client": [
+      "packages/hermes-client/AGENTS.md",
+      "packages/hermes-client/package.json",
+      "packages/hermes-client/src/client.ts",
+      "packages/hermes-client/src/index.ts",
+      "packages/hermes-client/src/types.ts",
+      "packages/hermes-client/tsconfig.json"
+    ],
+    "packages-honcho": [
+      "packages/honcho/README.md",
+      "packages/honcho/package.json",
+      "packages/honcho/src/client.ts",
+      "packages/honcho/src/index.test.ts",
+      "packages/honcho/src/index.ts",
+      "packages/honcho/src/types.ts",
+      "packages/honcho/tsconfig.json",
+      "packages/honcho/vitest.config.ts"
+    ],
+    "packages-mem-brain": [
+      "packages/mem-brain/AGENTS.md",
+      "packages/mem-brain/README.md",
+      "packages/mem-brain/llm-wiki/AGENTS.md",
+      "packages/mem-brain/llm-wiki/README.md",
+      "packages/mem-brain/llm-wiki/raw/aigency-specs/AI-CODER-CONSTITUTION.md",
+      "packages/mem-brain/llm-wiki/raw/aigency-specs/CLAUDE.md",
+      "packages/mem-brain/llm-wiki/raw/aigency-specs/integrations-spec.md",
+      "packages/mem-brain/llm-wiki/raw/aigency-specs/memory-architecture.md",
+      "packages/mem-brain/llm-wiki/raw/aigency-specs/org-agents.md",
+      "packages/mem-brain/llm-wiki/raw/aigency-specs/org-core.md",
+      "packages/mem-brain/llm-wiki/wiki/agents/registry.md",
+      "packages/mem-brain/llm-wiki/wiki/architecture/data-layer.md",
+      "packages/mem-brain/llm-wiki/wiki/architecture/overview.md",
+      "packages/mem-brain/llm-wiki/wiki/frontend/design-tokens.md",
+      "packages/mem-brain/llm-wiki/wiki/index.md",
+      "packages/mem-brain/llm-wiki/wiki/log.md",
+      "packages/mem-brain/llm-wiki/wiki/services/contracts.md",
+      "packages/mem-brain/llm-wiki/wiki/services/librarian.md",
+      "packages/mem-brain/llm-wiki/wiki/services/membrane.md",
+      "packages/mem-brain/llm-wiki/wiki/services/oracle.md",
+      "packages/mem-brain/llm-wiki/wiki/services/router.md",
+      "packages/mem-brain/llm-wiki/wiki/services/telos.md",
+      "packages/mem-brain/package.json",
+      "packages/mem-brain/src/automation-jobs.ts",
+      "packages/mem-brain/src/crystal-graft.ts",
+      "packages/mem-brain/src/index.test.ts",
+      "packages/mem-brain/src/index.ts",
+      "packages/mem-brain/src/job-queue.ts",
+      "packages/mem-brain/src/mcp-server.ts",
+      "packages/mem-brain/src/mem-brain.ts",
+      "packages/mem-brain/src/oracle-substrate.ts",
+      "packages/mem-brain/src/schema.surql",
+      "packages/mem-brain/src/wiki-engine.test.ts",
+      "packages/mem-brain/src/wiki-engine.ts",
+      "packages/mem-brain/tsconfig.json",
+      "packages/mem-brain/vitest.config.ts"
+    ],
+    "packages-repoatlas-cli": [
+      "packages/repoatlas-cli/README.md",
+      "packages/repoatlas-cli/package.json",
+      "packages/repoatlas-cli/src/config.ts",
+      "packages/repoatlas-cli/src/index.ts",
+      "packages/repoatlas-cli/src/lib/analyze.ts",
+      "packages/repoatlas-cli/src/sync.ts",
+      "packages/repoatlas-cli/tsconfig.json"
+    ],
+    "packages-surreal": [
+      "packages/surreal/README.md",
+      "packages/surreal/package.json",
+      "packages/surreal/src/client.test.ts",
+      "packages/surreal/src/client.ts",
+      "packages/surreal/src/index.ts",
+      "packages/surreal/src/live.ts",
+      "packages/surreal/src/types.ts",
+      "packages/surreal/tsconfig.json",
+      "packages/surreal/vitest.config.ts"
+    ],
+    "packages-tsconfig": [
+      "packages/tsconfig/base.json",
+      "packages/tsconfig/node.json",
+      "packages/tsconfig/package.json",
+      "packages/tsconfig/react.json"
+    ],
+    "packages-vault-tools": [
+      "packages/vault-tools/README.md",
+      "packages/vault-tools/package.json",
+      "packages/vault-tools/src/compile.ts",
+      "packages/vault-tools/src/config.ts",
+      "packages/vault-tools/src/flush.ts",
+      "packages/vault-tools/src/index.test.ts",
+      "packages/vault-tools/src/index.ts",
+      "packages/vault-tools/src/lint.ts",
+      "packages/vault-tools/tsconfig.json",
+      "packages/vault-tools/vitest.config.ts"
+    ],
+    "root": [
+      ".coderabbit.yaml",
+      ".commitlintrc.json",
+      ".czrc",
+      ".gitignore",
+      ".mega-linter.yml",
+      ".repoatlas.json",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "CONSTITUTION.md",
+      "HERMES_GALAXY_ARCHITECTURE.md",
+      "HERMES_GALAXY_v2.md",
+      "HERMES_GALAXY_v3.md",
+      "README.md",
+      "SLICE_WORKFLOW.md",
+      "biome.json",
+      "codecov.yml",
+      "lefthook.yml",
+      "package.json",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "render.yaml",
+      "tsconfig.json",
+      "turbo.json"
+    ],
+    "scripts": [
+      "scripts/galaxy-deploy.sh",
+      "scripts/galaxy-provision.sh"
+    ],
+    "scripts-automation": [
+      "scripts/automation/agent-slice-commit.sh",
+      "scripts/automation/agentic-wiki-regen.sh",
+      "scripts/automation/apply-coderabbit-fixes.sh",
+      "scripts/automation/autofix.sh",
+      "scripts/automation/coderabbit-review.sh",
+      "scripts/automation/coverage-check.sh",
+      "scripts/automation/docs-staleness-check.sh",
+      "scripts/automation/generate-commit-msg.sh",
+      "scripts/automation/generate-tests.sh",
+      "scripts/automation/gitnexus-sync.sh",
+      "scripts/automation/setup-slm.sh",
+      "scripts/automation/wiki-check.sh"
+    ],
+    "wiki": [
+      "wiki/index.md"
+    ]
+  },
+  "moduleTree": [
+    {
+      "name": ".Claude",
+      "slug": "claude",
+      "files": [
+        ".claude/settings.local.json"
+      ],
+      "children": [
+        {
+          "name": "Skills",
+          "slug": "claude-skills",
+          "files": [
+            ".claude/skills/gitnexus/gitnexus-cli/SKILL.md",
+            ".claude/skills/gitnexus/gitnexus-debugging/SKILL.md",
+            ".claude/skills/gitnexus/gitnexus-exploring/SKILL.md",
+            ".claude/skills/gitnexus/gitnexus-guide/SKILL.md",
+            ".claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md",
+            ".claude/skills/gitnexus/gitnexus-refactoring/SKILL.md"
+          ]
+        }
+      ]
+    },
+    {
+      "name": ".Github",
+      "slug": "github",
+      "files": [],
+      "children": [
+        {
+          "name": "Workflows",
+          "slug": "github-workflows",
+          "files": [
+            ".github/workflows/automation.yml",
+            ".github/workflows/coderabbit.yml",
+            ".github/workflows/coverage.yml",
+            ".github/workflows/megalinter.yml",
+            ".github/workflows/repoatlas-sync.yml"
+          ]
+        }
+      ]
+    },
+    {
+      "name": ".Vercel",
+      "slug": "vercel",
+      "files": [
+        ".vercel/project.json"
+      ]
+    },
+    {
+      "name": "Agents",
+      "slug": "agents",
+      "files": [],
+      "children": [
+        {
+          "name": "Atlas",
+          "slug": "agents-atlas",
+          "files": [
+            "agents/atlas/agent.yaml",
+            "agents/atlas/package.json"
+          ]
+        },
+        {
+          "name": "Cipher",
+          "slug": "agents-cipher",
+          "files": [
+            "agents/cipher/agent.yaml",
+            "agents/cipher/package.json"
+          ]
+        },
+        {
+          "name": "Compass",
+          "slug": "agents-compass",
+          "files": [
+            "agents/compass/agent.yaml",
+            "agents/compass/package.json"
+          ]
+        },
+        {
+          "name": "Echo",
+          "slug": "agents-echo",
+          "files": [
+            "agents/echo/agent.yaml",
+            "agents/echo/package.json"
+          ]
+        },
+        {
+          "name": "Herald",
+          "slug": "agents-herald",
+          "files": [
+            "agents/herald/agent.yaml",
+            "agents/herald/package.json"
+          ]
+        },
+        {
+          "name": "Iris",
+          "slug": "agents-iris",
+          "files": [
+            "agents/iris/agent.yaml",
+            "agents/iris/package.json"
+          ]
+        },
+        {
+          "name": "Librarian",
+          "slug": "agents-librarian",
+          "files": [
+            "agents/librarian/agent.yaml",
+            "agents/librarian/package.json"
+          ]
+        },
+        {
+          "name": "Oracle",
+          "slug": "agents-oracle",
+          "files": [
+            "agents/oracle/agent.yaml",
+            "agents/oracle/package.json"
+          ]
+        },
+        {
+          "name": "Vector",
+          "slug": "agents-vector",
+          "files": [
+            "agents/vector/agent.yaml",
+            "agents/vector/package.json"
+          ]
+        },
+        {
+          "name": "Zenith",
+          "slug": "agents-zenith",
+          "files": [
+            "agents/zenith/agent.yaml",
+            "agents/zenith/package.json"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Apps",
+      "slug": "apps",
+      "files": [],
+      "children": [
+        {
+          "name": "Contracts",
+          "slug": "apps-contracts",
+          "files": [
+            "apps/contracts/foundry.toml",
+            "apps/contracts/package.json",
+            "apps/contracts/src/HarvestMoon.sol"
+          ]
+        },
+        {
+          "name": "Docs",
+          "slug": "apps-docs",
+          "files": [
+            "apps/docs/01-getting-started/overview.md",
+            "apps/docs/01-getting-started/quick-reference.md",
+            "apps/docs/01-getting-started/setup.md",
+            "apps/docs/02-deep-dive/agent-system.md",
+            "apps/docs/02-deep-dive/apps/contracts.md",
+            "apps/docs/02-deep-dive/apps/librarian.md",
+            "apps/docs/02-deep-dive/apps/membrane.md",
+            "apps/docs/02-deep-dive/apps/oracle.md",
+            "apps/docs/02-deep-dive/apps/router.md",
+            "apps/docs/02-deep-dive/apps/telos.md",
+            "apps/docs/02-deep-dive/architecture.md",
+            "apps/docs/02-deep-dive/data-layer.md",
+            "apps/docs/02-deep-dive/frontend.md",
+            "apps/docs/02-deep-dive/packages/agent-core.md",
+            "apps/docs/02-deep-dive/packages/design-tokens.md",
+            "apps/docs/02-deep-dive/packages/honcho.md",
+            "apps/docs/02-deep-dive/packages/mem-brain.md",
+            "apps/docs/02-deep-dive/packages/surreal.md",
+            "apps/docs/02-deep-dive/packages/vault-tools.md",
+            "apps/docs/03-agents/atlas.md",
+            "apps/docs/03-agents/cipher.md",
+            "apps/docs/03-agents/compass.md",
+            "apps/docs/03-agents/echo.md",
+            "apps/docs/03-agents/herald.md",
+            "apps/docs/03-agents/index.md",
+            "apps/docs/03-agents/iris.md",
+            "apps/docs/03-agents/vector.md",
+            "apps/docs/03-agents/zenith.md",
+            "apps/docs/AGENTS.md",
+            "apps/docs/AUTOMATION.md",
+            "apps/docs/README.md",
+            "apps/docs/llms-full.txt",
+            "apps/docs/llms.txt",
+            "apps/docs/onboarding/contributor.md",
+            "apps/docs/onboarding/executive.md",
+            "apps/docs/onboarding/product-manager.md",
+            "apps/docs/onboarding/staff-engineer.md",
+            "apps/docs/package.json"
+          ]
+        },
+        {
+          "name": "Galaxy",
+          "slug": "apps-galaxy",
+          "files": [
+            "apps/galaxy/.env.example",
+            "apps/galaxy/AGENTS.md",
+            "apps/galaxy/Dockerfile.daytona",
+            "apps/galaxy/package.json",
+            "apps/galaxy/setup-daytona.sh",
+            "apps/galaxy/src/cli.ts",
+            "apps/galaxy/src/config.ts",
+            "apps/galaxy/src/index.ts",
+            "apps/galaxy/src/orchestrator.ts",
+            "apps/galaxy/tsconfig.json"
+          ]
+        },
+        {
+          "name": "Librarian",
+          "slug": "apps-librarian",
+          "files": [
+            "apps/librarian/package.json",
+            "apps/librarian/src/index.ts",
+            "apps/librarian/tsconfig.json"
+          ]
+        },
+        {
+          "name": "Membrane",
+          "slug": "apps-membrane",
+          "files": [
+            "apps/membrane/package.json",
+            "apps/membrane/src/App.tsx",
+            "apps/membrane/src/main.tsx",
+            "apps/membrane/tsconfig.json"
+          ]
+        },
+        {
+          "name": "Nexus",
+          "slug": "apps-nexus",
+          "files": [
+            "apps/nexus/.gitignore",
+            "apps/nexus/next-env.d.ts",
+            "apps/nexus/next.config.mjs",
+            "apps/nexus/package.json",
+            "apps/nexus/scripts/bundle-registry.ts",
+            "apps/nexus/src/components/Canvas.tsx",
+            "apps/nexus/src/components/ChatPanel.tsx",
+            "apps/nexus/src/components/ProjectSwitcher.tsx",
+            "apps/nexus/src/components/Shell.tsx",
+            "apps/nexus/src/components/Sidebar.tsx",
+            "apps/nexus/src/components/StatusBar.tsx",
+            "apps/nexus/src/components/TopBar.tsx",
+            "apps/nexus/src/data/gitnexus.ts",
+            "apps/nexus/src/index.css",
+            "apps/nexus/src/lib/staticPaths.ts",
+            "apps/nexus/src/pages/_app.tsx",
+            "apps/nexus/src/pages/_document.tsx",
+            "apps/nexus/src/pages/files.tsx",
+            "apps/nexus/src/pages/graph.tsx",
+            "apps/nexus/src/pages/impact.tsx",
+            "apps/nexus/src/pages/index.tsx",
+            "apps/nexus/src/pages/onboarding.tsx",
+            "apps/nexus/src/pages/process.tsx",
+            "apps/nexus/src/pages/projects.tsx",
+            "apps/nexus/src/pages/search.tsx",
+            "apps/nexus/src/pages/settings.tsx",
+            "apps/nexus/src/pages/symbol/[symbol].tsx",
+            "apps/nexus/src/pages/wiki/[slug].tsx",
+            "apps/nexus/src/pages/wiki/index.tsx",
+            "apps/nexus/src/services/backend-client.ts",
+            "apps/nexus/src/store.ts",
+            "apps/nexus/src/styles/canvas.css",
+            "apps/nexus/src/styles/design-tokens.css",
+            "apps/nexus/src/views/FileTreeView.tsx",
+            "apps/nexus/src/views/GraphView.tsx",
+            "apps/nexus/src/views/ImpactView.tsx",
+            "apps/nexus/src/views/OnboardingView.tsx",
+            "apps/nexus/src/views/OverviewView.tsx",
+            "apps/nexus/src/views/ProcessView.tsx",
+            "apps/nexus/src/views/ProjectsView.tsx",
+            "apps/nexus/src/views/SearchView.tsx",
+            "apps/nexus/src/views/SettingsView.tsx",
+            "apps/nexus/src/views/SymbolContextView.tsx",
+            "apps/nexus/src/views/WikiIndexView.tsx",
+            "apps/nexus/src/views/WikiView.tsx",
+            "apps/nexus/src/vite-env.d.ts",
+            "apps/nexus/tsconfig.json",
+            "apps/nexus/tsconfig.tsbuildinfo",
+            "apps/nexus/vercel.json"
+          ]
+        },
+        {
+          "name": "Oracle",
+          "slug": "apps-oracle",
+          "files": [
+            "apps/oracle/package.json",
+            "apps/oracle/src/index.ts",
+            "apps/oracle/tsconfig.json"
+          ]
+        },
+        {
+          "name": "Repoatlas Server",
+          "slug": "apps-repoatlas-server",
+          "files": [
+            "apps/repoatlas-server/.env.example",
+            "apps/repoatlas-server/README.md",
+            "apps/repoatlas-server/docker-compose.yml",
+            "apps/repoatlas-server/migrations/001_init.sql",
+            "apps/repoatlas-server/migrations/002_populate_remote_urls.sql",
+            "apps/repoatlas-server/package.json",
+            "apps/repoatlas-server/scripts/test-ingest.ts",
+            "apps/repoatlas-server/src/db/index.ts",
+            "apps/repoatlas-server/src/index.ts",
+            "apps/repoatlas-server/src/lib/config.ts",
+            "apps/repoatlas-server/src/lib/extract.ts",
+            "apps/repoatlas-server/src/routes/public.ts",
+            "apps/repoatlas-server/src/routes/upload.ts",
+            "apps/repoatlas-server/tsconfig.json"
+          ]
+        },
+        {
+          "name": "Router",
+          "slug": "apps-router",
+          "files": [
+            "apps/router/README.md",
+            "apps/router/config/production.example.yaml",
+            "apps/router/config/providers.development.yaml",
+            "apps/router/config/providers.yaml",
+            "apps/router/jest.config.js",
+            "apps/router/package.json",
+            "apps/router/package.json.orig",
+            "apps/router/src/cli.ts",
+            "apps/router/src/config/env-override.ts",
+            "apps/router/src/config/index.test.ts",
+            "apps/router/src/config/index.ts",
+            "apps/router/src/config/integration.test.ts",
+            "apps/router/src/config/loader.ts",
+            "apps/router/src/config/schema.ts",
+            "apps/router/src/config/validator.ts",
+            "apps/router/src/lib/logging/logger.test.ts",
+            "apps/router/src/lib/logging/logger.ts",
+            "apps/router/src/quota-tracker.test.ts",
+            "apps/router/src/quota-tracker.ts",
+            "apps/router/src/router.ts",
+            "apps/router/src/server.test.ts",
+            "apps/router/src/server.ts",
+            "apps/router/tsconfig.json"
+          ]
+        },
+        {
+          "name": "Telos",
+          "slug": "apps-telos",
+          "files": [
+            "apps/telos/INTERVIEW.md",
+            "apps/telos/README.md",
+            "apps/telos/TELOS.md",
+            "apps/telos/agents/atlas.md",
+            "apps/telos/agents/cipher.md",
+            "apps/telos/agents/compass.md",
+            "apps/telos/agents/echo.md",
+            "apps/telos/agents/herald.md",
+            "apps/telos/agents/iris.md",
+            "apps/telos/agents/vector.md",
+            "apps/telos/agents/zenith.md",
+            "apps/telos/drafts/aigency-corporate.DRAFT.md",
+            "apps/telos/drafts/architect-personal.DRAFT.md",
+            "apps/telos/package.json",
+            "apps/telos/src/cli.ts",
+            "apps/telos/src/dev-server.ts",
+            "apps/telos/src/index.ts",
+            "apps/telos/templates/TELOS-v1-blank.md",
+            "apps/telos/templates/agent-persona.md",
+            "apps/telos/tsconfig.json"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Packages",
+      "slug": "packages",
+      "files": [],
+      "children": [
+        {
+          "name": "Agent Core",
+          "slug": "packages-agent-core",
+          "files": [
+            "packages/agent-core/README.md",
+            "packages/agent-core/package.json",
+            "packages/agent-core/src/index.test.ts",
+            "packages/agent-core/src/index.ts",
+            "packages/agent-core/tsconfig.json",
+            "packages/agent-core/vitest.config.ts"
+          ]
+        },
+        {
+          "name": "Commit Agent",
+          "slug": "packages-commit-agent",
+          "files": [
+            "packages/commit-agent/biome.json",
+            "packages/commit-agent/package.json",
+            "packages/commit-agent/src/cli.ts",
+            "packages/commit-agent/src/index.ts",
+            "packages/commit-agent/src/modes/auto.ts",
+            "packages/commit-agent/src/modes/free.ts",
+            "packages/commit-agent/src/modes/guided.ts",
+            "packages/commit-agent/src/modes/suggested.ts",
+            "packages/commit-agent/src/services/git.ts",
+            "packages/commit-agent/src/services/slm.ts",
+            "packages/commit-agent/src/services/validator.test.ts",
+            "packages/commit-agent/src/services/validator.ts",
+            "packages/commit-agent/src/types.ts",
+            "packages/commit-agent/src/utils/tty.ts",
+            "packages/commit-agent/tsconfig.json",
+            "packages/commit-agent/tsup.config.ts",
+            "packages/commit-agent/vitest.config.ts"
+          ]
+        },
+        {
+          "name": "Design Tokens",
+          "slug": "packages-design-tokens",
+          "files": [
+            "packages/design-tokens/package.json",
+            "packages/design-tokens/src/aigency-design-tokens.json",
+            "packages/design-tokens/src/index.ts",
+            "packages/design-tokens/src/synapttree-design-tokens.json",
+            "packages/design-tokens/tsconfig.json"
+          ]
+        },
+        {
+          "name": "Galaxy Bridge",
+          "slug": "packages-galaxy-bridge",
+          "files": [
+            "packages/galaxy-bridge/AGENTS.md",
+            "packages/galaxy-bridge/package.json",
+            "packages/galaxy-bridge/src/index.ts",
+            "packages/galaxy-bridge/src/omp-rpc-client.ts",
+            "packages/galaxy-bridge/src/omp-rpc-types.ts",
+            "packages/galaxy-bridge/src/ssh-transport.ts",
+            "packages/galaxy-bridge/src/task-delegator.ts",
+            "packages/galaxy-bridge/tsconfig.json"
+          ]
+        },
+        {
+          "name": "Hermes Client",
+          "slug": "packages-hermes-client",
+          "files": [
+            "packages/hermes-client/AGENTS.md",
+            "packages/hermes-client/package.json",
+            "packages/hermes-client/src/client.ts",
+            "packages/hermes-client/src/index.ts",
+            "packages/hermes-client/src/types.ts",
+            "packages/hermes-client/tsconfig.json"
+          ]
+        },
+        {
+          "name": "Honcho",
+          "slug": "packages-honcho",
+          "files": [
+            "packages/honcho/README.md",
+            "packages/honcho/package.json",
+            "packages/honcho/src/client.ts",
+            "packages/honcho/src/index.test.ts",
+            "packages/honcho/src/index.ts",
+            "packages/honcho/src/types.ts",
+            "packages/honcho/tsconfig.json",
+            "packages/honcho/vitest.config.ts"
+          ]
+        },
+        {
+          "name": "Mem Brain",
+          "slug": "packages-mem-brain",
+          "files": [
+            "packages/mem-brain/AGENTS.md",
+            "packages/mem-brain/README.md",
+            "packages/mem-brain/llm-wiki/AGENTS.md",
+            "packages/mem-brain/llm-wiki/README.md",
+            "packages/mem-brain/llm-wiki/raw/aigency-specs/AI-CODER-CONSTITUTION.md",
+            "packages/mem-brain/llm-wiki/raw/aigency-specs/CLAUDE.md",
+            "packages/mem-brain/llm-wiki/raw/aigency-specs/integrations-spec.md",
+            "packages/mem-brain/llm-wiki/raw/aigency-specs/memory-architecture.md",
+            "packages/mem-brain/llm-wiki/raw/aigency-specs/org-agents.md",
+            "packages/mem-brain/llm-wiki/raw/aigency-specs/org-core.md",
+            "packages/mem-brain/llm-wiki/wiki/agents/registry.md",
+            "packages/mem-brain/llm-wiki/wiki/architecture/data-layer.md",
+            "packages/mem-brain/llm-wiki/wiki/architecture/overview.md",
+            "packages/mem-brain/llm-wiki/wiki/frontend/design-tokens.md",
+            "packages/mem-brain/llm-wiki/wiki/index.md",
+            "packages/mem-brain/llm-wiki/wiki/log.md",
+            "packages/mem-brain/llm-wiki/wiki/services/contracts.md",
+            "packages/mem-brain/llm-wiki/wiki/services/librarian.md",
+            "packages/mem-brain/llm-wiki/wiki/services/membrane.md",
+            "packages/mem-brain/llm-wiki/wiki/services/oracle.md",
+            "packages/mem-brain/llm-wiki/wiki/services/router.md",
+            "packages/mem-brain/llm-wiki/wiki/services/telos.md",
+            "packages/mem-brain/package.json",
+            "packages/mem-brain/src/automation-jobs.ts",
+            "packages/mem-brain/src/crystal-graft.ts",
+            "packages/mem-brain/src/index.test.ts",
+            "packages/mem-brain/src/index.ts",
+            "packages/mem-brain/src/job-queue.ts",
+            "packages/mem-brain/src/mcp-server.ts",
+            "packages/mem-brain/src/mem-brain.ts",
+            "packages/mem-brain/src/oracle-substrate.ts",
+            "packages/mem-brain/src/schema.surql",
+            "packages/mem-brain/src/wiki-engine.test.ts",
+            "packages/mem-brain/src/wiki-engine.ts",
+            "packages/mem-brain/tsconfig.json",
+            "packages/mem-brain/vitest.config.ts"
+          ]
+        },
+        {
+          "name": "Repoatlas Cli",
+          "slug": "packages-repoatlas-cli",
+          "files": [
+            "packages/repoatlas-cli/README.md",
+            "packages/repoatlas-cli/package.json",
+            "packages/repoatlas-cli/src/config.ts",
+            "packages/repoatlas-cli/src/index.ts",
+            "packages/repoatlas-cli/src/lib/analyze.ts",
+            "packages/repoatlas-cli/src/sync.ts",
+            "packages/repoatlas-cli/tsconfig.json"
+          ]
+        },
+        {
+          "name": "Surreal",
+          "slug": "packages-surreal",
+          "files": [
+            "packages/surreal/README.md",
+            "packages/surreal/package.json",
+            "packages/surreal/src/client.test.ts",
+            "packages/surreal/src/client.ts",
+            "packages/surreal/src/index.ts",
+            "packages/surreal/src/live.ts",
+            "packages/surreal/src/types.ts",
+            "packages/surreal/tsconfig.json",
+            "packages/surreal/vitest.config.ts"
+          ]
+        },
+        {
+          "name": "Tsconfig",
+          "slug": "packages-tsconfig",
+          "files": [
+            "packages/tsconfig/base.json",
+            "packages/tsconfig/node.json",
+            "packages/tsconfig/package.json",
+            "packages/tsconfig/react.json"
+          ]
+        },
+        {
+          "name": "Vault Tools",
+          "slug": "packages-vault-tools",
+          "files": [
+            "packages/vault-tools/README.md",
+            "packages/vault-tools/package.json",
+            "packages/vault-tools/src/compile.ts",
+            "packages/vault-tools/src/config.ts",
+            "packages/vault-tools/src/flush.ts",
+            "packages/vault-tools/src/index.test.ts",
+            "packages/vault-tools/src/index.ts",
+            "packages/vault-tools/src/lint.ts",
+            "packages/vault-tools/tsconfig.json",
+            "packages/vault-tools/vitest.config.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Root",
+      "slug": "root",
+      "files": [
+        ".coderabbit.yaml",
+        ".commitlintrc.json",
+        ".czrc",
+        ".gitignore",
+        ".mega-linter.yml",
+        ".repoatlas.json",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "CONSTITUTION.md",
+        "HERMES_GALAXY_ARCHITECTURE.md",
+        "HERMES_GALAXY_v2.md",
+        "HERMES_GALAXY_v3.md",
+        "README.md",
+        "SLICE_WORKFLOW.md",
+        "biome.json",
+        "codecov.yml",
+        "lefthook.yml",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "render.yaml",
+        "tsconfig.json",
+        "turbo.json"
+      ]
+    },
+    {
+      "name": "Scripts",
+      "slug": "scripts",
+      "files": [
+        "scripts/galaxy-deploy.sh",
+        "scripts/galaxy-provision.sh"
+      ],
+      "children": [
+        {
+          "name": "Automation",
+          "slug": "scripts-automation",
+          "files": [
+            "scripts/automation/agent-slice-commit.sh",
+            "scripts/automation/agentic-wiki-regen.sh",
+            "scripts/automation/apply-coderabbit-fixes.sh",
+            "scripts/automation/autofix.sh",
+            "scripts/automation/coderabbit-review.sh",
+            "scripts/automation/coverage-check.sh",
+            "scripts/automation/docs-staleness-check.sh",
+            "scripts/automation/generate-commit-msg.sh",
+            "scripts/automation/generate-tests.sh",
+            "scripts/automation/gitnexus-sync.sh",
+            "scripts/automation/setup-slm.sh",
+            "scripts/automation/wiki-check.sh"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Wiki",
+      "slug": "wiki",
+      "files": [
+        "wiki/index.md"
+      ]
+    }
+  ]
+}

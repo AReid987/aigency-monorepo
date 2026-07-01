@@ -8,6 +8,8 @@ interface RegistryEntry {
   name: string;
   path: string;
   storagePath: string;
+  /** Committed data directory relative to this script for CI/cloud builds. */
+  dataPath?: string;
   indexedAt: string;
   lastCommit: string;
   remoteUrl?: string;
@@ -147,9 +149,20 @@ async function main() {
 
   for (const [id, group] of byId) {
     const picked = group.sort((a, b) => (b.stats?.files ?? 0) - (a.stats?.files ?? 0))[0];
-    const wikiDir = join(picked.storagePath, "wiki");
+
+    // Prefer a live local index; fall back to committed data so cloud builds
+    // still ship a working static bundle when absolute storagePath does not exist.
+    let sourceDir = picked.storagePath;
+    if (!existsSync(join(sourceDir, "wiki", "module_tree.json")) && picked.dataPath) {
+      const committed = resolve(scriptDir, picked.dataPath);
+      if (existsSync(join(committed, "wiki", "module_tree.json"))) {
+        sourceDir = committed;
+      }
+    }
+    const wikiDir = join(sourceDir, "wiki");
 
     if (!existsSync(join(wikiDir, "module_tree.json"))) {
+      console.warn(`[bundle-registry] Skipping ${picked.name}: no wiki data at ${sourceDir}`);
       continue;
     }
 
@@ -164,7 +177,7 @@ async function main() {
     copyRecursive(wikiDir, join(destDir, "wiki"));
 
     // Copy top-level repo meta for stats.
-    const repoMeta = join(picked.storagePath, "meta.json");
+    const repoMeta = join(sourceDir, "meta.json");
     if (existsSync(repoMeta)) {
       writeFileSync(join(destDir, "repo-meta.json"), readFileSync(repoMeta));
     }
