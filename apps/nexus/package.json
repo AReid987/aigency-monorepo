@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm bundle:registry && next build",
-    "bundle:registry": "tsx scripts/bundle-registry.ts",
+    "bundle:registry": "GITNEXUS_REGISTRY_PATH=scripts/registry.local.json tsx scripts/bundle-registry.ts",
     "clean": "rimraf dist",
     "dev": "next dev -p 3000",
     "dev:full": "pnpm bundle:registry && next dev -p 3000",

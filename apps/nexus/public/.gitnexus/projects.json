@@ -1,61 +1,20 @@
 {
   "projects": [
     {
-      "id": "aigency-router-v2",
-      "name": "aigency-router-v2",
-      "path": "/Users/antonioreid/CODE/00_PROJECTS/00_APPS/AIGENCY/aigency-router-v2",
-      "storagePath": "/Users/antonioreid/CODE/00_PROJECTS/00_APPS/AIGENCY/aigency-router-v2/.gitnexus",
-      "remoteUrl": "https://github.com/antonioreid/aigency-router-v2",
-      "indexedAt": "2026-06-18T07:20:14.677Z",
-      "lastCommit": "eff5b2d5d4f545e5b0d7e55923e0274defd9ab61",
-      "stats": {
-        "files": 148,
-        "nodes": 1188,
-        "edges": 2311,
-        "communities": 68,
-        "processes": 63,
-        "embeddings": 0
-      },
-      "hasData": true,
-      "wikiCount": 43
-    },
-    {
       "id": "aigency-monorepo",
       "name": "aigency-monorepo",
       "path": "/Users/antonioreid/CODE/00_PROJECTS/00_APPS/AIGENCY/aigency-monorepo",
       "storagePath": "/Users/antonioreid/CODE/00_PROJECTS/00_APPS/AIGENCY/aigency-monorepo/.gitnexus",
       "remoteUrl": "https://github.com/AReid987/aigency-monorepo",
-      "indexedAt": "2026-06-21T08:32:38.651Z",
-      "lastCommit": "b9204b6540a822916a9aa7ec80392088b6c56a0b",
+      "indexedAt": "2026-07-01T12:16:27.896Z",
+      "lastCommit": "81ae308ff17a0b027bbd8d016215d080c7471897",
       "stats": {
-        "files": 327,
-        "nodes": 2994,
-        "edges": 4904,
-        "communities": 81,
-        "processes": 153,
-        "embeddings": 0
+        "files": 354,
+        "nodes": 43,
+        "modules": 9
       },
       "hasData": true,
       "wikiCount": 89
-    },
-    {
-      "id": "survey-agent",
-      "name": "survey-agent",
-      "path": "/Users/antonioreid/survey-agent",
-      "storagePath": "/Users/antonioreid/survey-agent/.gitnexus",
-      "remoteUrl": "https://github.com/antonioreid/survey-agent",
-      "indexedAt": "2026-06-24T08:34:08.059Z",
-      "lastCommit": "eb41f457cc06aad3e2fbfc0c70850faae046a776",
-      "stats": {
-        "files": 52,
-        "nodes": 838,
-        "edges": 1347,
-        "communities": 35,
-        "processes": 33,
-        "embeddings": 0
-      },
-      "hasData": true,
-      "wikiCount": 10
     }
   ]
 }

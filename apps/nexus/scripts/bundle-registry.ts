@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -117,6 +117,7 @@ async function main() {
   const outDir = resolve(scriptDir, "../public/.gitnexus");
   const reposDir = join(outDir, "repos");
   mkdirSync(outDir, { recursive: true });
+  rmSync(reposDir, { recursive: true, force: true });
   mkdirSync(reposDir, { recursive: true });
 
   let entries: RegistryEntry[] = [];
