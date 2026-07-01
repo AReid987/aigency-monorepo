@@ -45,6 +45,8 @@ typechain-types
 config/providers.yaml
 config/tailnet.yaml
 .gitnexus
+!apps/nexus/public/.gitnexus
+!apps/nexus/public/.gitnexus/**
 
 # lefthook
 lefthook-local.yml

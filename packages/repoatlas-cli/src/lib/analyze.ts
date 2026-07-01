@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 
 export interface ModuleNode {
   name: string;
@@ -235,7 +235,10 @@ function generateWikiPage(node: ModuleNode): string {
   return md;
 }
 
-export async function analyzeAndBuildWiki(cwd: string): Promise<void> {
+export async function analyzeAndBuildWiki(
+  cwd: string,
+  options: { projectId?: string; projectName?: string } = {}
+): Promise<{ projectId: string }> {
   const files = await gitTrackedFiles(cwd);
   if (files.length === 0) {
     throw new Error("No git-tracked files found. Ensure this is a git repository with commits.");
@@ -245,6 +248,9 @@ export async function analyzeAndBuildWiki(cwd: string): Promise<void> {
   const moduleFiles = moduleFilesMap(tree);
   const [remoteUrl, lastCommit] = await Promise.all([gitRemote(cwd), gitLastCommit(cwd)]);
   const indexedAt = new Date().toISOString();
+
+  const projectId = options.projectId ?? slugify(basename(cwd));
+  const projectName = options.projectName ?? projectId;
 
   const meta: RepoMeta = {
     repoPath: cwd,
@@ -280,4 +286,41 @@ export async function analyzeAndBuildWiki(cwd: string): Promise<void> {
     await Promise.all((node.children ?? []).map(writeNodePages));
   }
   await Promise.all(tree.map(writeNodePages));
+
+  // Also emit the static bundle layout used by the deployed Nexus UI when the
+  // backend is offline: /.gitnexus/projects.json + /repos/<id>/wiki/...
+  const staticRepoDir = join(gitnexusDir, "repos", projectId);
+  const staticWikiDir = join(staticRepoDir, "wiki");
+  await mkdir(staticWikiDir, { recursive: true });
+
+  await writeFile(join(staticRepoDir, "meta.json"), JSON.stringify(meta, null, 2));
+  await writeFile(join(staticWikiDir, "meta.json"), JSON.stringify(wikiMeta, null, 2));
+  await writeFile(join(staticWikiDir, "module_tree.json"), JSON.stringify(tree, null, 2));
+
+  async function writeStaticNodePages(node: ModuleNode) {
+    const md = generateWikiPage(node);
+    await writeFile(join(staticWikiDir, `${node.slug}.md`), md);
+    await Promise.all((node.children ?? []).map(writeStaticNodePages));
+  }
+  await Promise.all(tree.map(writeStaticNodePages));
+
+  const manifest = {
+    projects: [
+      {
+        id: projectId,
+        name: projectName,
+        path: cwd,
+        storagePath: staticRepoDir,
+        remoteUrl,
+        indexedAt,
+        lastCommit: lastCommit ?? null,
+        stats: meta.stats,
+        hasData: true,
+        wikiCount: tree.length,
+      },
+    ],
+  };
+  await writeFile(join(gitnexusDir, "projects.json"), JSON.stringify(manifest, null, 2));
+
+  return { projectId };
 }

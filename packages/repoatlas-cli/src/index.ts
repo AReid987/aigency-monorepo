@@ -86,7 +86,10 @@ program
     }
 
     if (options.analyze) {
-      await analyzeAndBuildWiki(found.root);
+      await analyzeAndBuildWiki(found.root, {
+        projectId: found.config.projectId,
+        projectName: found.config.projectId,
+      });
     }
 
     const tarPath = await createTarball(found.root);
