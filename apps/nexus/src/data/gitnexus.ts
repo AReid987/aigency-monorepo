@@ -42,11 +42,12 @@ export interface ProjectInfo {
 interface ProjectManifest {
   projects: ProjectInfo[];
 }
-const REPOATLAS_URL = typeof process !== "undefined"
-  ? (process.env.NEXT_PUBLIC_REPOATLAS_API_URL ??
-     process.env.NEXT_PUBLIC_GITNEXUS_BACKEND_URL ??
-     "https://repoatlas-server.onrender.com")
-  : "https://repoatlas-server.onrender.com"
+const REPOATLAS_URL =
+  typeof process !== "undefined"
+    ? (process.env.NEXT_PUBLIC_REPOATLAS_API_URL ??
+      process.env.NEXT_PUBLIC_GITNEXUS_BACKEND_URL ??
+      "https://repoatlas-server.onrender.com")
+    : "https://repoatlas-server.onrender.com";
 
 const metaCache = new Map<string, MetaData>();
 const treeCache = new Map<string, ModuleNode[]>();
@@ -70,23 +71,35 @@ function titleFromSlug(slug: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export async function loadProjectsManifest(): Promise<ProjectManifest> {
+async function loadStaticManifest(): Promise<ProjectManifest> {
+  const res = await fetch("/.gitnexus/projects.json");
+  if (!res.ok) {
+    return { projects: [] };
+  }
+  return (await res.json()) as ProjectManifest;
+}
+
+export async function loadProjectsManifest(): Promise<
+  ProjectManifest & { source: "backend" | "static" }
+> {
   if (REPOATLAS_URL) {
     try {
       const res = await fetch(`${REPOATLAS_URL}/api/repos`);
       if (res.ok) {
-        return (await res.json()) as ProjectManifest;
+        const fromBackend = (await res.json()) as ProjectManifest;
+        if (fromBackend.projects.some((p) => p.hasData)) {
+          return { ...fromBackend, source: "backend" };
+        }
+        // Backend is alive but empty — fall through to static bundle so the
+        // deployed UI is never stuck on "No projects".
       }
     } catch {
       // fall through to static manifest
     }
   }
 
-  const res = await fetch("/.gitnexus/projects.json");
-  if (!res.ok) {
-    return { projects: [] };
-  }
-  return (await res.json()) as ProjectManifest;
+  const fromStatic = await loadStaticManifest();
+  return { ...fromStatic, source: "static" };
 }
 
 export async function loadRepoMeta(repoId: string): Promise<MetaData> {
@@ -194,39 +207,58 @@ function collectSlugs(nodes: ModuleNode[]): string[] {
   return out;
 }
 
-const AIGENCY_ACCENT = "#fbbf24";
-const AIGENCY_GO = "#4ade80";
-const AIGENCY_CONDITIONAL = "#fb923c";
-const AIGENCY_AVOID = "#f87171";
-const AIGENCY_HIGHLIGHT = "#e879f9";
-const AIGENCY_OTHER = "#f472b6";
-const AIGENCY_MUTED = "#94a3b8";
+function collectFiles(n: ModuleNode): string[] {
+  const own = n.files ?? [];
+  const child = (n.children ?? []).flatMap(collectFiles);
+  return [...own, ...child];
+}
+
+// Aigency OKLCH semantic signal colors — resolved from design tokens at runtime.
+// Using CSS variable strings lets canvas.css/design-tokens.css drive the palette,
+// so category colors have semantic meaning and stay consistent across the UI.
+const AIGENCY_AGENT: Record<string, string> = {
+  zenith: "var(--aig-signal-conditional)",
+  cipher: "var(--aig-signal-go)",
+  echo: "var(--aig-signal-avoid)",
+  vector: "var(--aig-signal-highlight)",
+  atlas: "var(--aig-signal-conditional)",
+  oracle: "var(--aig-signal-highlight)",
+  librarian: "var(--aig-signal-conditional)",
+  herald: "var(--aig-signal-conditional)",
+  iris: "var(--aig-signal-highlight)",
+  compass: "var(--aig-signal-go)",
+  architect: "var(--aig-signal-conditional)",
+};
 
 export function getAgentColor(name: string): string {
-  const map: Record<string, string> = {
-    zenith: AIGENCY_ACCENT,
-    cipher: AIGENCY_GO,
-    echo: AIGENCY_AVOID,
-    vector: AIGENCY_HIGHLIGHT,
-    atlas: AIGENCY_CONDITIONAL,
-    oracle: AIGENCY_HIGHLIGHT,
-    librarian: AIGENCY_CONDITIONAL,
-    herald: AIGENCY_ACCENT,
-    iris: AIGENCY_HIGHLIGHT,
-    compass: AIGENCY_GO,
-    architect: AIGENCY_ACCENT,
-  };
   const key = slugify(name);
-  return map[key] || AIGENCY_MUTED;
+  return AIGENCY_AGENT[key] || "var(--aig-foreground-muted)";
 }
 
 export function getCategoryColor(cat: ReturnType<typeof getModuleCategory>): string {
   return {
-    package: AIGENCY_HIGHLIGHT,
-    app: AIGENCY_ACCENT,
-    agent: AIGENCY_GO,
-    other: AIGENCY_OTHER,
+    package: "var(--aig-signal-highlight)",
+    app: "var(--aig-signal-conditional)",
+    agent: "var(--aig-signal-go)",
+    other: "var(--aig-foreground-muted)",
   }[cat];
+}
+
+export function getCategorySignal(cat: ReturnType<typeof getModuleCategory>): string {
+  return {
+    package: "highlight",
+    app: "conditional",
+    agent: "go",
+    other: "muted",
+  }[cat];
+}
+
+export function getRiskColor(risk: "low" | "medium" | "high"): string {
+  return {
+    low: "var(--aig-signal-go)",
+    medium: "var(--aig-signal-conditional)",
+    high: "var(--aig-signal-avoid)",
+  }[risk];
 }
 
 export function getModuleCategory(slug: string): "package" | "app" | "agent" | "other" {
@@ -258,4 +290,191 @@ export function getModuleCategory(slug: string): "package" | "app" | "agent" | "
 
 export function getCategoryLabel(cat: ReturnType<typeof getModuleCategory>): string {
   return { package: "Package", app: "App", agent: "Agent", other: "Other" }[cat];
+}
+
+export interface StaticImpactEntry {
+  file: string;
+  symbol: string;
+  risk: "low" | "medium" | "high";
+  reason: string;
+}
+
+export interface StaticSymbolContext {
+  name: string;
+  file: string;
+  lines: [number, number];
+  references: { file: string; line: number }[];
+  summary: string;
+}
+
+function flattenModuleTree(nodes: ModuleNode[]): ModuleNode[] {
+  const out: ModuleNode[] = [];
+  for (const n of nodes) {
+    out.push(n);
+    if (n.children) {
+      out.push(...flattenModuleTree(n.children));
+    }
+  }
+  return out;
+}
+
+function normalizeStaticFiles(
+  tree: ModuleNode[],
+  moduleFiles: Record<string, string[]> = {}
+): Map<string, string[]> {
+  const map = new Map<string, string[]>();
+  for (const n of flattenModuleTree(tree)) {
+    const byName = moduleFiles[n.name];
+    const bySlug = moduleFiles[n.slug];
+    const bySlugName = moduleFiles[slugify(n.name)];
+    const own = n.files ?? [];
+    const child = (n.children ?? []).flatMap(collectFiles);
+    map.set(n.slug, byName ?? bySlug ?? bySlugName ?? [...own, ...child]);
+  }
+  return map;
+}
+
+function buildStaticEdges(tree: ModuleNode[], moduleFiles: Record<string, string[]> = {}) {
+  const filesByModule = normalizeStaticFiles(tree, moduleFiles);
+  const nodes = flattenModuleTree(tree);
+  const edges: { source: string; target: string; type: "parent" | "import" | "reference" }[] = [];
+  const pairKey = (a: string, b: string) => (a < b ? `${a}<->${b}` : `${b}<->${a}`);
+  const seenPairs = new Set<string>();
+
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const a = nodes[i];
+      const b = nodes[j];
+      const key = pairKey(a.slug, b.slug);
+      if (seenPairs.has(key)) {
+        continue;
+      }
+
+      const filesA = filesByModule.get(a.slug) ?? [];
+      const filesB = filesByModule.get(b.slug) ?? [];
+      const nameA = a.slug.replace(/^other-/, "");
+      const nameB = b.slug.replace(/^other-/, "");
+
+      const aUsesB = filesA.some((f) => f.toLowerCase().includes(nameB) && nameB.length > 2);
+      const bUsesA = filesB.some((f) => f.toLowerCase().includes(nameA) && nameA.length > 2);
+
+      if (aUsesB || bUsesA) {
+        seenPairs.add(key);
+        edges.push({
+          source: aUsesB ? a.slug : b.slug,
+          target: aUsesB ? b.slug : a.slug,
+          type: aUsesB && bUsesA ? "reference" : "import",
+        });
+      }
+    }
+  }
+
+  return { nodes, edges };
+}
+
+export function computeStaticImpact(
+  symbol: string,
+  tree: ModuleNode[],
+  moduleFiles: Record<string, string[]> = {}
+): StaticImpactEntry[] {
+  if (!symbol || !tree.length) {
+    return [];
+  }
+  const { nodes, edges } = buildStaticEdges(tree, moduleFiles);
+  const target = nodes.find(
+    (n) =>
+      n.slug === symbol ||
+      slugify(n.name) === slugify(symbol) ||
+      n.name.toLowerCase().includes(symbol.toLowerCase()) ||
+      symbol.toLowerCase().includes(n.slug)
+  );
+  if (!target) {
+    return [];
+  }
+
+  const targetSlug = target.slug;
+  const targetName = target.name;
+  const impacted = new Map<string, StaticImpactEntry & { distance: number }>();
+
+  function visit(nodeId: string, distance: number, visited: Set<string>) {
+    if (distance > 2 || visited.has(nodeId)) {
+      return;
+    }
+    visited.add(nodeId);
+    for (const edge of edges) {
+      if (edge.source === nodeId) {
+        const neighbor = edge.target;
+        if (neighbor === targetSlug) {
+          continue;
+        }
+        const reason =
+          edge.type === "import"
+            ? `Imports / uses ${targetName}`
+            : `Bidirectional references with ${targetName}`;
+        const existing = impacted.get(neighbor);
+        if (!existing || distance < existing.distance) {
+          const label = nodes.find((n) => n.slug === neighbor)?.name ?? neighbor;
+          impacted.set(neighbor, {
+            file: `${neighbor}.md`,
+            symbol: label,
+            risk: distance === 1 ? "high" : "medium",
+            reason,
+            distance,
+          });
+        }
+        visit(neighbor, distance + 1, new Set(visited));
+      } else if (edge.target === nodeId && edge.type === "reference") {
+        const neighbor = edge.source;
+        if (neighbor === targetSlug) {
+          continue;
+        }
+        const label = nodes.find((n) => n.slug === neighbor)?.name ?? neighbor;
+        impacted.set(neighbor, {
+          file: `${neighbor}.md`,
+          symbol: label,
+          risk: distance === 1 ? "high" : "medium",
+          reason: `Bidirectional references with ${targetName}`,
+          distance,
+        });
+        visit(neighbor, distance + 1, new Set(visited));
+      }
+    }
+  }
+
+  visit(targetSlug, 1, new Set());
+
+  return Array.from(impacted.values()).sort((a, b) => a.distance - b.distance);
+}
+
+export function computeStaticSymbolContext(
+  symbol: string,
+  pages: WikiPage[]
+): StaticSymbolContext | null {
+  if (!symbol || pages.length === 0) {
+    return null;
+  }
+  const q = symbol.toLowerCase();
+  const matches = pages.filter(
+    (p) =>
+      p.slug.toLowerCase().includes(q) ||
+      p.title.toLowerCase().includes(q) ||
+      p.markdown.toLowerCase().includes(q)
+  );
+  if (matches.length === 0) {
+    return null;
+  }
+  const best = matches[0];
+  const references = matches.slice(1, 6).map((p) => ({ file: `${p.slug}.md`, line: 1 }));
+  return {
+    name: best.title,
+    file: `${best.slug}.md`,
+    lines: [1, best.markdown.split("\n").length],
+    references,
+    summary:
+      best.markdown
+        .replace(/^#.+\n?/m, "")
+        .replace(/\n+/g, " ")
+        .slice(0, 240)
+        .trim() || `Wiki page for ${best.title}`,
+  };
 }

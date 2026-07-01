@@ -1,0 +1,65 @@
+name: RepoAtlas Sync
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: repoatlas-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Sync code intelligence to RepoAtlas
+    runs-on: ubuntu-latest
+    if: github.repository != ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build RepoAtlas CLI
+        run: pnpm --filter @repoatlas/cli build
+
+      - name: Configure RepoAtlas credentials
+        env:
+          REPOATLAS_API_URL: ${{ secrets.REPOATLAS_API_URL }}
+          REPOATLAS_API_TOKEN: ${{ secrets.REPOATLAS_API_TOKEN }}
+        run: |
+          pnpm --filter @repoatlas/cli exec repoatlas login "$REPOATLAS_API_URL" "$REPOATLAS_API_TOKEN"
+
+      - name: Register project (idempotent)
+        env:
+          REPOATLAS_PROJECT_ID: ${{ vars.REPOATLAS_PROJECT_ID || github.event.repository.name }}
+          REPOATLAS_PROJECT_NAME: ${{ vars.REPOATLAS_PROJECT_NAME || github.event.repository.name }}
+        run: |
+          if [ ! -f .repoatlas.json ]; then
+            pnpm --filter @repoatlas/cli exec repoatlas init . \
+              --id "$REPOATLAS_PROJECT_ID" \
+              --name "$REPOATLAS_PROJECT_NAME" \
+              --remote-url "${{ github.event.repository.html_url }}" || true
+          fi
+
+      - name: Sync docs and graph
+        run: pnpm --filter @repoatlas/cli exec repoatlas sync .
+
+      - name: Report status
+        if: always()
+        run: |
+          echo "RepoAtlas sync completed with exit code $?"

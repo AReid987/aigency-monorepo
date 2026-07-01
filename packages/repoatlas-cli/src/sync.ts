@@ -1,32 +1,11 @@
-import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { create } from "tar";
 import type { GlobalConfig, ProjectConfig } from "./config.js";
+import { analyzeAndBuildWiki } from "./lib/analyze.js";
 
-function run(cmd: string, args: string[], cwd: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn(cmd, args, { cwd, stdio: "inherit" });
-    proc.on("error", reject);
-    proc.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`${cmd} ${args.join(" ")} exited with ${code}`));
-      }
-    });
-  });
-}
-
-export async function analyzeAndBuildWiki(cwd: string): Promise<void> {
-  if (!existsSync(join(cwd, ".git"))) {
-    throw new Error(`Not a git repository: ${cwd}`);
-  }
-
-  await run("npx", ["gitnexus", "analyze"], cwd);
-  await run("npx", ["gitnexus", "wiki"], cwd);
-}
+export { analyzeAndBuildWiki };
 
 export async function createTarball(cwd: string): Promise<string> {
   const gitnexusDir = join(cwd, ".gitnexus");

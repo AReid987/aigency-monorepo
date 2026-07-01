@@ -1,14 +1,18 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { type StaticSymbolContext, computeStaticSymbolContext } from "../data/gitnexus";
 import { type SymbolContext, getSymbolContext } from "../services/backend-client";
 import { useNexusStore } from "../store";
+
+type ContextShape = SymbolContext | StaticSymbolContext;
 
 export function SymbolContextView({ symbol: symbolProp }: { symbol?: string }) {
   const router = useRouter();
   const symbol =
     symbolProp ?? (typeof router.query.symbol === "string" ? router.query.symbol : undefined);
   const repo = useNexusStore((s) => s.currentRepo);
-  const [context, setContext] = useState<SymbolContext | null>(null);
+  const pages = useNexusStore((s) => s.pages);
+  const [context, setContext] = useState<ContextShape | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,9 +24,20 @@ export function SymbolContextView({ symbol: symbolProp }: { symbol?: string }) {
     setLoading(true);
     getSymbolContext(repo, symbol ?? "")
       .then((data) => {
-        if (mounted) {
-          setContext(data);
+        if (!mounted) {
+          return;
         }
+        if (data || pages.length === 0) {
+          setContext(data);
+          return;
+        }
+        setContext(computeStaticSymbolContext(symbol ?? "", pages));
+      })
+      .catch(() => {
+        if (!mounted || pages.length === 0) {
+          return;
+        }
+        setContext(computeStaticSymbolContext(symbol ?? "", pages));
       })
       .finally(() => {
         if (mounted) {
@@ -32,7 +47,7 @@ export function SymbolContextView({ symbol: symbolProp }: { symbol?: string }) {
     return () => {
       mounted = false;
     };
-  }, [repo, symbol]);
+  }, [repo, symbol, pages]);
 
   if (loading) {
     return <div className="aig-loading">Loading symbol context…</div>;

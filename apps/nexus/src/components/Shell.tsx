@@ -51,7 +51,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           version: backendStatus.version,
           lastChecked: Date.now(),
         });
-        setDataSource(process.env.NEXT_PUBLIC_REPOATLAS_API_URL ? "backend" : "static");
+        setDataSource(manifest.source);
 
         const repoFromUrl = typeof router.query.repo === "string" ? router.query.repo : null;
         const repo =

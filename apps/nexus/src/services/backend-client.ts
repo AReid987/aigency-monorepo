@@ -3,7 +3,7 @@ import type { MetaData, ModuleNode, WikiPage } from "../data/gitnexus";
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_REPOATLAS_API_URL ??
   process.env.NEXT_PUBLIC_GITNEXUS_BACKEND_URL ??
-  "http://localhost:4747";
+  "https://repoatlas-server.onrender.com";
 
 async function safeFetch<T>(url: string): Promise<T | null> {
   try {

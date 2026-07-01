@@ -33,8 +33,17 @@ pnpm dev               # http://localhost:4747
 - `GET /api/repo/:id/tree`
 - `GET /api/repo/:id/wiki`
 - `GET /api/repo/:id/wiki/:slug`
+- `GET /api/repo/:id/graph` – module relationship graph
+- `GET /api/repo/:id/search?q=...` – wiki search
+- `GET /api/repo/:id/symbol/:symbol` – symbol context
+- `GET /api/repo/:id/impact?symbol=...` – blast radius
+- `GET /api/repo/:id/process` – indexing progress
 - `POST /api/projects` – create/upsert project (Bearer token)
 - `POST /api/projects/:id/sync` – upload `.gitnexus.tar.gz` (Bearer token)
+
+## CI/CD
+
+See `.github/workflows/repoatlas-sync.yml` and `packages/repoatlas-cli/README.md` for the GitHub Actions hook that auto-updates code intelligence on every push.
 
 ## Deploy to Render
 

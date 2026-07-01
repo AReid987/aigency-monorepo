@@ -26,30 +26,72 @@ interface GraphNode {
 interface GraphLink {
   source: string;
   target: string;
-  type: "parent" | "reference";
+  type: "parent" | "import" | "reference";
 }
 
 type Category = ReturnType<typeof getModuleCategory>;
 
 const ALL_CATEGORIES: Category[] = ["app", "package", "agent", "other"];
 
-const EDGE_PARENT_COLOR = "#60a5fa";
-const EDGE_REFERENCE_COLOR = "#22d3ee";
-const EDGE_HOVER_COLOR = "#ffffff";
-const EDGE_DEFAULT_SIZE = 5;
+// Aigency OKLCH semantic tokens — resolved at runtime so the graph matches the
+// spacecraft-instrument design system. Parent edges are subtle fences; import
+// edges are the warm accent; reference edges are the cyan-ish highlight.
+const EDGE_PARENT_COLOR = "var(--aig-fence-strong)";
+const EDGE_IMPORT_COLOR = "var(--aig-accent)";
+const EDGE_REFERENCE_COLOR = "var(--aig-signal-highlight)";
+const EDGE_HOVER_COLOR = "var(--aig-foreground)";
+const EDGE_DEFAULT_SIZE = 4;
 
-function countFiles(n: ModuleNode): number {
-  return (n.files?.length ?? 0) + (n.children ?? []).reduce((sum, c) => sum + countFiles(c), 0);
-}
+const LABEL_COLOR = "var(--aig-foreground-body)";
+const DEFAULT_NODE_COLOR = "var(--aig-foreground-muted)";
 
 function collectChildren(n: ModuleNode): string[] {
   return (n.children ?? []).flatMap((c) => [c.slug, ...collectChildren(c)]);
 }
 
-function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[] } {
+function collectAllFiles(n: ModuleNode): string[] {
+  const own = n.files ?? [];
+  const child = (n.children ?? []).flatMap(collectAllFiles);
+  return [...own, ...child];
+}
+
+function slugifyName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function normalizeModuleFiles(
+  tree: ModuleNode[],
+  moduleFiles: Record<string, string[]> = {}
+): Map<string, string[]> {
+  const map = new Map<string, string[]>();
+  function walk(n: ModuleNode) {
+    // moduleFiles may be keyed by human-readable name or by slug.
+    const byName = moduleFiles[n.name];
+    const bySlug = moduleFiles[n.slug];
+    const bySlugName = moduleFiles[slugifyName(n.name)];
+    const files = byName ?? bySlug ?? bySlugName ?? collectAllFiles(n);
+    map.set(n.slug, files);
+    for (const child of n.children ?? []) {
+      walk(child);
+    }
+  }
+  for (const root of tree) {
+    walk(root);
+  }
+  return map;
+}
+
+function buildGraph(
+  tree: ModuleNode[],
+  moduleFiles: Record<string, string[]> = {}
+): { nodes: GraphNode[]; links: GraphLink[] } {
   const nodes: GraphNode[] = [];
   const links: GraphLink[] = [];
   const added = new Set<string>();
+  const filesByModule = normalizeModuleFiles(tree, moduleFiles);
 
   function addNode(n: ModuleNode, parentId?: string) {
     if (added.has(n.slug)) {
@@ -57,6 +99,7 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
     }
     added.add(n.slug);
     const cat = getModuleCategory(n.slug);
+    const moduleFilesForNode = filesByModule.get(n.slug) ?? [];
     nodes.push({
       id: n.slug,
       label: n.name,
@@ -65,7 +108,7 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
       size: cat === "agent" ? 14 : cat === "app" ? 18 : cat === "package" ? 16 : 12,
       color: getCategoryColor(cat),
       category: cat,
-      fileCount: countFiles(n),
+      fileCount: moduleFilesForNode.length,
       children: collectChildren(n),
     });
     if (parentId) {
@@ -79,18 +122,42 @@ function buildGraph(tree: ModuleNode[]): { nodes: GraphNode[]; links: GraphLink[
     addNode(root);
   }
 
-  for (const a of nodes) {
-    for (const b of nodes) {
-      if (a.id >= b.id) {
+  // Cross-module edges derived from shared file-name tokens. This is a lightweight,
+  // static-graph approximation of real import/call relationships using the wiki
+  // module tree. A real call graph requires language-server/import analysis.
+  const moduleIds = nodes.map((n) => n.id);
+  const pairKey = (a: string, b: string) => (a < b ? `${a}<->${b}` : `${b}<->${a}`);
+  const seenPairs = new Set<string>();
+
+  for (let i = 0; i < moduleIds.length; i++) {
+    for (let j = i + 1; j < moduleIds.length; j++) {
+      const a = moduleIds[i];
+      const b = moduleIds[j];
+      const key = pairKey(a, b);
+      if (seenPairs.has(key)) {
         continue;
       }
-      if (a.category === "package" && b.category === "app") {
-        if (a.id.includes(b.id) || b.id.includes(a.id)) {
-          links.push({ source: a.id, target: b.id, type: "reference" });
-        }
+
+      const filesA = filesByModule.get(a) ?? [];
+      const filesB = filesByModule.get(b) ?? [];
+      const nameA = a.replace(/^other-/, "");
+      const nameB = b.replace(/^other-/, "");
+
+      // A module imports/uses another when its file list contains the other's name.
+      const aUsesB = filesA.some((f) => f.toLowerCase().includes(nameB) && nameB.length > 2);
+      const bUsesA = filesB.some((f) => f.toLowerCase().includes(nameA) && nameA.length > 2);
+
+      if (aUsesB || bUsesA) {
+        seenPairs.add(key);
+        links.push({
+          source: aUsesB ? a : b,
+          target: aUsesB ? b : a,
+          type: aUsesB && bUsesA ? "reference" : "import",
+        });
       }
     }
   }
+
   return { nodes, links };
 }
 
@@ -192,16 +259,17 @@ export function GraphView() {
   const [visible, setVisible] = useState<Set<Category>>(new Set(ALL_CATEGORIES));
   const [query, setQuery] = useState("");
 
+  const meta = useNexusStore((s) => s.meta);
   const { nodes, links, nodeMap } = useMemo(() => {
     if (!tree) {
       return { nodes: [], links: [], nodeMap: new Map<string, GraphNode>() };
     }
-    const g = buildGraph(tree);
+    const g = buildGraph(tree, meta?.moduleFiles);
     circularInitialLayout(g.nodes);
     runForceLayout(g.nodes, g.links);
     const map = new Map(g.nodes.map((n) => [n.id, n]));
     return { nodes: g.nodes, links: g.links, nodeMap: map };
-  }, [tree]);
+  }, [tree, meta]);
 
   const suggestions = useMemo(() => {
     if (!query.trim()) {
@@ -229,10 +297,15 @@ export function GraphView() {
     }
     for (const l of links) {
       if (graph.hasNode(l.source) && graph.hasNode(l.target)) {
-        const color = l.type === "reference" ? EDGE_REFERENCE_COLOR : EDGE_PARENT_COLOR;
+        const color =
+          l.type === "reference"
+            ? EDGE_REFERENCE_COLOR
+            : l.type === "import"
+              ? EDGE_IMPORT_COLOR
+              : EDGE_PARENT_COLOR;
         graph.addEdge(l.source, l.target, {
           size: EDGE_DEFAULT_SIZE,
-          color,
+          color: resolveColor(color),
           type: "arrow",
           kind: l.type,
         });
@@ -243,16 +316,16 @@ export function GraphView() {
       renderLabels: true,
       labelSize: 12,
       labelWeight: "500",
-      labelColor: { color: "#e2e8f0" },
-      defaultNodeColor: "#94a3b8",
-      defaultEdgeColor: EDGE_PARENT_COLOR,
+      labelColor: { color: resolveColor(LABEL_COLOR) },
+      defaultNodeColor: resolveColor(DEFAULT_NODE_COLOR),
+      defaultEdgeColor: resolveColor(EDGE_PARENT_COLOR),
       defaultEdgeType: "arrow",
       hideEdgesOnMove: false,
       hideLabelsOnMove: false,
       allowInvalidContainer: true,
       enableEdgeEvents: true,
       itemSizesReference: "screen",
-      minEdgeThickness: 3,
+      minEdgeThickness: 2,
     });
 
     renderer.on("enterNode", ({ node }) => setHovered(node));
@@ -275,17 +348,20 @@ export function GraphView() {
     }
     const graph = renderer.getGraph();
     graph.forEachEdge((edge) => {
-      const kind = graph.getEdgeAttribute(edge, "kind") as "parent" | "reference" | undefined;
+      const kind = graph.getEdgeAttribute(edge, "kind") as
+        | "parent"
+        | "import"
+        | "reference"
+        | undefined;
       const isHovered = edge === hoveredEdge;
-      graph.setEdgeAttribute(
-        edge,
-        "color",
-        isHovered
-          ? EDGE_HOVER_COLOR
-          : kind === "reference"
-            ? EDGE_REFERENCE_COLOR
-            : EDGE_PARENT_COLOR
-      );
+      let color = EDGE_PARENT_COLOR;
+      if (kind === "reference") {
+        color = EDGE_REFERENCE_COLOR;
+      }
+      if (kind === "import") {
+        color = EDGE_IMPORT_COLOR;
+      }
+      graph.setEdgeAttribute(edge, "color", resolveColor(isHovered ? EDGE_HOVER_COLOR : color));
       graph.setEdgeAttribute(edge, "size", isHovered ? 6 : EDGE_DEFAULT_SIZE);
     });
     renderer.refresh();
@@ -344,6 +420,14 @@ export function GraphView() {
   const selectedNode = selected ? nodeMap.get(selected) : null;
   const selectedSource = selected && tree ? findNode(tree, selected) : null;
 
+  const edgeCounts = useMemo(() => {
+    const counts = { parent: 0, import: 0, reference: 0 };
+    for (const l of links) {
+      counts[l.type]++;
+    }
+    return counts;
+  }, [links]);
+
   if (!tree) {
     return <div className="aig-loading">Loading graph…</div>;
   }
@@ -354,8 +438,13 @@ export function GraphView() {
         <div>
           <h1 className="aig-view__title">Relationship Graph</h1>
           <p className="aig-graph__subtitle">
-            {nodes.length} modules · {links.length} relationships · pan, zoom, and click nodes to
-            inspect
+            {nodes.length} modules · {links.length} relationships (
+            <span style={{ color: "var(--aig-fence-strong)" }}>{edgeCounts.parent} parent</span>,{" "}
+            <span style={{ color: "var(--aig-accent)" }}>{edgeCounts.import} import</span>,{" "}
+            <span style={{ color: "var(--aig-signal-highlight)" }}>
+              {edgeCounts.reference} bidirectional
+            </span>
+            ) · pan, zoom, and click nodes to inspect
           </p>
         </div>
         <div className="aig-graph__controls">
@@ -477,6 +566,25 @@ export function GraphView() {
               </button>
             );
           })}
+          <span className="aig-legend-divider" />
+          <span className="aig-legend-edge" title="Module hierarchy">
+            <span
+              className="aig-legend-edge__line"
+              style={{ background: "var(--aig-fence-strong)" }}
+            />
+            Parent
+          </span>
+          <span className="aig-legend-edge" title="Likely import/use relationship">
+            <span className="aig-legend-edge__line" style={{ background: "var(--aig-accent)" }} />
+            Import
+          </span>
+          <span className="aig-legend-edge" title="Mutual references">
+            <span
+              className="aig-legend-edge__line"
+              style={{ background: "var(--aig-signal-highlight)" }}
+            />
+            Reference
+          </span>
         </div>
         {hovered && <div className="aig-graph__hover aig-text-pixel">{hovered}</div>}
         {hoveredEdge && <div className="aig-graph__hover aig-text-pixel">{hoveredEdge}</div>}
@@ -657,6 +765,22 @@ export function GraphView() {
         .aig-legend-item__dot {
           width: 10px;
           height: 10px;
+        }
+        .aig-legend-divider {
+          width: 1px;
+          height: 14px;
+          background: var(--aig-fence-light);
+        }
+        .aig-legend-edge {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: var(--aig-text-size-xs);
+          color: var(--aig-foreground-muted);
+        }
+        .aig-legend-edge__line {
+          width: 18px;
+          height: 2px;
         }
         .aig-graph__hover {
           padding: 6px 10px;

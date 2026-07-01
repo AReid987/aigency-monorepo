@@ -1,11 +1,14 @@
 import { Shield } from "lucide-react";
 import { useEffect, useState } from "react";
+import { computeStaticImpact } from "../data/gitnexus";
 import { type ImpactEntry, getImpact } from "../services/backend-client";
 import { useNexusStore } from "../store";
 
 export function ImpactView() {
   const repo = useNexusStore((s) => s.currentRepo);
   const symbol = useNexusStore((s) => s.selectedSymbol);
+  const tree = useNexusStore((s) => s.tree);
+  const meta = useNexusStore((s) => s.meta);
   const [impact, setImpact] = useState<ImpactEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,9 +21,21 @@ export function ImpactView() {
     setLoading(true);
     getImpact(repo, symbol ?? "")
       .then((data) => {
-        if (mounted) {
-          setImpact(data);
+        if (!mounted) {
+          return;
         }
+        if (data.length > 0 || !tree) {
+          setImpact(data);
+          return;
+        }
+        // Backend unavailable/empty — compute impact locally from the static tree.
+        setImpact(computeStaticImpact(symbol ?? "", tree, meta?.moduleFiles));
+      })
+      .catch(() => {
+        if (!mounted || !tree) {
+          return;
+        }
+        setImpact(computeStaticImpact(symbol ?? "", tree, meta?.moduleFiles));
       })
       .finally(() => {
         if (mounted) {
@@ -30,7 +45,7 @@ export function ImpactView() {
     return () => {
       mounted = false;
     };
-  }, [repo, symbol]);
+  }, [repo, symbol, tree, meta]);
 
   return (
     <div className="aig-view">
