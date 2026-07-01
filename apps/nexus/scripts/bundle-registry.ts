@@ -192,23 +192,25 @@ async function main() {
     }
   }
 
-  // Merge in backend metadata (especially remoteUrl) when the local registry
-  // is missing or stale. This keeps the static fallback correct on hosts like
-  // Vercel where ~/.gitnexus/registry.json is not available during build.
-  const backendProjects = await fetchBackendProjects();
-  const projectMap = new Map(projects.map((p) => [p.id, p]));
-  for (const backend of backendProjects) {
-    const existing = projectMap.get(backend.id);
-    if (existing) {
-      if (!existing.remoteUrl && backend.remoteUrl) {
-        existing.remoteUrl = backend.remoteUrl;
+  // Merge in backend metadata (especially remoteUrl) when explicitly requested.
+  // Without this flag the static bundle contains exactly what the registry
+  // declares, avoiding stale projects from an earlier backend ingest.
+  if (process.env.REPOATLAS_BUNDLE_BACKEND === "1") {
+    const backendProjects = await fetchBackendProjects();
+    const projectMap = new Map(projects.map((p) => [p.id, p]));
+    for (const backend of backendProjects) {
+      const existing = projectMap.get(backend.id);
+      if (existing) {
+        if (!existing.remoteUrl && backend.remoteUrl) {
+          existing.remoteUrl = backend.remoteUrl;
+        }
+        if (!existing.hasData && backend.hasData) {
+          existing.hasData = backend.hasData;
+        }
+      } else {
+        projectMap.set(backend.id, backend);
+        projects.push(backend);
       }
-      if (!existing.hasData && backend.hasData) {
-        existing.hasData = backend.hasData;
-      }
-    } else {
-      projectMap.set(backend.id, backend);
-      projects.push(backend);
     }
   }
 
