@@ -1,0 +1,300 @@
+# Instincts generated from https://github.com/AReid987/aigency-monorepo
+# Generated: 2026-06-01T23:32:32.304Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: aigency-monorepo-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: build
+
+## Evidence
+
+- 1 commits analyzed
+- Detected conventional commit pattern
+- Examples: build(deps-dev): bump the npm_and_yarn group across 5 directories with 2 updates
+
+---
+id: aigency-monorepo-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Commit Length
+
+## Action
+
+Write moderate-length commit messages (~80 characters)
+
+## Evidence
+
+- Average commit message length: 80 chars
+- Based on 1 commits
+
+---
+id: aigency-monorepo-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: aigency-monorepo-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: aigency-monorepo-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: aigency-monorepo-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: aigency-monorepo-instinct-file-naming
+trigger: "When creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Instinct File Naming
+
+## Action
+
+Name the file using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.files: camelCase
+
+---
+id: aigency-monorepo-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Instinct Function Naming
+
+## Action
+
+Use camelCase for the function name
+
+## Evidence
+
+- Pattern in namingConventions.functions: camelCase
+
+---
+id: aigency-monorepo-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Instinct Class Naming
+
+## Action
+
+Use PascalCase for the class name
+
+## Evidence
+
+- Pattern in namingConventions.classes: PascalCase
+
+---
+id: aigency-monorepo-instinct-constant-naming
+trigger: "When declaring a constant"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for the constant name
+
+## Evidence
+
+- Pattern in namingConventions.constants: SCREAMING_SNAKE_CASE
+
+---
+id: aigency-monorepo-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Instinct Import Style
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in importStyle: relative
+
+---
+id: aigency-monorepo-instinct-export-style
+trigger: "When exporting code"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle: named
+
+---
+id: aigency-monorepo-instinct-git-commit-format
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Instinct Git Commit Format
+
+## Action
+
+Use conventional commit format with a type prefix (e.g., build: ...)
+
+## Evidence
+
+- Pattern in commits.type: conventional
+- Pattern in commits.prefixes: ["build"]
+- Seen in commit example: build(deps-dev): bump the npm_and_yarn group across 5 directories with 2 updates
+
+---
+id: aigency-monorepo-instinct-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Instinct Commit Length
+
+## Action
+
+Keep the commit message around 80 characters
+
+## Evidence
+
+- Pattern in commits.averageLength: 80
+
+---
+id: aigency-monorepo-instinct-test-location
+trigger: "When adding or updating tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: AReid987/aigency-monorepo
+---
+
+# Aigency Monorepo Instinct Test Location
+
+## Action
+
+Place tests in a separate directory from source code
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation: separate
+
